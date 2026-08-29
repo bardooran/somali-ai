@@ -1,0 +1,6 @@
+{"rule_id":"ORTH-CONTRACT-001","input":"Waxaan tegayaa.","expected_suggestion":"Waxa aan tegayaa.","expected_flag":true}
+{"rule_id":"ORTH-CONTRACT-002","input":"Wuxuu yimid.","expected_suggestion":"Waxa uu yimid.","expected_flag":true}
+{"rule_id":"ORTH-CONTRACT-003","input":"Waxay joogtaa guriga.","expected_suggestion":"Waxa ay joogtaa guriga.","expected_flag":true}
+{"rule_id":"ORTH-CONTRACT-004","input":"Waxaan rabaa inaan tago.","expected_suggestion":"Waxa aan rabaa in aan tago.","expected_flag":true}
+{"rule_id":"ORTH-CONTRACT-005","input":"Anoo socda ayaan arkay.","expected_suggestion":"Aniga oo socda ayaan arkay.","expected_flag":true}
+{"rule_id":"ORTH-CONTRACT-008","input":"Bay timid.","expected_suggestion":null,"expected_flag":false,"note":"Do not auto-correct ambiguous bay without grammatical context."}
