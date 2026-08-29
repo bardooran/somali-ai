@@ -1,0 +1,5 @@
+{"id":"PUNCT-001","text":"Cali waxa uu tegay Xamar.","expected":"accepted","rule":"ORTH-PUNCT-001"}
+{"id":"PUNCT-002","text":"Ma Cali baa tegay?","expected":"accepted","rule":"ORTH-PUNCT-002"}
+{"id":"PUNCT-003","text":"Waar kaalay Caliyow!","expected":"accepted","rule":"ORTH-PUNCT-003"}
+{"id":"PUNCT-004","text":"Jaamac, Faarax, Caasha, iyo Cali ayaa tegay.","expected":"accepted","rule":"ORTH-PUNCT-004"}
+{"id":"PUNCT-005","text":"Aniga oo jooga guriga ayaa uu soo galay.","expected":"accepted","rule":"ORTH-PUNCT-005","note":"Source specifically warns against inserting commas around this two-part construction."}
