@@ -3,17 +3,33 @@ from pathlib import Path
 from src.checker import Finding, apply_safe_fixes, check_text, load_rules
 
 
-RULES = Path("rules/orthography/contractions.jsonl")
+CONTRACTION_RULES = Path("rules/orthography/contractions.jsonl")
+ORTHOGRAPHY_RULES = Path("rules/orthography")
 
 
-def test_loads_rules():
-    rules = load_rules(RULES)
+def test_loads_contraction_rules():
+    rules = load_rules(CONTRACTION_RULES)
     assert len(rules) >= 10
     assert any(rule.id == "ORTH-CONTRACT-001" for rule in rules)
 
 
+def test_loads_full_orthography_directory():
+    rules = load_rules(ORTHOGRAPHY_RULES)
+    ids = {rule.id for rule in rules}
+    assert "ORTH-CONTRACT-001" in ids
+    assert "ORTH-PUNCT-001" in ids
+    assert "ORTH-CAP-001" in ids
+    assert "ORTH-SPACE-001" in ids
+
+
+def test_reference_only_rules_do_not_break_checking():
+    rules = load_rules(ORTHOGRAPHY_RULES)
+    findings = check_text("Waxaan tegayaa.", rules)
+    assert any(finding.rule_id == "ORTH-CONTRACT-001" for finding in findings)
+
+
 def test_finds_simple_contractions():
-    rules = load_rules(RULES)
+    rules = load_rules(CONTRACTION_RULES)
     findings = check_text("Waxaan ogahay inuu iman doono, wuxuu yimid.", rules)
     ids = [finding.rule_id for finding in findings]
     assert "ORTH-CONTRACT-001" in ids
@@ -21,13 +37,13 @@ def test_finds_simple_contractions():
 
 
 def test_respects_word_boundaries():
-    rules = load_rules(RULES)
+    rules = load_rules(CONTRACTION_RULES)
     findings = check_text("waxaanle", rules)
     assert not any(finding.rule_id == "ORTH-CONTRACT-001" for finding in findings)
 
 
 def test_ambiguous_rule_is_not_auto_applied():
-    rules = load_rules(RULES)
+    rules = load_rules(CONTRACTION_RULES)
     text = "Bay timid."
     findings = check_text(text, rules)
     assert any(finding.rule_id == "ORTH-CONTRACT-008" for finding in findings)
@@ -50,7 +66,7 @@ def test_context_required_rule_is_not_auto_applied():
 
 
 def test_safe_fixes_are_applied_and_case_is_preserved():
-    rules = load_rules(RULES)
+    rules = load_rules(CONTRACTION_RULES)
     text = "Waxaan tegayaa, laakiin wuxuu joogayaa."
     findings = check_text(text, rules)
     corrected = apply_safe_fixes(text, findings)
