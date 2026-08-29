@@ -16,6 +16,8 @@ from typing import Iterable
 
 WORD_BOUNDARY_TEMPLATE = r"(?<!\w){token}(?!\w)"
 NON_AUTOFIX_STATUSES = {"ambiguous", "context_required"}
+OPENING_SENTENCE_CHARS = set('"\'“‘([{')
+SENTENCE_END_CHARS = set(".!?")
 
 
 @dataclass(frozen=True)
@@ -85,10 +87,71 @@ def _iter_matches(text: str, token: str) -> Iterable[re.Match[str]]:
     return re.finditer(pattern, text, flags=re.IGNORECASE)
 
 
-def check_text(text: str, rules: Iterable[Rule]) -> list[Finding]:
-    """Run executable replacement rules and ignore reference-only rules."""
+def _next_sentence_letter(text: str, start: int) -> int | None:
+    """Return the next alphabetic character after whitespace/opening punctuation."""
+    index = start
+    while index < len(text):
+        char = text[index]
+        if char.isspace() or char in OPENING_SENTENCE_CHARS:
+            index += 1
+            continue
+        return index if char.isalpha() else None
+    return None
+
+
+def _sentence_start_positions(text: str) -> list[int]:
+    starts: list[int] = []
+    first = _next_sentence_letter(text, 0)
+    if first is not None:
+        starts.append(first)
+
+    for index, char in enumerate(text):
+        if char not in SENTENCE_END_CHARS:
+            continue
+        next_letter = _next_sentence_letter(text, index + 1)
+        if next_letter is not None and next_letter not in starts:
+            starts.append(next_letter)
+    return starts
+
+
+def _capitalization_findings(text: str, rules: Iterable[Rule]) -> list[Finding]:
+    sentence_rule = next(
+        (
+            rule
+            for rule in rules
+            if rule.category == "capitalization" and rule.target == "sentence_start"
+        ),
+        None,
+    )
+    if sentence_rule is None:
+        return []
+
     findings: list[Finding] = []
-    for rule in rules:
+    for position in _sentence_start_positions(text):
+        char = text[position]
+        if not char.islower():
+            continue
+        findings.append(
+            Finding(
+                rule_id=sentence_rule.id,
+                matched_text=char,
+                suggestion=char.upper(),
+                start=position,
+                end=position + 1,
+                status=sentence_rule.status,
+                category=sentence_rule.category,
+                note=sentence_rule.note,
+            )
+        )
+    return findings
+
+
+def check_text(text: str, rules: Iterable[Rule]) -> list[Finding]:
+    """Run supported orthography detectors while ignoring reference-only rules."""
+    rule_list = list(rules)
+    findings: list[Finding] = []
+
+    for rule in rule_list:
         if not rule.is_executable_replacement:
             continue
         assert rule.input is not None
@@ -106,6 +169,8 @@ def check_text(text: str, rules: Iterable[Rule]) -> list[Finding]:
                     note=rule.note,
                 )
             )
+
+    findings.extend(_capitalization_findings(text, rule_list))
     return sorted(findings, key=lambda item: (item.start, item.end, item.rule_id))
 
 
