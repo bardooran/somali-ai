@@ -21,6 +21,7 @@ def test_loads_full_orthography_directory():
     assert "ORTH-CAP-001" in ids
     assert "ORTH-SPACE-001" in ids
     assert "ORTH-WEEKDAY-001" in ids
+    assert "ORTH-MONTH-001" in ids
 
 
 def test_reference_only_rules_do_not_break_checking():
@@ -113,3 +114,20 @@ def test_capitalizes_somali_weekday_names():
     assert "ORTH-WEEKDAY-005" in ids
     corrected = apply_safe_fixes(text, findings)
     assert corrected == "Waxa aan imanayaa Isniin, waxaana baxayaa Jimce."
+
+
+def test_does_not_report_already_correct_weekday_capitalization():
+    rules = load_rules(ORTHOGRAPHY_RULES)
+    findings = check_text("Maanta waa Sabti.", rules)
+    assert not any(finding.rule_id == "ORTH-WEEKDAY-006" for finding in findings)
+
+
+def test_capitalizes_source_listed_month_names():
+    rules = load_rules(ORTHOGRAPHY_RULES)
+    text = "Waxaan imanayaa abriil, waxaana baxayaa maajo."
+    findings = check_text(text, rules)
+    ids = {finding.rule_id for finding in findings}
+    assert "ORTH-MONTH-002" in ids
+    assert "ORTH-MONTH-003" in ids
+    corrected = apply_safe_fixes(text, findings)
+    assert corrected == "Waxa aan imanayaa Abriil, waxaana baxayaa Maajo."
