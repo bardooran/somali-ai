@@ -71,3 +71,33 @@ def test_safe_fixes_are_applied_and_case_is_preserved():
     findings = check_text(text, rules)
     corrected = apply_safe_fixes(text, findings)
     assert corrected == "Waxa aan tegayaa, laakiin waxa uu joogayaa."
+
+
+def test_detects_lowercase_at_start_of_text():
+    rules = load_rules(ORTHOGRAPHY_RULES)
+    text = "cali wuu yimid."
+    findings = check_text(text, rules)
+    cap = [finding for finding in findings if finding.rule_id == "ORTH-CAP-001"]
+    assert len(cap) == 1
+    assert cap[0].matched_text == "c"
+    assert cap[0].suggestion == "C"
+    assert apply_safe_fixes(text, findings) == "Cali wuu yimid."
+
+
+def test_detects_lowercase_after_sentence_punctuation():
+    rules = load_rules(ORTHOGRAPHY_RULES)
+    text = "Cali wuu yimid. faadumo way baxday? haa."
+    findings = check_text(text, rules)
+    cap = [finding for finding in findings if finding.rule_id == "ORTH-CAP-001"]
+    assert [finding.matched_text for finding in cap] == ["f", "h"]
+    corrected = apply_safe_fixes(text, findings)
+    assert corrected == "Cali wuu yimid. Faadumo waa ay baxday? Haa."
+
+
+def test_detects_sentence_start_inside_opening_quote():
+    rules = load_rules(ORTHOGRAPHY_RULES)
+    text = '"cali wuu yimid."'
+    findings = check_text(text, rules)
+    cap = [finding for finding in findings if finding.rule_id == "ORTH-CAP-001"]
+    assert len(cap) == 1
+    assert apply_safe_fixes(text, findings) == '"Cali wuu yimid."'
