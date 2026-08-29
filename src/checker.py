@@ -157,10 +157,13 @@ def check_text(text: str, rules: Iterable[Rule]) -> list[Finding]:
         assert rule.input is not None
         assert rule.preferred_written is not None
         for match in _iter_matches(text, rule.input):
+            matched_text = match.group(0)
+            if matched_text == rule.preferred_written:
+                continue
             findings.append(
                 Finding(
                     rule_id=rule.id,
-                    matched_text=match.group(0),
+                    matched_text=matched_text,
                     suggestion=rule.preferred_written,
                     start=match.start(),
                     end=match.end(),
