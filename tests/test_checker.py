@@ -22,6 +22,7 @@ def test_loads_full_orthography_directory():
     assert "ORTH-SPACE-001" in ids
     assert "ORTH-WEEKDAY-001" in ids
     assert "ORTH-MONTH-001" in ids
+    assert "ORTH-NAME-001" in ids
 
 
 def test_reference_only_rules_do_not_break_checking():
@@ -131,3 +132,17 @@ def test_capitalizes_source_listed_month_names():
     assert "ORTH-MONTH-003" in ids
     corrected = apply_safe_fixes(text, findings)
     assert corrected == "Waxa aan imanayaa Abriil, waxaana baxayaa Maajo."
+
+
+def test_capitalizes_source_listed_proper_names():
+    rules = load_rules(ORTHOGRAPHY_RULES)
+    text = "faadumo waxay joogtaa muqdisho, calina wuxuu aaday garoowe."
+    findings = check_text(text, rules)
+    ids = {finding.rule_id for finding in findings}
+    assert "ORTH-NAME-005" in ids
+    assert "ORTH-NAME-002" in ids
+    assert "ORTH-NAME-008" in ids
+    corrected = apply_safe_fixes(text, findings)
+    assert "Faadumo" in corrected
+    assert "Muqdisho" in corrected
+    assert "Garoowe" in corrected
