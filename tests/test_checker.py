@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from src.checker import apply_safe_fixes, check_text, load_rules
+from src.checker import Finding, apply_safe_fixes, check_text, load_rules
 
 
 RULES = Path("rules/orthography/contractions.jsonl")
@@ -33,6 +33,20 @@ def test_ambiguous_rule_is_not_auto_applied():
     assert any(finding.rule_id == "ORTH-CONTRACT-008" for finding in findings)
     corrected = apply_safe_fixes(text, findings)
     assert corrected == text
+
+
+def test_context_required_rule_is_not_auto_applied():
+    text = "maxaan"
+    finding = Finding(
+        rule_id="ORTH-SPACE-004",
+        matched_text="maxaan",
+        suggestion="maxaa aan",
+        start=0,
+        end=6,
+        status="context_required",
+        category="word_separation",
+    )
+    assert apply_safe_fixes(text, [finding]) == text
 
 
 def test_safe_fixes_are_applied_and_case_is_preserved():
