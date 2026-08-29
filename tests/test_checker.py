@@ -20,6 +20,7 @@ def test_loads_full_orthography_directory():
     assert "ORTH-PUNCT-001" in ids
     assert "ORTH-CAP-001" in ids
     assert "ORTH-SPACE-001" in ids
+    assert "ORTH-WEEKDAY-001" in ids
 
 
 def test_reference_only_rules_do_not_break_checking():
@@ -101,3 +102,14 @@ def test_detects_sentence_start_inside_opening_quote():
     cap = [finding for finding in findings if finding.rule_id == "ORTH-CAP-001"]
     assert len(cap) == 1
     assert apply_safe_fixes(text, findings) == '"Cali wuu yimid."'
+
+
+def test_capitalizes_somali_weekday_names():
+    rules = load_rules(ORTHOGRAPHY_RULES)
+    text = "Waxaan imanayaa isniin, waxaana baxayaa jimce."
+    findings = check_text(text, rules)
+    ids = {finding.rule_id for finding in findings}
+    assert "ORTH-WEEKDAY-001" in ids
+    assert "ORTH-WEEKDAY-005" in ids
+    corrected = apply_safe_fixes(text, findings)
+    assert corrected == "Waxa aan imanayaa Isniin, waxaana baxayaa Jimce."
