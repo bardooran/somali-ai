@@ -1,7 +1,7 @@
 """Small rule-based Somali orthography checker.
 
-This is intentionally conservative: ambiguous rules are reported separately and
-are never auto-applied without context.
+This is intentionally conservative: rules that require context are reported
+separately and are never auto-applied without enough evidence.
 """
 
 from __future__ import annotations
@@ -14,6 +14,7 @@ from typing import Iterable
 
 
 WORD_BOUNDARY_TEMPLATE = r"(?<!\w){token}(?!\w)"
+NON_AUTOFIX_STATUSES = {"ambiguous", "context_required"}
 
 
 @dataclass(frozen=True)
@@ -79,11 +80,13 @@ def check_text(text: str, rules: Iterable[Rule]) -> list[Finding]:
 
 
 def apply_safe_fixes(text: str, findings: Iterable[Finding]) -> str:
-    """Apply only non-ambiguous findings.
+    """Apply only findings that do not require contextual review.
 
     Replacements are applied from right to left so character offsets stay valid.
     """
-    safe = [finding for finding in findings if finding.status != "ambiguous"]
+    safe = [
+        finding for finding in findings if finding.status not in NON_AUTOFIX_STATUSES
+    ]
     result = text
     for finding in sorted(safe, key=lambda item: item.start, reverse=True):
         replacement = finding.suggestion
