@@ -34,6 +34,8 @@ class Rule:
     preferred_pattern: str | None = None
     mark: str | None = None
     use: str | None = None
+    forms: list[str] | None = None
+    sources: list[str] | None = None
 
     @property
     def is_executable_replacement(self) -> bool:
