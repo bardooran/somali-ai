@@ -1,7 +1,8 @@
 """Small rule-based Somali orthography checker.
 
-This is intentionally conservative: rules that require context are reported
-separately and are never auto-applied without enough evidence.
+The checker is intentionally conservative. The rule library may contain both
+executable replacement rules and reference/context rules that are not yet safe
+to apply automatically.
 """
 
 from __future__ import annotations
@@ -21,11 +22,20 @@ NON_AUTOFIX_STATUSES = {"ambiguous", "context_required"}
 class Rule:
     id: str
     category: str
-    input: str
-    preferred_written: str
     status: str
     source: str = ""
     note: str = ""
+    input: str | None = None
+    preferred_written: str | None = None
+    target: str | None = None
+    pattern: str | None = None
+    preferred_pattern: str | None = None
+    mark: str | None = None
+    use: str | None = None
+
+    @property
+    def is_executable_replacement(self) -> bool:
+        return bool(self.input and self.preferred_written)
 
 
 @dataclass(frozen=True)
@@ -40,18 +50,33 @@ class Finding:
     note: str = ""
 
 
+def _rule_files(path: Path) -> list[Path]:
+    if path.is_dir():
+        return sorted(path.glob("*.jsonl"))
+    return [path]
+
+
 def load_rules(path: str | Path) -> list[Rule]:
+    """Load one JSONL rule file or every JSONL file in a rule directory."""
     rules: list[Rule] = []
-    with Path(path).open("r", encoding="utf-8") as handle:
-        for line_number, line in enumerate(handle, start=1):
-            stripped = line.strip()
-            if not stripped:
-                continue
-            try:
-                item = json.loads(stripped)
-            except json.JSONDecodeError as exc:
-                raise ValueError(f"Invalid JSONL on line {line_number}: {exc}") from exc
-            rules.append(Rule(**item))
+    for rule_file in _rule_files(Path(path)):
+        with rule_file.open("r", encoding="utf-8") as handle:
+            for line_number, line in enumerate(handle, start=1):
+                stripped = line.strip()
+                if not stripped:
+                    continue
+                try:
+                    item = json.loads(stripped)
+                except json.JSONDecodeError as exc:
+                    raise ValueError(
+                        f"Invalid JSONL in {rule_file} on line {line_number}: {exc}"
+                    ) from exc
+                try:
+                    rules.append(Rule(**item))
+                except TypeError as exc:
+                    raise ValueError(
+                        f"Invalid rule schema in {rule_file} on line {line_number}: {exc}"
+                    ) from exc
     return rules
 
 
@@ -61,8 +86,13 @@ def _iter_matches(text: str, token: str) -> Iterable[re.Match[str]]:
 
 
 def check_text(text: str, rules: Iterable[Rule]) -> list[Finding]:
+    """Run executable replacement rules and ignore reference-only rules."""
     findings: list[Finding] = []
     for rule in rules:
+        if not rule.is_executable_replacement:
+            continue
+        assert rule.input is not None
+        assert rule.preferred_written is not None
         for match in _iter_matches(text, rule.input):
             findings.append(
                 Finding(
