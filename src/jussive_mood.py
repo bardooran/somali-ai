@@ -1,10 +1,9 @@
 """Conservative analyzer for reviewed Somali ``hab talo`` marker+verb pairs.
 
-The source table presents jussive/exhortative markers together with verb forms,
-for example ``(ha) cuno``, ``(ha) cunto``, ``(ha) cuneen`` and negative
-``yaanu/yuusan cunin`` or ``yaanay/yaysan cunin``. This module treats the
-marker and verb as one contextual pair and never derives unseen forms from
-suffixes.
+The source tables present jussive/exhortative markers together with verb forms,
+for example ``(ha) cuno`` / ``(ha) cunto`` and ``ha yimaaddo`` /
+``ha timaaddo``. This module treats the marker and verb as one contextual pair
+and never derives unseen forms from suffixes.
 """
 
 from __future__ import annotations
@@ -14,7 +13,10 @@ import re
 from dataclasses import dataclass
 from pathlib import Path
 
-PAIR_PATH = Path("data/morphology/qaamuus_2012_reviewed_jussive_pairs.jsonl")
+PAIR_PATHS = (
+    Path("data/morphology/qaamuus_2012_reviewed_jussive_pairs.jsonl"),
+    Path("data/morphology/qaamuus_2012_reviewed_imow_jussive_pairs.jsonl"),
+)
 TOKEN_RE = re.compile(r"[^\W\d_]+(?:['’][^\W\d_]+)*", flags=re.UNICODE)
 
 
@@ -39,11 +41,12 @@ class JussiveMoodAnalysis:
 
 def _records() -> list[dict]:
     records: list[dict] = []
-    with PAIR_PATH.open("r", encoding="utf-8") as handle:
-        for line in handle:
-            stripped = line.strip()
-            if stripped:
-                records.append(json.loads(stripped))
+    for path in PAIR_PATHS:
+        with path.open("r", encoding="utf-8") as handle:
+            for line in handle:
+                stripped = line.strip()
+                if stripped:
+                    records.append(json.loads(stripped))
     return records
 
 
@@ -75,7 +78,7 @@ def analyze_jussive_mood(sentence: str) -> JussiveMoodAnalysis:
     """Analyze the first reviewed adjacent ``marker + verb`` hab-talo pair.
 
     Exact reviewed pairs are accepted. If both marker and verb are known in the
-    reviewed hab-talo table but the exact pair is absent, return a review-only
+    reviewed hab-talo tables but the exact pair is absent, return a review-only
     conflict. A known marker followed by an unseen verb remains unjudged.
     """
     tokens = TOKEN_RE.findall(sentence)
@@ -150,7 +153,7 @@ def analyze_jussive_mood(sentence: str) -> JussiveMoodAnalysis:
                 agrees=False,
                 note=(
                     "The marker and verb are both reviewed in hab talo, but this exact pair "
-                    "is not licensed by the cited paradigm. This may be a person or polarity "
+                    "is not licensed by the cited paradigms. This may be a person or polarity "
                     "conflict; review required and no automatic rewrite is made."
                 ),
             )
@@ -165,7 +168,7 @@ def analyze_jussive_mood(sentence: str) -> JussiveMoodAnalysis:
             agrees=None,
             note=(
                 "A reviewed hab-talo marker was found, but the following verb is absent "
-                "from the reviewed pair table. The form is left unjudged; no suffix "
+                "from the reviewed pair tables. The form is left unjudged; no suffix "
                 "inference is used."
             ),
         )
