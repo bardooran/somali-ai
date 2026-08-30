@@ -79,10 +79,76 @@ def test_dugan_is_preferred_regional_form_without_claiming_qaamuus_headword_evid
     assert any(item.preference == "preferred" for item in result.regional_analyses)
 
 
-def test_inflected_form_is_not_silently_lemmatized_yet():
+def test_gabadha_links_to_gabadh_through_reviewed_morphology_mapping():
     result = lookup_word("gabadha")
+    assert result.known
+    assert result.exact_entries == ()
+    assert len(result.morphology_candidates) == 1
+    candidate = result.morphology_candidates[0]
+    assert candidate.lemma == "gabadh"
+    assert candidate.analysis_type == "definite_singular"
+    assert candidate.features["gender"] == "feminine"
+    assert candidate.executable is False
+    assert "stored evidence" in result.note
+
+
+def test_buugga_links_to_buug_without_open_ended_suffix_stripping():
+    result = lookup_word("buugga")
+    assert result.known
+    candidate = result.morphology_candidates[0]
+    assert candidate.lemma == "buug"
+    assert candidate.features["definiteness"] == "definite"
+    assert candidate.features["gender"] == "masculine"
+
+
+def test_reviewed_plural_mappings_preserve_irregular_patterns():
+    expected = {
+        "buugag": "buug",
+        "kabo": "kab",
+        "gacmo": "gacan",
+        "mindiyo": "mindi",
+    }
+    for surface, lemma in expected.items():
+        result = lookup_word(surface)
+        assert result.known
+        assert len(result.morphology_candidates) == 1
+        assert result.morphology_candidates[0].lemma == lemma
+        assert result.morphology_candidates[0].analysis_type == "plural"
+
+
+def test_source_attested_feminine_article_surfaces_return_lemmas():
+    expected = {
+        "marada": "maro",
+        "badda": "bad",
+        "qodaxda": "qodax",
+        "bacda": "bac",
+        "usha": "ul",
+        "isha": "il",
+        "bisha": "bil",
+    }
+    for surface, lemma in expected.items():
+        result = lookup_word(surface)
+        assert result.morphology_candidates[0].lemma == lemma
+        assert result.morphology_candidates[0].analysis_type == "definite_singular"
+
+
+def test_source_attested_possessive_surfaces_return_possessor_features():
+    first_person = lookup_word("buuggayga").morphology_candidates[0]
+    inclusive = lookup_word("dalkeenna").morphology_candidates[0]
+    second_plural = lookup_word("ushiinna").morphology_candidates[0]
+    assert first_person.lemma == "buug"
+    assert first_person.features["possessor_person"] == "1sg"
+    assert inclusive.lemma == "dal"
+    assert inclusive.features["possessor_person"] == "1pl_inclusive"
+    assert second_plural.lemma == "ul"
+    assert second_plural.features["possessor_person"] == "2pl"
+
+
+def test_unknown_inflected_looking_word_is_still_not_guessed():
+    result = lookup_word("ereygaqiyaaska")
     assert not result.known
     assert result.exact_entries == ()
+    assert result.morphology_candidates == ()
     assert "no analysis is guessed" in result.note
 
 
@@ -90,4 +156,5 @@ def test_unknown_word_is_not_guessed():
     result = lookup_word("erey-aan-jirin")
     assert not result.known
     assert result.exact_entries == ()
+    assert result.morphology_candidates == ()
     assert result.regional_analyses == ()
