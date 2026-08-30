@@ -20,8 +20,6 @@ def test_cli_reports_agreement_conflict_without_autofixing_it():
     assert "possible subject-verb agreement conflict" in output
     assert "keentay" in output
     assert "Safe corrected text:" in output
-    # Agreement itself is not auto-fixed. The existing orthography rule may still
-    # expand the sentence marker way -> waa ay.
     assert "Iyada waa ay keenay." in output
     assert "Iyada waa ay keentay." not in output
 
@@ -65,3 +63,36 @@ def test_cli_does_not_report_optional_third_person_focus_structure():
     output = run_cli("Moos baa wiilkii cunay.")
 
     assert "possible missing subject clitic" not in output
+
+
+def test_cli_reports_masculine_object_construction_gender_conflict_review_only():
+    text = "Libaaxu maydin eryanaysaa?"
+    output = run_cli(text)
+
+    assert "Grammar findings:" in output
+    assert "possible subject-gender/verb agreement conflict" in output
+    assert "GRAM-OBJAGR-003" in output
+    assert "Safe corrected text:" in output
+    assert text in output
+    assert "Libaaxu maydin eryanayaa?" not in output
+
+
+def test_cli_reports_feminine_object_construction_gender_conflict_review_only():
+    text = "Libaaxadu maydin eryanayaa?"
+    output = run_cli(text)
+
+    assert "possible subject-gender/verb agreement conflict" in output
+    assert "GRAM-OBJAGR-004" in output
+    assert text in output
+
+
+def test_cli_keeps_reviewed_object_agreement_silent():
+    for text in ["Libaaxu maydin eryanayaa?", "Libaaxadu maydin eryanaysaa?"]:
+        output = run_cli(text)
+        assert "possible subject-gender/verb agreement conflict" not in output
+
+
+def test_cli_does_not_guess_hidden_subject_gender_for_bare_maydin():
+    output = run_cli("Maydin cunaysaa?")
+
+    assert "possible subject-gender/verb agreement conflict" not in output
