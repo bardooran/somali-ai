@@ -10,10 +10,14 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 
-from src.morphology_candidates import MorphologyCandidate, analyze_surface_form
+from src.morphology_candidates import (
+    MorphologyCandidate,
+    analyze_surface_form,
+    reviewed_candidates_for_lemma,
+)
 from src.noun_gender_agreement import infer_subject_gender, infer_subject_number
 from src.noun_subject_case import PERSONAL_PRONOUN_FORMS
-from src.reviewed_finite_verb import analyze_reviewed_finite_verb
+from src.reviewed_finite_verb import ReviewedFiniteVerbAnalysis, analyze_reviewed_finite_verb
 
 TOKEN_RE = re.compile(r"[^\W\d_]+(?:['’][^\W\d_]+)*", flags=re.UNICODE)
 
@@ -71,14 +75,37 @@ def _negative_candidate(form: str) -> MorphologyCandidate | None:
     return None
 
 
+def _has_matching_reviewed_negative_paradigm(
+    affirmative: ReviewedFiniteVerbAnalysis,
+) -> bool:
+    """Return true only when the same lemma and tense/aspect has negative evidence.
+
+    A reviewed affirmative token after ``ma`` is not enough by itself to prove a
+    polarity error. Some irregular paradigms have incomplete negative evidence.
+    This guard prevents the checker from turning missing evidence into a rule.
+    """
+    affirmative_aspects = set(affirmative.tense_aspects)
+    if not affirmative_aspects:
+        return False
+
+    for lemma in affirmative.lemmas:
+        for candidate in reviewed_candidates_for_lemma(lemma, "negative_finite_verb"):
+            negative_aspect = candidate.features.get("tense_aspect")
+            if isinstance(negative_aspect, str) and negative_aspect in affirmative_aspects:
+                return True
+    return False
+
+
 def analyze_negative_finite_agreement(sentence: str) -> NegativeFiniteAgreementAnalysis:
     """Check a reviewed noun subject against an exact ``ma + verb`` paradigm.
 
     If an exact negative finite form is found, person agreement is checked from
     its reviewed features. If the form is explicitly person-neutralized, it is
     accepted for any safely resolved third-person noun subject. If ``ma`` is
-    followed by an exact reviewed affirmative finite form instead, this layer
-    reports a polarity conflict. Unknown forms remain unjudged.
+    followed by an exact reviewed affirmative finite form, a polarity conflict
+    is reported only when a reviewed negative paradigm exists for the same lemma
+    and tense/aspect. Otherwise the construction remains unjudged. Unknown forms
+    are never generated or guessed.
     """
     tokens = TOKEN_RE.findall(sentence)
     if len(tokens) < 3:
@@ -126,6 +153,7 @@ def analyze_negative_finite_agreement(sentence: str) -> NegativeFiniteAgreementA
 
         affirmative = analyze_reviewed_finite_verb(verb)
         if affirmative.recognized:
+            matching_negative = _has_matching_reviewed_negative_paradigm(affirmative)
             return NegativeFiniteAgreementAnalysis(
                 recognized=True,
                 subject=subject,
@@ -137,10 +165,16 @@ def analyze_negative_finite_agreement(sentence: str) -> NegativeFiniteAgreementA
                 tense_aspect=affirmative.tense_aspects[0] if affirmative.tense_aspects else None,
                 polarity="affirmative",
                 expected_person=expected_person,
-                agrees=False,
+                agrees=False if matching_negative else None,
                 note=(
-                    "The token after ma is an exact reviewed affirmative finite form, not a "
-                    "reviewed negative member of the paradigm. Review required."
+                    "The token after ma is an exact reviewed affirmative finite form and a "
+                    "reviewed negative paradigm exists for the same lemma and tense/aspect; "
+                    "review required."
+                    if matching_negative
+                    else
+                    "The token after ma is an exact reviewed affirmative finite form, but no "
+                    "reviewed negative paradigm is available for the same lemma and tense/aspect. "
+                    "The construction is left unjudged rather than treating missing evidence as an error."
                 ),
             )
 
