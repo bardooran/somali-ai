@@ -42,8 +42,30 @@ def test_split_may_idin_is_recognized():
     assert result.agrees is True
 
 
-def test_bare_maydin_does_not_guess_subject_gender():
+def test_bare_maydin_cunaysaa_marks_feminine_understood_subject():
     result = analyze_object_agreement("Maydin cunaysaa?")
+    assert result.recognized is True
+    assert result.subject is None
+    assert result.subject_gender == "feminine"
+    assert result.object_clitic == "idin"
+    assert result.verb == "cunaysaa"
+    assert result.agrees is True
+    assert result.rule_id == "GRAM-OBJAGR-002"
+
+
+def test_bare_maydin_cunayaa_marks_masculine_understood_subject():
+    result = analyze_object_agreement("Maydin cunayaa?")
+    assert result.recognized is True
+    assert result.subject is None
+    assert result.subject_gender == "masculine"
+    assert result.object_clitic == "idin"
+    assert result.verb == "cunayaa"
+    assert result.agrees is True
+    assert result.rule_id == "GRAM-OBJAGR-006"
+
+
+def test_bare_maydin_unknown_verb_stays_unjudged():
+    result = analyze_object_agreement("Maydin arkaa?")
     assert result.recognized is True
     assert result.subject is None
     assert result.subject_gender is None
