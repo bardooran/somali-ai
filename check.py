@@ -11,6 +11,7 @@ from src.checker import check_file
 from src.conditional_agreement import analyze_conditional_agreement
 from src.dependent_mood import analyze_dependent_mood
 from src.focus_particle import scan_focus_particle_clitics
+from src.focused_object_agreement import analyze_focused_object_agreement
 from src.future_auxiliary_agreement import analyze_future_auxiliary_agreement
 from src.jussive_mood import analyze_jussive_mood
 from src.negation import analyze_ma_plus_verb
@@ -75,6 +76,11 @@ def main() -> None:
     possession_focus_conflict = (
         possession_focus_agreement.recognized
         and possession_focus_agreement.agrees is False
+    )
+    focused_object_agreement = analyze_focused_object_agreement(args.text)
+    focused_object_conflict = (
+        focused_object_agreement.recognized
+        and focused_object_agreement.agrees is False
     )
     negation_conflicts = _scan_negation_conflicts(args.text)
 
@@ -197,6 +203,7 @@ def main() -> None:
         and not object_agreement_conflict
         and not role_aware_conflict
         and not possession_focus_conflict
+        and not focused_object_conflict
         and not negation_conflicts
         and not predicate_conflicts
         and not reviewed_sentence_conflict
@@ -232,6 +239,7 @@ def main() -> None:
         or object_agreement_conflict
         or role_aware_conflict
         or possession_focus_conflict
+        or focused_object_conflict
         or negation_conflicts
         or predicate_conflicts
         or reviewed_sentence_conflict
@@ -285,6 +293,26 @@ def main() -> None:
                 f"leeyahay form supports person(s): {verb_persons or 'none'}. Intervening focused "
                 "material does not control agreement; no automatic rewrite. "
                 f"({possession_focus_agreement.rule_id})"
+            )
+
+        if focused_object_conflict:
+            clitic_persons = ", ".join(focused_object_agreement.focus_clitic_persons)
+            verb_persons = ", ".join(focused_object_agreement.verb_persons)
+            conflict_parts = []
+            if focused_object_agreement.clitic_agrees is False:
+                conflict_parts.append("contracted focus/subject clitic")
+            if focused_object_agreement.verb_agrees is False:
+                conflict_parts.append("finite verb")
+            conflict_label = " and ".join(conflict_parts) or "focused-object agreement"
+            print(
+                f"- [REVIEW] {focused_object_agreement.subject!r} ... "
+                f"{focused_object_agreement.focus_clitic!r} + {focused_object_agreement.verb!r}: "
+                f"possible focused-object agreement conflict in the {conflict_label}; "
+                f"explicit subject expects {focused_object_agreement.expected_person}. "
+                f"Focus clitic supports person(s): {clitic_persons or 'none'}; exact reviewed "
+                f"finite verb supports person(s): {verb_persons or 'none'}. The focused object "
+                "does not control agreement; no automatic rewrite. "
+                f"({focused_object_agreement.rule_id})"
             )
 
         if dependent_mood_conflict:
