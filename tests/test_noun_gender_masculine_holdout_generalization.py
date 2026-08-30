@@ -1,9 +1,10 @@
 """Holdout tests for masculine noun case and agreement generalization.
 
 The subject forms in this file are deliberately absent from the exact native-
-reviewed subject list. Their paired non-subject forms are source-backed, so the
-runtime must combine source morphology with the reviewed subject-surface rules
-instead of memorizing the subject forms or complete sentences.
+reviewed subject list and from the exact morphology datasets. Their paired non-
+subject forms are source-backed, so the runtime must combine source morphology
+with the reviewed subject-surface rules instead of memorizing subject forms or
+complete sentences.
 """
 
 import subprocess
@@ -26,9 +27,10 @@ HOLDOUT_MASCULINE_SINGULARS = {
 }
 
 
-def test_masculine_holdouts_are_not_exact_reviewed_subjects():
+def test_masculine_holdouts_are_not_memorized_or_direct_morphology_entries():
     for subject in HOLDOUT_MASCULINE_SINGULARS:
         assert subject not in REVIEWED_SINGULAR_FORMS
+        assert analyze_surface_form(subject) == ()
 
 
 def test_masculine_holdout_number_comes_from_source_backed_paired_morphology():
