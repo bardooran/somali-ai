@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run the current Somali orthography checker from the command line."""
+"""Run the current Somali orthography and conservative grammar checker."""
 
 from __future__ import annotations
 
@@ -7,6 +7,7 @@ import argparse
 from pathlib import Path
 
 from src.checker import check_file
+from src.sentence_agreement import scan_sentence_agreement
 
 
 DEFAULT_RULES = Path("rules/orthography")
@@ -24,18 +25,31 @@ def main() -> None:
     args = parser.parse_args()
 
     findings, corrected = check_file(args.text, args.rules)
+    grammar_findings = scan_sentence_agreement(args.text)
 
-    if not findings:
-        print("No executable matching rules found.")
+    if not findings and not grammar_findings:
+        print("No supported orthography or agreement findings found.")
         return
 
-    print("Findings:")
-    for finding in findings:
-        label = "REVIEW" if finding.status in {"ambiguous", "context_required"} else "SUGGEST"
-        print(
-            f"- [{label}] {finding.matched_text!r} -> {finding.suggestion!r} "
-            f"({finding.rule_id})"
-        )
+    if findings:
+        print("Orthography findings:")
+        for finding in findings:
+            label = "REVIEW" if finding.status in {"ambiguous", "context_required"} else "SUGGEST"
+            print(
+                f"- [{label}] {finding.matched_text!r} -> {finding.suggestion!r} "
+                f"({finding.rule_id})"
+            )
+
+    if grammar_findings:
+        if findings:
+            print()
+        print("Grammar findings:")
+        for finding in grammar_findings:
+            expected = ", ".join(finding.expected_forms)
+            print(
+                f"- [REVIEW] {finding.pronoun!r} + {finding.verb!r}: "
+                f"possible subject-verb agreement conflict; reviewed forms for this subject include: {expected}"
+            )
 
     print("\nSafe corrected text:")
     print(corrected)
