@@ -9,6 +9,7 @@ from pathlib import Path
 
 from src.checker import check_file
 from src.conditional_agreement import analyze_conditional_agreement
+from src.dependent_mood import analyze_dependent_mood
 from src.focus_particle import scan_focus_particle_clitics
 from src.future_auxiliary_agreement import analyze_future_auxiliary_agreement
 from src.negation import analyze_ma_plus_verb
@@ -69,6 +70,9 @@ def main() -> None:
     role_aware = analyze_role_aware_sentence(args.text)
     role_aware_conflict = role_aware.recognized and role_aware.agrees is False
     negation_conflicts = _scan_negation_conflicts(args.text)
+
+    dependent_mood = analyze_dependent_mood(args.text)
+    dependent_mood_conflict = dependent_mood.recognized and dependent_mood.agrees is False
 
     conditional_agreement = analyze_conditional_agreement(args.text)
     conditional_conflict = (
@@ -196,6 +200,7 @@ def main() -> None:
         and not negative_finite_conflict
         and not negative_past_aspect_conflict
         and not conditional_conflict
+        and not dependent_mood_conflict
     ):
         print("No supported orthography or grammar findings found.")
         return
@@ -228,6 +233,7 @@ def main() -> None:
         or negative_finite_conflict
         or negative_past_aspect_conflict
         or conditional_conflict
+        or dependent_mood_conflict
     ):
         if findings:
             print()
@@ -245,6 +251,21 @@ def main() -> None:
                 f"- [REVIEW] {finding.subject!r} ... {finding.particle!r}: "
                 f"possible missing subject clitic in a baa/ayaa focus construction "
                 f"({finding.rule_id})"
+            )
+
+        if dependent_mood_conflict:
+            marker_persons = ", ".join(dependent_mood.marker_persons)
+            marker_polarities = ", ".join(dependent_mood.marker_polarities)
+            verb_persons = ", ".join(dependent_mood.verb_persons)
+            verb_polarities = ", ".join(dependent_mood.verb_polarities)
+            print(
+                f"- [REVIEW] {dependent_mood.marker!r} + {dependent_mood.verb!r}: "
+                "possible habka dhimman marker/verb conflict; "
+                f"marker person(s): {marker_persons or 'none'}, polarity(s): "
+                f"{marker_polarities or 'none'}; verb person(s): {verb_persons or 'none'}, "
+                f"polarity(s): {verb_polarities or 'none'}. Exact reviewed dependent pairs "
+                "are required; no automatic rewrite. "
+                f"({dependent_mood.rule_id})"
             )
 
         if object_agreement_conflict:
