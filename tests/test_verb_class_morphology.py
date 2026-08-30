@@ -43,16 +43,29 @@ def test_fal_sifo_iv_a_and_iv_b_are_not_treated_as_plain_adjectives():
     assert fiican.features["person"] == "3sg_m"
 
 
-def test_maydh_and_maydho_are_native_reviewed_without_invented_person_labels():
+def test_maydh_family_includes_native_reviewed_ongoing_surfaces():
     base = analyze_surface_form("maydh")[0]
-    surface = analyze_surface_form("maydho")[0]
+    short_surface = analyze_surface_form("maydho")[0]
+    ongoing = analyze_surface_form("maydhayaa")[0]
+    ongoing_variant = analyze_surface_form("maydhanayaa")[0]
+
     assert base.lemma == "maydh"
-    assert surface.lemma == "maydh"
-    assert base.evidence_type == "native_speaker_project_review"
-    assert surface.evidence_type == "native_speaker_project_review"
-    assert "person" not in surface.features
-    assert "tense_aspect" not in surface.features
-    assert surface.executable is False
+    assert short_surface.lemma == "maydh"
+    assert ongoing.lemma == "maydh"
+    assert ongoing_variant.lemma == "maydh"
+    assert ongoing.features["tense_aspect"] == "ongoing_current"
+    assert ongoing.features["possible_persons"] == ["1sg", "3sg_m"]
+    assert ongoing_variant.features["tense_aspect"] == "ongoing_current"
+    assert ongoing.evidence_type == "native_speaker_project_review"
+    assert ongoing.executable is False
+
+
+def test_maydhayaadee_preserves_reviewed_discourse_nuance_without_overclaiming():
+    analysis = analyze_surface_form("maydhayaadee")[0]
+    assert analysis.lemma == "maydh"
+    assert analysis.features["person"] == "1sg_in_reviewed_example"
+    assert analysis.features["discourse_function"] == "speaker_emphasis_or_explanatory_tone_provisional"
+    assert analysis.status == "native_reviewed_pragmatics_provisional"
 
 
 def test_word_lookup_can_reach_maydh_lemma_from_reviewed_maydho_surface():
@@ -62,7 +75,21 @@ def test_word_lookup_can_reach_maydh_lemma_from_reviewed_maydho_surface():
     assert any(candidate.lemma == "maydh" for candidate in result.morphology_candidates)
 
 
-def test_unreviewed_class_like_forms_are_not_generated_by_suffix_guessing():
-    assert analyze_surface_form("maydhayaa") == ()
-    assert analyze_surface_form("adkeeyeenno") == ()
-    assert analyze_surface_form("jabsadayaal") == ()
+def test_jabsadeen_is_reviewed_finite_verb_but_jabsadayaal_is_agent_noun_plural():
+    verb = analyze_surface_form("jabsadeen")[0]
+    agent_plural = analyze_surface_form("jabsadayaal")[0]
+
+    assert verb.lemma == "jabso"
+    assert verb.analysis_type == "native_reviewed_finite_verb_surface"
+    assert verb.features["person"] == "3pl"
+    assert verb.features["tense_aspect"] == "past"
+
+    assert agent_plural.analysis_type == "native_reviewed_agent_noun_plural"
+    assert agent_plural.features["part_of_speech"] == "noun"
+    assert agent_plural.features["number"] == "plural"
+    assert agent_plural.features["canonical_singular"] == "unreviewed"
+
+
+def test_unknown_forms_are_not_generated_by_suffix_guessing():
+    assert analyze_surface_form("maydhxyz") == ()
+    assert analyze_surface_form("jabsadxyz") == ()
