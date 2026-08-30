@@ -94,7 +94,7 @@ def test_live_cli_reports_cross_family_plural_verb_conflicts_without_rewriting()
     ):
         output = run_cli(text)
         assert "possible plural noun-subject/verb agreement conflict" in output
-        assert "expected finite-verb person is '3pl'" in output
+        assert "Expected 3pl." in output
         assert "Safe corrected text:" in output
         assert text in output
 
