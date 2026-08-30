@@ -1,10 +1,10 @@
 """Holdout tests for noun case and gender/number agreement generalization.
 
-These subjects are deliberately not added to the exact native-reviewed subject
-list. Their paired non-subject definite forms are already source-backed in the
-Qaamuus morphology data, so the runtime must combine that number evidence with
-reviewed subject-surface case and gender signals instead of memorizing whole
-sentences.
+These subjects are deliberately absent from the exact native-reviewed subject
+list and from the exact morphology datasets. Their paired non-subject definite
+forms are source-backed in the Qaamuus morphology data, so the runtime must
+combine that evidence with reviewed subject-surface case and gender rules
+instead of memorizing subject forms or whole sentences.
 """
 
 import subprocess
@@ -34,9 +34,10 @@ HOLDOUT_FEMININE_SINGULARS = {
 }
 
 
-def test_holdouts_are_not_memorized_as_exact_reviewed_subjects():
+def test_holdouts_are_not_memorized_or_direct_morphology_entries():
     for subject in HOLDOUT_FEMININE_SINGULARS:
         assert subject not in REVIEWED_SINGULAR_FORMS
+        assert analyze_surface_form(subject) == ()
 
 
 def test_holdout_number_comes_from_paired_source_backed_morphology():
