@@ -33,11 +33,11 @@ def _tokens(text: str) -> list[str]:
 
 
 def analyze_object_agreement(text: str) -> ObjectAgreementResult:
-    """Analyze only the currently reviewed libaaxu/libaaxadu + idin patterns.
+    """Analyze only the currently reviewed subject/object-agreement patterns.
 
-    The function deliberately does not infer a subject for bare ``maydin``
-    questions because the subject is discourse-given and may have different
-    gender agreement.
+    Bare ``maydin`` questions may have a discourse-given subject. For the
+    native-reviewed ``cunayaa/cunaysaa`` contrast, the verb form itself provides
+    masculine/feminine agreement evidence. Unknown verb forms remain unjudged.
     """
     tokens = _tokens(text)
     if not tokens:
@@ -77,14 +77,40 @@ def analyze_object_agreement(text: str) -> ObjectAgreementResult:
             "Feminine subject libaaxadu controls eryanaysaa; idin is the object.",
         )
 
+    verb = tokens[-1] if tokens else None
+    if verb == "cunaysaa":
+        return ObjectAgreementResult(
+            text,
+            True,
+            None,
+            "feminine",
+            "idin",
+            verb,
+            True,
+            "GRAM-OBJAGR-002",
+            "Reviewed bare maydin construction: cunaysaa carries feminine agreement for the understood subject; idin is the object.",
+        )
+    if verb == "cunayaa":
+        return ObjectAgreementResult(
+            text,
+            True,
+            None,
+            "masculine",
+            "idin",
+            verb,
+            True,
+            "GRAM-OBJAGR-006",
+            "Reviewed bare maydin construction: cunayaa carries masculine agreement for the understood subject; idin is the object.",
+        )
+
     return ObjectAgreementResult(
         text,
         True,
         None,
         None,
         "idin",
-        tokens[-1] if tokens else None,
+        verb,
         None,
         "GRAM-OBJAGR-001",
-        "Second-person-plural object is recognized, but the subject is discourse-given or outside the current executable patterns; no agreement judgment is made.",
+        "Second-person-plural object is recognized, but the subject or verb agreement is outside the current reviewed executable patterns; no agreement judgment is made.",
     )
