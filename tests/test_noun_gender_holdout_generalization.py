@@ -27,6 +27,7 @@ HOLDOUT_FEMININE_SINGULARS = {
     "qodaxdu": "qodaxda",
     "bacdu": "bacda",
     "gallaydu": "gallayda",
+    "bu'du": "bu'da",
     "ushu": "usha",
     "ishu": "isha",
     "bishu": "bisha",
