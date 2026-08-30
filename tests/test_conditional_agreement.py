@@ -24,13 +24,15 @@ def test_conditional_rules_are_review_only():
     assert all(record["autofix"] is False for record in records)
 
 
-def test_conditional_auxiliaries_are_context_forms_not_ordinary_finite_verbs():
-    assert any(c.analysis_type == "conditional_auxiliary" for c in analyze_surface_form("lahaa"))
-    assert any(c.analysis_type == "conditional_auxiliary" for c in analyze_surface_form("lahayd"))
-    assert any(c.analysis_type == "conditional_auxiliary" for c in analyze_surface_form("lahayeen"))
-    assert analyze_reviewed_finite_verb("lahaa").recognized is False
-    assert analyze_reviewed_finite_verb("lahayd").recognized is False
-    assert analyze_reviewed_finite_verb("lahayeen").recognized is False
+def test_conditional_auxiliaries_share_surfaces_with_possessive_past():
+    for surface in ("lahaa", "lahayd", "lahaayeen"):
+        candidates = analyze_surface_form(surface)
+        assert any(c.analysis_type == "conditional_auxiliary" for c in candidates)
+        assert analyze_reviewed_finite_verb(surface).recognized is True
+        assert "leeyahay" in analyze_reviewed_finite_verb(surface).lemmas
+
+    # Cross-validation corrected the earlier parsed 3pl spelling.
+    assert analyze_surface_form("lahayeen") == ()
 
 
 def test_negative_conditional_surfaces_preserve_contextual_ambiguity():
@@ -74,7 +76,7 @@ def test_feminine_affirmative_conditional_agrees():
 
 
 def test_plural_affirmative_conditional_agrees():
-    result = analyze_conditional_agreement("Macallimiintu way cuni lahayeen.")
+    result = analyze_conditional_agreement("Macallimiintu way cuni lahaayeen.")
     assert result.recognized
     assert result.subject_number == "plural"
     assert result.expected_person == "3pl"
@@ -159,6 +161,7 @@ def test_cli_reports_affirmative_conditional_agreement_conflict_without_autofix(
     output = _run_checker("Gabadhu way cuni lahaa.")
     assert "possible conditional agreement conflict" in output
     assert "Expected 3sg_f" in output
+    assert "possible singular noun/finite-verb agreement conflict" not in output
     assert "Safe corrected text:\nGabadhu way cuni lahaa." in output
 
 
