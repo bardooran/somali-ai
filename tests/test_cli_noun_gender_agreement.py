@@ -37,7 +37,6 @@ def test_cli_reports_dugsigu_wrong_clitic_with_reviewed_singular_number():
     output = run_cli(text)
     assert "possible noun-subject gender/clitic agreement conflict" in output
     assert "supported clitic is 'wuu'" in output
-    # The copula already matches masculine singular gender.
     assert "possible noun-subject predicate/copula agreement conflict" not in output
 
 
@@ -54,11 +53,37 @@ def test_cli_does_not_force_wuu_for_number_ambiguous_unreviewed_masculine_surfac
     assert "possible noun-subject gender/clitic agreement conflict" not in output
 
 
-def test_cli_preserves_plural_way_examples_without_gender_conflict():
+def test_cli_preserves_native_reviewed_plural_way_examples():
     for text in ("Baabuurtu way socdaan.", "Carruurtu way ciyaarayaan."):
         output = run_cli(text)
         assert "possible noun-subject gender/clitic agreement conflict" not in output
         assert "possible noun-subject predicate/copula agreement conflict" not in output
+
+
+def test_cli_accepts_morphology_backed_plural_way_for_both_plural_genders():
+    for text in (
+        "Miisasku way jiraan.",
+        "Duruustu way jiraan.",
+        "Macallimiintu way jiraan.",
+        "Waddooyinku way jiraan.",
+        "Daawooyinku way jiraan.",
+    ):
+        output = run_cli(text)
+        assert "possible noun-subject gender/clitic agreement conflict" not in output
+
+
+def test_cli_rejects_wuu_for_morphology_backed_plural_subjects():
+    for text in (
+        "Miisasku wuu jiraan.",
+        "Duruustu wuu jiraan.",
+        "Waddooyinku wuu jiraan.",
+    ):
+        output = run_cli(text)
+        assert "Grammar findings:" in output
+        assert "possible noun-subject gender/clitic agreement conflict" in output
+        assert "supported clitic is 'way'" in output
+        assert "No automatic rewrite" not in output or "no automatic rewrite" in output.casefold()
+        assert text in output
 
 
 def test_cli_does_not_reclassify_independent_pronoun_as_noun():
