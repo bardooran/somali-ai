@@ -23,12 +23,38 @@ def test_loads_full_orthography_directory():
     assert "ORTH-WEEKDAY-001" in ids
     assert "ORTH-MONTH-001" in ids
     assert "ORTH-NAME-001" in ids
+    assert "ORTH-VARIANT-001" in ids
 
 
 def test_reference_only_rules_do_not_break_checking():
     rules = load_rules(ORTHOGRAPHY_RULES)
     findings = check_text("Waxaan tegayaa.", rules)
     assert any(finding.rule_id == "ORTH-CONTRACT-001" for finding in findings)
+
+
+def test_source_conflict_variants_are_reference_only():
+    rules = load_rules(ORTHOGRAPHY_RULES)
+    variant = next(rule for rule in rules if rule.id == "ORTH-VARIANT-001")
+    assert variant.forms == ["Jimce", "Jimco"]
+    assert not variant.is_executable_replacement
+    assert variant.status == "context_required"
+
+
+def test_source_conflict_variant_is_not_rewritten_to_other_spelling():
+    rules = load_rules(ORTHOGRAPHY_RULES)
+    text = "Maanta waa Jimco, bisha Janaayo ayaana la xusay."
+    findings = check_text(text, rules)
+    corrected = apply_safe_fixes(text, findings)
+    assert "Jimco" in corrected
+    assert "Janaayo" in corrected
+    assert "Jimce" not in corrected
+    assert "Jannaayo" not in corrected
+
+
+def test_lowercase_variant_does_not_trigger_conflicting_spelling_rule():
+    rules = load_rules(ORTHOGRAPHY_RULES)
+    findings = check_text("Maanta waa jimco.", rules)
+    assert not any(finding.rule_id == "ORTH-WEEKDAY-005" for finding in findings)
 
 
 def test_finds_simple_contractions():
@@ -85,6 +111,16 @@ def test_detects_lowercase_at_start_of_text():
     assert cap[0].matched_text == "c"
     assert cap[0].suggestion == "C"
     assert apply_safe_fixes(text, findings) == "Cali wuu yimid."
+
+
+def test_longer_lexical_fix_wins_over_overlapping_sentence_start_fix():
+    rules = load_rules(ORTHOGRAPHY_RULES)
+    text = "faadumo way timid."
+    findings = check_text(text, rules)
+    ids = {finding.rule_id for finding in findings}
+    assert "ORTH-CAP-001" in ids
+    assert "ORTH-NAME-005" in ids
+    assert apply_safe_fixes(text, findings) == "Faadumo waa ay timid."
 
 
 def test_detects_lowercase_after_sentence_punctuation():
