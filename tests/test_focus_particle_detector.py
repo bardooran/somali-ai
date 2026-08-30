@@ -21,7 +21,7 @@ def test_plural_second_person_is_supported():
 
 
 def test_subject_focused_baa_is_not_flagged():
-    # Source gives Adiga baa moos cunay as a valid subject-focus structure.
+    # Subject-focus baa is a different structure from focused-object + bare baa.
     assert scan_focus_particle_clitics("Adigu baa moos cuntay.") == []
 
 
@@ -30,9 +30,11 @@ def test_contracted_subject_clitic_form_is_not_flagged():
     assert scan_focus_particle_clitics("Adigu moos baad cuntay.") == []
 
 
-def test_optional_third_person_structure_is_not_touched():
-    # Source explicitly allows bare baa when the third-person subject follows
-    # the focused object but precedes the verb.
+def test_disputed_third_person_structure_remains_outside_detector():
+    # Silence here is NOT acceptance. Native project review reads this surface
+    # form with reversed semantic roles (approximately "the banana ate the boy")
+    # rather than the source-intended "the boy ate the banana". Third-person
+    # focus remains context-required until broader evidence resolves the conflict.
     assert scan_focus_particle_clitics("Moos baa wiilkii cunay.") == []
 
 
