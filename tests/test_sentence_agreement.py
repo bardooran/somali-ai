@@ -36,3 +36,35 @@ def test_scanner_handles_short_intervening_material():
 
 def test_matching_plural_pair_is_silent():
     assert scan_sentence_agreement("Iyaga way keeneen.") == []
+
+
+def test_anchored_feminine_subject_clitic_mismatch_is_reported():
+    findings = scan_sentence_agreement("Waa ay keenay.")
+    assert len(findings) == 1
+    assert findings[0].pronoun.casefold() == "ay"
+    assert "keentay" in findings[0].expected_forms
+
+
+def test_anchored_feminine_subject_clitic_match_is_silent():
+    assert scan_sentence_agreement("Waa ay keentay.") == []
+
+
+def test_anchored_masculine_subject_clitic_match_is_silent():
+    assert scan_sentence_agreement("Baa uu keenay.") == []
+
+
+def test_anchored_masculine_subject_clitic_mismatch_is_reported():
+    findings = scan_sentence_agreement("Baa uu keentay.")
+    assert len(findings) == 1
+    assert findings[0].pronoun.casefold() == "uu"
+    assert "keenay" in findings[0].expected_forms
+
+
+def test_bare_ay_is_not_scanned_as_subject_clitic():
+    assert scan_sentence_agreement("Ay keenay.") == []
+
+
+def test_nearby_independent_subject_prevents_duplicate_clitic_finding():
+    findings = scan_sentence_agreement("Iyada waa ay keenay.")
+    assert len(findings) == 1
+    assert findings[0].pronoun.casefold() == "iyada"
