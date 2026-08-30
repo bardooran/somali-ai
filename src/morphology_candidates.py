@@ -2,8 +2,8 @@
 
 This module intentionally does not perform open-ended suffix stripping. It only
 returns analyses for surface forms stored in reviewed morphology datasets. That
-gives the word analyzer a safe bridge from inflected surface forms to candidate
-lemmas while broader morphology remains under validation.
+gives the word analyzer a safe bridge from inflected or derived surface forms
+to candidate lemmas while broader morphology remains under validation.
 """
 
 from __future__ import annotations
@@ -24,11 +24,15 @@ REVIEWED_VERB_CLASS_FORMS_PATH = Path(
 NATIVE_REVIEW_MAYDH_FORMS_PATH = Path(
     "data/morphology/native_review_jigjiga_maydh_forms.jsonl"
 )
+NATIVE_REVIEW_DERIVATIONAL_FORMS_PATH = Path(
+    "data/morphology/native_review_jigjiga_derivational_forms.jsonl"
+)
 DEFAULT_MORPHOLOGY_PATHS = (
     REVIEWED_NOUN_FORMS_PATH,
     REVIEWED_VERB_FORMS_PATH,
     REVIEWED_VERB_CLASS_FORMS_PATH,
     NATIVE_REVIEW_MAYDH_FORMS_PATH,
+    NATIVE_REVIEW_DERIVATIONAL_FORMS_PATH,
 )
 
 
@@ -94,7 +98,7 @@ def analyze_surface_form(
     Matching is case-insensitive, but no characters are removed, replaced, or
     normalized beyond Unicode-preserving Python ``casefold`` comparison. If a
     form is absent from the reviewed datasets, the function returns an empty
-    tuple rather than guessing a lemma.
+    tuple rather than guessing a lemma or derivation.
     """
     query = form.strip().casefold()
     records = _load_jsonl(path) if path is not None else _default_records()
