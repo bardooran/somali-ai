@@ -8,6 +8,7 @@ from pathlib import Path
 
 from src.checker import check_file
 from src.focus_particle import scan_focus_particle_clitics
+from src.object_agreement import analyze_object_agreement
 from src.sentence_agreement import scan_sentence_agreement
 
 
@@ -28,8 +29,10 @@ def main() -> None:
     findings, corrected = check_file(args.text, args.rules)
     agreement_findings = scan_sentence_agreement(args.text)
     focus_findings = scan_focus_particle_clitics(args.text)
+    object_agreement = analyze_object_agreement(args.text)
+    object_agreement_conflict = object_agreement.recognized and object_agreement.agrees is False
 
-    if not findings and not agreement_findings and not focus_findings:
+    if not findings and not agreement_findings and not focus_findings and not object_agreement_conflict:
         print("No supported orthography or grammar findings found.")
         return
 
@@ -42,7 +45,7 @@ def main() -> None:
                 f"({finding.rule_id})"
             )
 
-    if agreement_findings or focus_findings:
+    if agreement_findings or focus_findings or object_agreement_conflict:
         if findings:
             print()
         print("Grammar findings:")
@@ -59,6 +62,13 @@ def main() -> None:
                 f"- [REVIEW] {finding.subject!r} ... {finding.particle!r}: "
                 f"possible missing subject clitic in a baa/ayaa focus construction "
                 f"({finding.rule_id})"
+            )
+
+        if object_agreement_conflict:
+            print(
+                f"- [REVIEW] {object_agreement.subject!r} + {object_agreement.object_clitic!r} + "
+                f"{object_agreement.verb!r}: possible subject-gender/verb agreement conflict; "
+                f"{object_agreement.note} ({object_agreement.rule_id})"
             )
 
     print("\nSafe corrected text:")
