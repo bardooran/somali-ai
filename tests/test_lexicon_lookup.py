@@ -43,6 +43,42 @@ def test_ukun_can_be_known_from_reviewed_variant_layer_before_exact_seed_entry()
     assert any(item.preference == "co_preferred" for item in result.regional_analyses)
 
 
+def test_everyday_seed_preserves_inan_gender_homographs():
+    result = lookup_word("inan")
+    assert result.known
+    assert len(result.exact_entries) == 2
+    assert {entry.homograph_index for entry in result.exact_entries} == {1, 2}
+    assert {entry.source_pos for entry in result.exact_entries} == {"m.l", "m.dh"}
+
+
+def test_everyday_seed_preserves_kor_noun_and_verb_analyses():
+    result = lookup_word("kor")
+    assert len(result.exact_entries) == 2
+    assert {entry.source_pos for entry in result.exact_entries} == {"m.l", "f.mg1"}
+
+
+def test_gabay_preserves_poetry_noun_and_verb_analyses():
+    result = lookup_word("gabay")
+    assert len(result.exact_entries) == 2
+    assert {entry.domain for entry in result.exact_entries} == {"suugaan"}
+    assert {entry.source_pos for entry in result.exact_entries} == {"m.l", "f.mg1"}
+
+
+def test_duwan_combines_dictionary_evidence_with_regional_variant_status():
+    result = lookup_word("duwan")
+    assert result.known
+    assert len(result.exact_entries) == 1
+    assert result.exact_entries[0].source_pos == "f.mg4"
+    assert any(item.preference == "recognized_variant" for item in result.regional_analyses)
+
+
+def test_dugan_is_preferred_regional_form_without_claiming_qaamuus_headword_evidence():
+    result = lookup_word("dugan")
+    assert result.known
+    assert result.exact_entries == ()
+    assert any(item.preference == "preferred" for item in result.regional_analyses)
+
+
 def test_inflected_form_is_not_silently_lemmatized_yet():
     result = lookup_word("gabadha")
     assert not result.known
