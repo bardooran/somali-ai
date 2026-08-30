@@ -11,6 +11,9 @@ from src.checker import check_file
 from src.focus_particle import scan_focus_particle_clitics
 from src.future_auxiliary_agreement import analyze_future_auxiliary_agreement
 from src.negation import analyze_ma_plus_verb
+from src.negative_future_auxiliary_agreement import (
+    analyze_negative_future_auxiliary_agreement,
+)
 from src.noun_gender_agreement import analyze_noun_gender_agreement
 from src.noun_number_verb_agreement import analyze_noun_number_verb_agreement
 from src.noun_singular_verb_agreement import analyze_noun_singular_verb_agreement
@@ -96,6 +99,20 @@ def main() -> None:
         and future_auxiliary_agreement.agrees is False
     )
 
+    negative_future_auxiliary_agreement = analyze_negative_future_auxiliary_agreement(
+        args.text
+    )
+    negative_future_auxiliary_conflict = (
+        negative_future_auxiliary_agreement.recognized
+        and negative_future_auxiliary_agreement.agrees is False
+    )
+    if negative_future_auxiliary_agreement.recognized:
+        # The subject-aware negative-future layer is more specific than the
+        # older span-only negation pair checker. Avoid duplicate future warnings.
+        negation_conflicts = [
+            result for result in negation_conflicts if result.paradigm != "future"
+        ]
+
     predicate_conflicts = scan_predicate_agreement(args.text)
     if (
         noun_gender_copula_conflict
@@ -136,6 +153,7 @@ def main() -> None:
         and not noun_number_verb_conflict
         and not noun_singular_verb_conflict
         and not future_auxiliary_conflict
+        and not negative_future_auxiliary_conflict
     ):
         print("No supported orthography or grammar findings found.")
         return
@@ -163,6 +181,7 @@ def main() -> None:
         or noun_number_verb_conflict
         or noun_singular_verb_conflict
         or future_auxiliary_conflict
+        or negative_future_auxiliary_conflict
     ):
         if findings:
             print()
@@ -287,6 +306,21 @@ def main() -> None:
                 "The future stem is non-finite and does not carry this agreement; "
                 "no automatic rewrite. "
                 f"({future_auxiliary_agreement.rule_id})"
+            )
+
+        if negative_future_auxiliary_conflict:
+            persons = ", ".join(negative_future_auxiliary_agreement.auxiliary_persons)
+            polarity = negative_future_auxiliary_agreement.auxiliary_polarity or "unknown"
+            print(
+                f"- [REVIEW] {negative_future_auxiliary_agreement.subject!r} + ma + "
+                f"{negative_future_auxiliary_agreement.future_stem!r} "
+                f"{negative_future_auxiliary_agreement.auxiliary!r}: possible negative future "
+                f"auxiliary agreement conflict; the reviewed auxiliary analysis has polarity "
+                f"{polarity!r} and person(s): {persons or 'none'}. "
+                f"Expected {negative_future_auxiliary_agreement.expected_person}. "
+                "Under ma, the reviewed negative future auxiliary morphology is required; "
+                "no automatic rewrite. "
+                f"({negative_future_auxiliary_agreement.rule_id})"
             )
 
     print("\nSafe corrected text:")
