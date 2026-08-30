@@ -25,6 +25,7 @@ from src.noun_singular_verb_agreement import analyze_noun_singular_verb_agreemen
 from src.noun_subject_case import analyze_noun_subject_case
 from src.object_agreement import analyze_object_agreement
 from src.past_habitual_auxiliary_agreement import analyze_past_habitual_auxiliary_agreement
+from src.possession_focus_agreement import analyze_possession_focus_agreement
 from src.predicate_sentence import scan_predicate_agreement
 from src.reviewed_sentence_agreement import analyze_reviewed_sentence_agreement
 from src.role_aware_sentences import analyze_role_aware_sentence
@@ -70,6 +71,11 @@ def main() -> None:
     object_agreement_conflict = object_agreement.recognized and object_agreement.agrees is False
     role_aware = analyze_role_aware_sentence(args.text)
     role_aware_conflict = role_aware.recognized and role_aware.agrees is False
+    possession_focus_agreement = analyze_possession_focus_agreement(args.text)
+    possession_focus_conflict = (
+        possession_focus_agreement.recognized
+        and possession_focus_agreement.agrees is False
+    )
     negation_conflicts = _scan_negation_conflicts(args.text)
 
     dependent_mood = analyze_dependent_mood(args.text)
@@ -190,6 +196,7 @@ def main() -> None:
         and not focus_findings
         and not object_agreement_conflict
         and not role_aware_conflict
+        and not possession_focus_conflict
         and not negation_conflicts
         and not predicate_conflicts
         and not reviewed_sentence_conflict
@@ -224,6 +231,7 @@ def main() -> None:
         or focus_findings
         or object_agreement_conflict
         or role_aware_conflict
+        or possession_focus_conflict
         or negation_conflicts
         or predicate_conflicts
         or reviewed_sentence_conflict
@@ -257,6 +265,26 @@ def main() -> None:
                 f"- [REVIEW] {finding.subject!r} ... {finding.particle!r}: "
                 f"possible missing subject clitic in a baa/ayaa focus construction "
                 f"({finding.rule_id})"
+            )
+
+        if possession_focus_conflict:
+            clitic_persons = ", ".join(possession_focus_agreement.focus_clitic_persons)
+            verb_persons = ", ".join(possession_focus_agreement.verb_persons)
+            conflict_parts = []
+            if possession_focus_agreement.clitic_agrees is False:
+                conflict_parts.append("contracted focus/subject clitic")
+            if possession_focus_agreement.verb_agrees is False:
+                conflict_parts.append("finite possession verb")
+            conflict_label = " and ".join(conflict_parts) or "focused possession agreement"
+            print(
+                f"- [REVIEW] {possession_focus_agreement.subject!r} ... "
+                f"{possession_focus_agreement.focus_clitic!r} + {possession_focus_agreement.verb!r}: "
+                f"possible focused possession agreement conflict in the {conflict_label}; "
+                f"explicit subject expects {possession_focus_agreement.expected_person}. "
+                f"Focus clitic supports person(s): {clitic_persons or 'none'}; exact reviewed "
+                f"leeyahay form supports person(s): {verb_persons or 'none'}. Intervening focused "
+                "material does not control agreement; no automatic rewrite. "
+                f"({possession_focus_agreement.rule_id})"
             )
 
         if dependent_mood_conflict:
