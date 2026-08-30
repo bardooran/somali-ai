@@ -18,6 +18,7 @@ PAIR_PATHS = (
     Path("data/morphology/qaamuus_2012_reviewed_dependent_pairs.jsonl"),
     Path("data/morphology/qaamuus_2012_reviewed_imow_dependent_pairs.jsonl"),
     Path("data/morphology/qaamuus_2012_reviewed_aqaan_dependent_pairs.jsonl"),
+    Path("data/morphology/qaamuus_2012_reviewed_ahaw_dependent_pairs.jsonl"),
 )
 TOKEN_RE = re.compile(r"[^\W\d_]+(?:['’][^\W\d_]+)*", flags=re.UNICODE)
 
