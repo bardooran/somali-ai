@@ -1,6 +1,7 @@
 import json
 from pathlib import Path
 
+from src.morphology_candidates import analyze_surface_form
 from src.noun_gender_agreement import (
     analyze_noun_gender_agreement,
     infer_subject_gender,
@@ -61,8 +62,6 @@ def test_strong_subject_suffixes_infer_gender_without_inventing_number():
     assert infer_subject_gender("Macallinku")[0] == "masculine"
     assert infer_subject_gender("Magaaladu")[0] == "feminine"
     assert infer_subject_gender("Meeshu")[0] == "feminine"
-    # A completely unseen strong-suffix form can carry gender evidence while
-    # number remains unknown.
     assert infer_subject_number("Tijaabogu")[0] is None
 
 
@@ -128,14 +127,72 @@ def test_unreviewed_masculine_surface_with_way_stays_number_ambiguous():
     assert result.clitic_agrees is None
 
 
-def test_plural_way_safety_is_preserved_for_reviewed_examples():
-    for sentence in ("Baabuurtu way socdaan.", "Carruurtu way ciyaarayaan."):
-        result = analyze_noun_gender_agreement(sentence)
+def test_native_reviewed_plural_subjects_now_have_explicit_number():
+    for subject in ("Baabuurtu", "Carruurtu"):
+        number, evidence = infer_subject_number(subject)
+        assert number == "plural"
+        assert evidence == "native_reviewed_plural_subject"
+        result = analyze_noun_gender_agreement(f"{subject} way jiraan.")
         assert result.recognized
-        assert result.gender == "feminine"
-        assert result.clitic_agrees is True
+        assert result.number == "plural"
         assert result.expected_clitic == "way"
+        assert result.clitic_agrees is True
         assert result.copula is None
+
+
+def test_reviewed_plural_number_overrides_masculine_singular_clitic_expectation():
+    result = analyze_noun_gender_agreement("Baabuurtu wuu jiraan.")
+    assert result.recognized
+    assert result.number == "plural"
+    assert result.clitic_agrees is False
+    assert result.expected_clitic == "way"
+
+
+def test_qaamuus_plural_definite_surfaces_are_loaded_with_number_and_gender():
+    expected = {
+        "miisaska": ("plural", "masculine"),
+        "duruusta": ("plural", "feminine"),
+        "macallimiinta": ("plural", "feminine"),
+        "waddooyinka": ("plural", "masculine"),
+        "daawooyinka": ("plural", "masculine"),
+    }
+    for surface, (number, gender) in expected.items():
+        candidates = analyze_surface_form(surface)
+        assert candidates
+        assert any(
+            candidate.features.get("number") == number
+            and candidate.features.get("gender") == gender
+            for candidate in candidates
+        )
+
+
+def test_subject_number_generalizes_through_paired_reviewed_plural_morphology():
+    subject_forms = {
+        "Miisasku": "masculine",
+        "Duruustu": "feminine",
+        "Macallimiintu": "feminine",
+        "Waddooyinku": "masculine",
+        "Daawooyinku": "masculine",
+    }
+    for subject, expected_gender in subject_forms.items():
+        number, evidence = infer_subject_number(subject)
+        assert number == "plural"
+        assert evidence == "paired_reviewed_morphology"
+        result = analyze_noun_gender_agreement(f"{subject} way jiraan.")
+        assert result.recognized
+        assert result.gender == expected_gender
+        assert result.number == "plural"
+        assert result.expected_clitic == "way"
+        assert result.clitic_agrees is True
+
+
+def test_morphology_backed_plural_rejects_wuu_regardless_of_plural_gender():
+    for subject in ("Miisasku", "Duruustu", "Waddooyinku"):
+        result = analyze_noun_gender_agreement(f"{subject} wuu jiraan.")
+        assert result.recognized
+        assert result.number == "plural"
+        assert result.expected_clitic == "way"
+        assert result.clitic_agrees is False
 
 
 def test_personal_pronouns_are_not_reclassified_as_nouns():
