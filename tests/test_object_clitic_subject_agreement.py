@@ -22,6 +22,7 @@ def test_idin_is_object_not_agreement_controller():
         rule = by_id[rule_id]
         assert rule["object_clitic"] == "idin"
         assert rule["verb_agreement_controller"] in {"understood_subject", "subject"}
+        assert rule["verb_agreement_controller"] != "object"
 
 
 def test_masculine_and_feminine_lion_agreement_stays_distinct():
@@ -46,3 +47,19 @@ def test_ongoing_question_can_switch_idin_to_na_in_answer():
     rule = {rule["id"]: rule for rule in load_rules()}["GRAM-OBJAGR-002"]
     assert rule["example"] == "Maydin cunaysaa?"
     assert rule["answer_example"] == "Haa, way na cunaysaa."
+    assert rule["aspect"] == "ongoing"
+
+
+def test_general_and_ongoing_cun_forms_stay_separate():
+    by_id = {rule["id"]: rule for rule in load_rules()}
+    assert by_id["GRAM-OBJAGR-001"]["example"] == "Maydin cuntaa?"
+    assert by_id["GRAM-OBJAGR-001"]["aspect"] == "general_or_habitual"
+    assert by_id["GRAM-OBJAGR-002"]["example"] == "Maydin cunaysaa?"
+    assert by_id["GRAM-OBJAGR-002"]["aspect"] == "ongoing"
+
+
+def test_native_review_rules_do_not_define_string_replacements():
+    for rule in load_rules():
+        assert "input" not in rule
+        assert "preferred_written" not in rule
+        assert "replacement" not in rule
