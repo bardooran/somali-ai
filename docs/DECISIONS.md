@@ -96,3 +96,15 @@ The project should recognize valid Somali regional variants rather than treating
 For the `dheh` family, preferred examples include `yidhi`, `tidhi`, and `odhan`, while forms such as `yiri`, `tiri`, and `oran` remain recognized regional variants. For the `aqaan` past paradigm family, the project prefers the `aqaannay / yaqaannay / naqaannay` type where appropriate while retaining `iqiin / yiqiin / niqiin` type forms as recognized variants/evidence.
 
 This preference must not be implemented as a blind string replacement. Regional alternations such as `r` / `dh` are lexical and paradigm-sensitive and must be validated pair by pair.
+
+## 2026-08-30 — Jigjiga-first profile supersedes the broader label
+
+The latest project preference is more precise: the primary output profile is **Jigjiga Somali**, with strong compatibility with Hargeisa/Northwestern usage. The older `Hargeisa/Jigjiga` label remains useful historical shorthand but should not be interpreted as giving Hargeisa priority over Jigjiga.
+
+Confirmed preferred or characteristic forms currently include `yidhi`, `tidhi`, `odhan`, `gabadh`, `jidh`, `maydh/maydho`, `tamaandho`, and the `aqaannay / yaqaannay / naqaannay` past family. Valid forms from Muqdisho, southern/central Somali, or other varieties remain recognized when supported and must not be marked grammatically wrong solely for regional difference.
+
+Some lexical choices are co-natural in the reviewed Jigjiga usage rather than strict preference pairs. Current examples are `beed / ukun` and `ka bacdi / ka dib`; the generator should be allowed to use either unless later context, register, or user preference gives a reason to choose one.
+
+`xabuub` has been reported in native review as a tomato term but remains a candidate pending independent verification of spelling and distribution. `dugan / duwan` is currently stored as a native-reviewed preference pair (`kala dugan` preferred in the profile, `kala duwan` recognized) pending broader source cross-checking.
+
+Regional sound correspondences must never become blind character-substitution rules. For example, the profile prefers `jidh` in the body sense but also uses ordinary `jir-` forms such as `jiro/jirto` in existential constructions; each lexical family must be analyzed independently.
