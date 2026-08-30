@@ -114,17 +114,17 @@ def _run_checker(text: str) -> str:
 
 
 def test_cli_reports_dependent_person_conflict_without_autofix():
-    output = _run_checker("uu cunto")
+    output = _run_checker("Uu cunto")
     assert "possible habka dhimman marker/verb conflict" in output
-    assert "Safe corrected text:\nuu cunto" in output
+    assert "Safe corrected text:\nUu cunto" in output
 
 
 def test_cli_reports_dependent_polarity_conflict_without_autofix():
-    output = _run_checker("uusan cuno")
+    output = _run_checker("Uusan cuno")
     assert "possible habka dhimman marker/verb conflict" in output
-    assert "Safe corrected text:\nuusan cuno" in output
+    assert "Safe corrected text:\nUusan cuno" in output
 
 
 def test_cli_accepts_reviewed_negative_dependent_pair():
-    output = _run_checker("aysan cunin")
+    output = _run_checker("Aysan cunin")
     assert output == "No supported orthography or grammar findings found."
