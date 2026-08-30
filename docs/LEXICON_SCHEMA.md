@@ -68,9 +68,18 @@ The project now also stores reviewed lexical evidence extracted from `Qaamuuska 
 
 This mapping is deliberately incomplete. New codes should be added only after checking the source abbreviation table.
 
+## Current reviewed datasets
+
+The reviewed Qaamuus lexicon is split by purpose instead of putting every word in one growing file:
+
+- `data/lexical/qaamuus_2012_grammar_lexicon_seed.jsonl` — grammar terms, function words, and the first reviewed lexical bridge records.
+- `data/lexical/qaamuus_2012_everyday_lexicon_seed.jsonl` — ordinary vocabulary and lexical families mined from dictionary entries. Initial records include `inan`, `gaban`, `duwan`, `kor`, and the noun/verb homographs of `gabay`.
+
+`src/lexicon.py` searches both datasets by default. A caller may still pass one explicit JSONL path when testing or researching a single dataset.
+
 ## Current reviewed lookup prototype
 
-`src/lexicon.py` performs exact lookup against the reviewed Qaamuus lexical seed. It preserves multiple analyses for homographs rather than selecting one without sentence context. Current examples include three separate analyses for `ka` and two for `kee`.
+`src/lexicon.py` performs exact lookup against the reviewed Qaamuus lexical datasets. It preserves multiple analyses for homographs rather than selecting one without sentence context. Current examples include three separate analyses for `ka`, two for `kee`, masculine/feminine analyses for `inan`, noun/verb analyses for `kor`, and noun/verb analyses for `gabay`.
 
 `src/regional_variants.py` attaches reviewed regional metadata separately. It distinguishes `preferred`, `co_preferred`, `recognized_variant`, and `candidate_unverified` forms. It does not rewrite user text.
 
@@ -78,4 +87,4 @@ The prototype intentionally does not lemmatize inflected surface forms. A query 
 
 ## Next implementation stage
 
-Expand the reviewed Qaamuus lexical seed in coherent families, then connect exact lookup to tested Somali morphology. Morphology should propose one or more candidate lemmas while preserving ambiguity, after which dictionary, grammatical, regional, and source-provenance information can be combined into the future word-analyzer response.
+Expand the reviewed Qaamuus lexical datasets in coherent families, then connect exact lookup to tested Somali morphology. Morphology should propose one or more candidate lemmas while preserving ambiguity, after which dictionary, grammatical, regional, and source-provenance information can be combined into the future word-analyzer response.
