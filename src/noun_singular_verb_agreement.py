@@ -10,6 +10,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 
+from src.morphology_candidates import analyze_surface_form
 from src.noun_gender_agreement import infer_subject_gender, infer_subject_number
 from src.noun_subject_case import PERSONAL_PRONOUN_FORMS
 from src.reviewed_finite_verb import analyze_reviewed_finite_verb
@@ -37,6 +38,24 @@ class NounSingularVerbAgreementAnalysis:
     note: str = ""
 
 
+def _is_reviewed_conditional_auxiliary_context(tokens: list[str], verb_index: int) -> bool:
+    """Keep lexical leeyahay past readings out of reviewed conditional spans."""
+    if verb_index <= 0:
+        return False
+    auxiliary = any(
+        candidate.analysis_type == "conditional_auxiliary"
+        and candidate.features.get("construction") == "conditional"
+        for candidate in analyze_surface_form(tokens[verb_index])
+    )
+    if not auxiliary:
+        return False
+    return any(
+        candidate.analysis_type == "conditional_stem"
+        and candidate.features.get("possible_use") == "conditional_with_auxiliary"
+        for candidate in analyze_surface_form(tokens[verb_index - 1])
+    )
+
+
 def analyze_noun_singular_verb_agreement(sentence: str) -> NounSingularVerbAgreementAnalysis:
     """Check singular noun gender against an exact reviewed finite verb form.
 
@@ -44,6 +63,11 @@ def analyze_noun_singular_verb_agreement(sentence: str) -> NounSingularVerbAgree
     require a reviewed 3sg_m-compatible finite verb; feminine singular subjects
     require 3sg_f compatibility. Reviewed tense/aspect is carried through as a
     separate feature. Unknown and non-finite verb forms remain unjudged.
+
+    A surface such as ``lahaa`` can be both lexical possessive past and a
+    conditional auxiliary. When it immediately follows an exact reviewed
+    conditional stem, this generic finite layer yields to the conditional
+    analyzer instead of reinterpreting the auxiliary as lexical possession.
     """
     tokens = TOKEN_RE.findall(sentence)
     if len(tokens) < 3:
@@ -64,7 +88,10 @@ def analyze_noun_singular_verb_agreement(sentence: str) -> NounSingularVerbAgree
 
         expected_person = "3sg_m" if gender == "masculine" else "3sg_f"
         upper = min(len(tokens), index + 2 + MAX_VERB_GAP)
-        for verb in tokens[index + 2 : upper]:
+        for verb_index in range(index + 2, upper):
+            verb = tokens[verb_index]
+            if _is_reviewed_conditional_auxiliary_context(tokens, verb_index):
+                continue
             verb_analysis = analyze_reviewed_finite_verb(verb)
             if not verb_analysis.recognized or not verb_analysis.persons:
                 continue
@@ -99,7 +126,7 @@ def analyze_noun_singular_verb_agreement(sentence: str) -> NounSingularVerbAgree
             agrees=None,
             note=(
                 f"Gender evidence: {gender_evidence}. Number evidence: {number_evidence}. "
-                "No exact reviewed finite verb was found; agreement and tense/aspect remain unjudged."
+                "No exact reviewed finite lexical verb was found outside a more specific reviewed construction; agreement and tense/aspect remain unjudged here."
             ),
         )
 
