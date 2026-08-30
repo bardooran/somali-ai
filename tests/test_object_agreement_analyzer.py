@@ -64,8 +64,78 @@ def test_bare_maydin_cunayaa_marks_masculine_understood_subject():
     assert result.rule_id == "GRAM-OBJAGR-006"
 
 
-def test_bare_maydin_unknown_verb_stays_unjudged():
+def test_maydin_arkaa_is_first_person_subject_with_second_person_plural_object():
     result = analyze_object_agreement("Maydin arkaa?")
+    assert result.recognized is True
+    assert result.subject == "first_person_singular"
+    assert result.object_clitic == "idin"
+    assert result.verb == "arkaa"
+    assert result.agrees is True
+    assert result.rule_id == "GRAM-OBJAGR-007"
+
+
+def test_maydin_arkayaa_preserves_same_roles_as_arkaa():
+    result = analyze_object_agreement("Maydin arkayaa?")
+    assert result.recognized is True
+    assert result.subject == "first_person_singular"
+    assert result.object_clitic == "idin"
+    assert result.verb == "arkayaa"
+    assert result.agrees is True
+    assert result.rule_id == "GRAM-OBJAGR-007"
+
+
+def test_maan_idin_arkaa_is_also_accepted_without_normalization():
+    result = analyze_object_agreement("Maan idin arkaa?")
+    assert result.recognized is True
+    assert result.subject == "first_person_singular"
+    assert result.object_clitic == "idin"
+    assert result.verb == "arkaa"
+    assert result.agrees is True
+    assert result.rule_id == "GRAM-OBJAGR-007"
+
+
+def test_maad_i_aragtaan_reverses_subject_and_object_roles():
+    result = analyze_object_agreement("Maad i aragtaan?")
+    assert result.recognized is True
+    assert result.subject == "second_person_plural"
+    assert result.object_clitic == "i"
+    assert result.verb == "aragtaan"
+    assert result.agrees is True
+    assert result.rule_id == "GRAM-OBJAGR-008"
+
+
+def test_ma_is_arkaysaan_is_reciprocal():
+    result = analyze_object_agreement("Ma is arkaysaan?")
+    assert result.recognized is True
+    assert result.subject == "second_person_plural"
+    assert result.object_clitic == "is"
+    assert result.verb == "arkaysaan"
+    assert result.agrees is True
+    assert result.rule_id == "GRAM-OBJAGR-009"
+
+
+def test_ma_la_idin_arkaa_is_impersonal_with_idin_object():
+    result = analyze_object_agreement("Ma la idin arkaa?")
+    assert result.recognized is True
+    assert result.subject == "impersonal_la"
+    assert result.object_clitic == "idin"
+    assert result.verb == "arkaa"
+    assert result.agrees is True
+    assert result.rule_id == "GRAM-OBJAGR-010"
+
+
+def test_ma_la_idin_arki_karaa_keeps_ability_construction():
+    result = analyze_object_agreement("Ma la idin arki karaa?")
+    assert result.recognized is True
+    assert result.subject == "impersonal_la"
+    assert result.object_clitic == "idin"
+    assert result.verb == "arki karaa"
+    assert result.agrees is True
+    assert result.rule_id == "GRAM-OBJAGR-010"
+
+
+def test_unknown_idin_verb_stays_unjudged():
+    result = analyze_object_agreement("Maydin maqashaa?")
     assert result.recognized is True
     assert result.subject is None
     assert result.subject_gender is None
