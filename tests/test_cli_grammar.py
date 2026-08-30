@@ -13,33 +13,34 @@ def run_cli(text: str) -> str:
 
 
 def test_cli_reports_agreement_conflict_without_autofixing_it():
-    output = run_cli("Iyada way keenay.")
+    text = "Iyada way keenay."
+    output = run_cli(text)
 
     assert "Grammar findings:" in output
     assert "[REVIEW]" in output
     assert "possible subject-verb agreement conflict" in output
     assert "keentay" in output
+    assert "Orthography findings:" not in output
     assert "Safe corrected text:" in output
-    assert "Iyada waa ay keenay." in output
-    assert "Iyada waa ay keentay." not in output
+    assert text in output
+    assert "Iyada way keentay." not in output
 
 
-def test_cli_keeps_matching_agreement_silent_while_orthography_can_still_apply():
+def test_cli_keeps_matching_agreement_and_natural_way_silent():
     output = run_cli("Iyada way keentay.")
 
     assert "Grammar findings:" not in output
-    assert "Orthography findings:" in output
-    assert "'way' -> 'waa ay'" in output
-    assert "Iyada waa ay keentay." in output
+    assert "Orthography findings:" not in output
+    assert "No supported orthography or grammar findings found." in output
 
 
-def test_cli_can_show_orthography_and_grammar_findings_together():
+def test_cli_can_show_capitalization_and_grammar_findings_together():
     output = run_cli("iyada way keenay.")
 
     assert "Orthography findings:" in output
     assert "Grammar findings:" in output
     assert "Safe corrected text:" in output
-    assert "Iyada" in output
+    assert "Iyada way keenay." in output
 
 
 def test_cli_reports_focus_particle_clitic_omission_as_review_only():
