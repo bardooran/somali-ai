@@ -1,9 +1,9 @@
 """Conservative analyzer for reviewed Somali object-clitic agreement patterns.
 
 This module only recognizes a small set of native-reviewed constructions. It
-never rewrites text. Its purpose is to keep subject agreement separate from the
-second-person-plural object clitic ``idin`` in examples such as
-``Libaaxu maydin eryanayaa?``.
+never rewrites text. Its purpose is to keep subject agreement separate from
+object clitics and to preserve reviewed role distinctions such as ``idin`` as
+second-person-plural object.
 """
 
 from __future__ import annotations
@@ -35,13 +35,85 @@ def _tokens(text: str) -> list[str]:
 def analyze_object_agreement(text: str) -> ObjectAgreementResult:
     """Analyze only the currently reviewed subject/object-agreement patterns.
 
-    Bare ``maydin`` questions may have a discourse-given subject. For the
-    native-reviewed ``cunayaa/cunaysaa`` contrast, the verb form itself provides
-    masculine/feminine agreement evidence. Unknown verb forms remain unjudged.
+    Bare ``maydin`` questions may have a discourse-given subject in some
+    constructions. For the reviewed ``cunayaa/cunaysaa`` contrast, the verb
+    form provides masculine/feminine agreement evidence. The reviewed ``arag``
+    questions are kept construction-specific: ``Maydin arkaa/arkayaa?`` is a
+    first-person-subject + second-person-plural-object pattern in project native
+    review, while ``Maad i aragtaan?`` reverses those roles.
     """
     tokens = _tokens(text)
     if not tokens:
         return ObjectAgreementResult(text, False, None, None, None, None, None, None, "No reviewed construction found.")
+
+    # Reviewed arag-family constructions. These are role analyses, not fixes.
+    if tokens in (["maydin", "arkaa"], ["maydin", "arkayaa"]):
+        verb = tokens[-1]
+        return ObjectAgreementResult(
+            text,
+            True,
+            "first_person_singular",
+            None,
+            "idin",
+            verb,
+            True,
+            "GRAM-OBJAGR-007",
+            "Native-reviewed arag construction: the speaker is the subject/seer and idin is the second-person-plural object. Arkaa and arkayaa are both valid; their aspect contrast is modeled separately from agreement.",
+        )
+
+    if tokens in (["maan", "idin", "arkaa"], ["maan", "idin", "arkayaa"]):
+        verb = tokens[-1]
+        return ObjectAgreementResult(
+            text,
+            True,
+            "first_person_singular",
+            None,
+            "idin",
+            verb,
+            True,
+            "GRAM-OBJAGR-007",
+            "Native review accepts this expanded first-person question alongside the contracted maydin form; neither is normalized into the other.",
+        )
+
+    if tokens == ["maad", "i", "aragtaan"]:
+        return ObjectAgreementResult(
+            text,
+            True,
+            "second_person_plural",
+            None,
+            "i",
+            "aragtaan",
+            True,
+            "GRAM-OBJAGR-008",
+            "Native-reviewed role reversal: you-all are the subject/seers and i is the first-person-singular object.",
+        )
+
+    if tokens == ["ma", "is", "arkaysaan"]:
+        return ObjectAgreementResult(
+            text,
+            True,
+            "second_person_plural",
+            None,
+            "is",
+            "arkaysaan",
+            True,
+            "GRAM-OBJAGR-009",
+            "Native-reviewed reciprocal construction: is gives the reviewed each-other reading here.",
+        )
+
+    if tokens in (["ma", "la", "idin", "arkaa"], ["ma", "la", "idin", "arki", "karaa"]):
+        verb = " ".join(tokens[-2:]) if tokens[-2:] == ["arki", "karaa"] else tokens[-1]
+        return ObjectAgreementResult(
+            text,
+            True,
+            "impersonal_la",
+            None,
+            "idin",
+            verb,
+            True,
+            "GRAM-OBJAGR-010",
+            "Native-reviewed impersonal la construction with idin as second-person-plural object. Arki karaa adds ability/possibility; no rewrite is proposed.",
+        )
 
     object_present = "maydin" in tokens or "idin" in tokens
     if not object_present:
