@@ -80,6 +80,18 @@ def test_ambiguous_rule_is_not_auto_applied():
     assert corrected == text
 
 
+def test_way_is_an_accepted_written_variant_not_a_correction():
+    rules = load_rules(CONTRACTION_RULES)
+    way_rule = next(rule for rule in rules if rule.id == "ORTH-CONTRACT-009")
+    assert way_rule.forms == ["way", "waa ay"]
+    assert way_rule.status == "accepted_variant"
+    assert not way_rule.is_executable_replacement
+    assert not any(
+        finding.rule_id == "ORTH-CONTRACT-009"
+        for finding in check_text("Meeshu way weyn tahay.", rules)
+    )
+
+
 def test_context_required_rule_is_not_auto_applied():
     text = "maxaan"
     finding = Finding(
@@ -120,7 +132,8 @@ def test_longer_lexical_fix_wins_over_overlapping_sentence_start_fix():
     ids = {finding.rule_id for finding in findings}
     assert "ORTH-CAP-001" in ids
     assert "ORTH-NAME-005" in ids
-    assert apply_safe_fixes(text, findings) == "Faadumo waa ay timid."
+    assert "ORTH-CONTRACT-009" not in ids
+    assert apply_safe_fixes(text, findings) == "Faadumo way timid."
 
 
 def test_detects_lowercase_after_sentence_punctuation():
@@ -130,7 +143,7 @@ def test_detects_lowercase_after_sentence_punctuation():
     cap = [finding for finding in findings if finding.rule_id == "ORTH-CAP-001"]
     assert [finding.matched_text for finding in cap] == ["f", "h"]
     corrected = apply_safe_fixes(text, findings)
-    assert corrected == "Cali wuu yimid. Faadumo waa ay baxday? Haa."
+    assert corrected == "Cali wuu yimid. Faadumo way baxday? Haa."
 
 
 def test_detects_sentence_start_inside_opening_quote():
