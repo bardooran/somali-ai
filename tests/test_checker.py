@@ -71,13 +71,23 @@ def test_respects_word_boundaries():
     assert not any(finding.rule_id == "ORTH-CONTRACT-001" for finding in findings)
 
 
-def test_ambiguous_rule_is_not_auto_applied():
+def test_focus_contractions_are_accepted_written_variants():
     rules = load_rules(CONTRACTION_RULES)
-    text = "Bay timid."
-    findings = check_text(text, rules)
-    assert any(finding.rule_id == "ORTH-CONTRACT-008" for finding in findings)
-    corrected = apply_safe_fixes(text, findings)
-    assert corrected == text
+    masculine = next(rule for rule in rules if rule.id == "ORTH-CONTRACT-007")
+    feminine_plural = next(rule for rule in rules if rule.id == "ORTH-CONTRACT-008")
+
+    assert masculine.category == "accepted_variant"
+    assert masculine.forms == ["buu", "baa uu", "ayuu", "ayaa uu"]
+    assert masculine.status == "context_required"
+    assert not masculine.is_executable_replacement
+
+    assert feminine_plural.category == "accepted_variant"
+    assert feminine_plural.forms == ["bay", "baa ay", "ayay", "ayaa ay"]
+    assert feminine_plural.status == "context_required"
+    assert not feminine_plural.is_executable_replacement
+
+    findings = check_text("Buu yimid. Bay timid. Ayuu cunay. Ayay yimaadeen.", rules)
+    assert not any(finding.rule_id in {"ORTH-CONTRACT-007", "ORTH-CONTRACT-008"} for finding in findings)
 
 
 def test_way_is_an_accepted_written_variant_not_a_correction():
