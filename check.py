@@ -4,15 +4,40 @@
 from __future__ import annotations
 
 import argparse
+import re
 from pathlib import Path
 
 from src.checker import check_file
 from src.focus_particle import scan_focus_particle_clitics
+from src.negation import analyze_ma_plus_verb
 from src.object_agreement import analyze_object_agreement
 from src.sentence_agreement import scan_sentence_agreement
 
 
 DEFAULT_RULES = Path("rules/orthography")
+
+
+def _scan_negation_conflicts(text: str):
+    """Return review-only conflicts for exact documented ``ma + verb`` spans.
+
+    The scanner is deliberately narrow. It considers short ``ma`` spans up to
+    three following tokens so documented multiword forms such as ``ma cuni
+    doono`` can be recognized, but unknown constructions remain unjudged.
+    """
+    tokens = re.findall(r"[^\W\d_]+", text, flags=re.UNICODE)
+    conflicts = []
+    for index, token in enumerate(tokens):
+        if token.casefold() != "ma":
+            continue
+        for width in range(1, min(3, len(tokens) - index - 1) + 1):
+            candidate = " ".join(tokens[index : index + width + 1])
+            result = analyze_ma_plus_verb(candidate)
+            if result.known and result.agrees_with_documented_pair is False:
+                conflicts.append(result)
+                break
+            if result.known and result.agrees_with_documented_pair is True:
+                break
+    return conflicts
 
 
 def main() -> None:
@@ -31,8 +56,9 @@ def main() -> None:
     focus_findings = scan_focus_particle_clitics(args.text)
     object_agreement = analyze_object_agreement(args.text)
     object_agreement_conflict = object_agreement.recognized and object_agreement.agrees is False
+    negation_conflicts = _scan_negation_conflicts(args.text)
 
-    if not findings and not agreement_findings and not focus_findings and not object_agreement_conflict:
+    if not findings and not agreement_findings and not focus_findings and not object_agreement_conflict and not negation_conflicts:
         print("No supported orthography or grammar findings found.")
         return
 
@@ -45,7 +71,7 @@ def main() -> None:
                 f"({finding.rule_id})"
             )
 
-    if agreement_findings or focus_findings or object_agreement_conflict:
+    if agreement_findings or focus_findings or object_agreement_conflict or negation_conflicts:
         if findings:
             print()
         print("Grammar findings:")
@@ -69,6 +95,13 @@ def main() -> None:
                 f"- [REVIEW] {object_agreement.subject!r} + {object_agreement.object_clitic!r} + "
                 f"{object_agreement.verb!r}: possible subject-gender/verb agreement conflict; "
                 f"{object_agreement.note} ({object_agreement.rule_id})"
+            )
+
+        for result in negation_conflicts:
+            print(
+                f"- [REVIEW] {result.input_form!r}: possible negation-paradigm conflict; "
+                f"documented negative form for this paradigm: {result.paired_form!r}. "
+                "Review required; no automatic rewrite."
             )
 
     print("\nSafe corrected text:")
