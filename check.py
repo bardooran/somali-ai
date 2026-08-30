@@ -9,6 +9,7 @@ from pathlib import Path
 
 from src.checker import check_file
 from src.focus_particle import scan_focus_particle_clitics
+from src.future_auxiliary_agreement import analyze_future_auxiliary_agreement
 from src.negation import analyze_ma_plus_verb
 from src.noun_gender_agreement import analyze_noun_gender_agreement
 from src.noun_number_verb_agreement import analyze_noun_number_verb_agreement
@@ -89,6 +90,12 @@ def main() -> None:
         and noun_singular_verb_agreement.agrees is False
     )
 
+    future_auxiliary_agreement = analyze_future_auxiliary_agreement(args.text)
+    future_auxiliary_conflict = (
+        future_auxiliary_agreement.recognized
+        and future_auxiliary_agreement.agrees is False
+    )
+
     predicate_conflicts = scan_predicate_agreement(args.text)
     if (
         noun_gender_copula_conflict
@@ -128,6 +135,7 @@ def main() -> None:
         and not noun_gender_copula_conflict
         and not noun_number_verb_conflict
         and not noun_singular_verb_conflict
+        and not future_auxiliary_conflict
     ):
         print("No supported orthography or grammar findings found.")
         return
@@ -154,6 +162,7 @@ def main() -> None:
         or noun_gender_copula_conflict
         or noun_number_verb_conflict
         or noun_singular_verb_conflict
+        or future_auxiliary_conflict
     ):
         if findings:
             print()
@@ -180,8 +189,6 @@ def main() -> None:
                 f"{object_agreement.note} ({object_agreement.rule_id})"
             )
 
-        # Avoid duplicate output for the same maydin/idin lion conflict. The
-        # role-aware layer adds useful coverage for explicit na-object forms.
         if role_aware_conflict and not object_agreement_conflict:
             print(
                 f"- [REVIEW] {role_aware.subject!r} + object {role_aware.object_clitic!r} + "
@@ -268,6 +275,18 @@ def main() -> None:
                 f"Expected {noun_singular_verb_agreement.expected_person}. "
                 "Unknown verbs are not guessed; no automatic rewrite. "
                 f"({noun_singular_verb_agreement.rule_id})"
+            )
+
+        if future_auxiliary_conflict:
+            persons = ", ".join(future_auxiliary_agreement.auxiliary_persons)
+            print(
+                f"- [REVIEW] {future_auxiliary_agreement.subject!r} + "
+                f"{future_auxiliary_agreement.future_stem!r} {future_auxiliary_agreement.auxiliary!r}: "
+                f"possible future auxiliary agreement conflict; the reviewed future auxiliary "
+                f"has person(s): {persons}. Expected {future_auxiliary_agreement.expected_person}. "
+                "The future stem is non-finite and does not carry this agreement; "
+                "no automatic rewrite. "
+                f"({future_auxiliary_agreement.rule_id})"
             )
 
     print("\nSafe corrected text:")
