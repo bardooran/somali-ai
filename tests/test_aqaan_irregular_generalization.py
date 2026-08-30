@@ -176,5 +176,5 @@ def test_cli_accepts_aqaan_present_and_person_neutral_past_negative():
 
 def test_cli_reports_aqaan_present_person_conflict_review_only():
     output = _run_checker("Gabadhu way yaqaan.")
-    assert "possible singular noun/finite-verb agreement conflict" in output
+    assert "possible singular noun-subject/finite-verb agreement conflict" in output
     assert "Safe corrected text:\nGabadhu way yaqaan." in output
