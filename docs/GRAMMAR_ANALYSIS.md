@@ -31,12 +31,13 @@ Reviewed examples include:
 
 - `Maydin cuntaa?`
 - `Maydin cunaysaa?`
+- `Maydin cunayaa?`
 - `May idin cunaysaa?`
 - `Libaaxu maydin eryanayaa?`
 - `Libaaxu muu idin eryanayaa?`
 - `Libaaxadu maydin eryanaysaa?`
 
-In these reviewed constructions, `idin` means the people receiving the action. The explicit or understood third-person subject controls the verb agreement.
+In the reviewed eating/chasing constructions, `idin` means the people receiving the action. The explicit or understood third-person subject controls the verb agreement.
 
 A reviewed question/answer pair makes the role switch visible:
 
@@ -44,6 +45,17 @@ A reviewed question/answer pair makes the role switch visible:
 - `Haa, way na cunaysaa.`
 
 Here the object changes from `idin` (you all) to `na` (us), while the subject remains the understood thing/animal doing the eating.
+
+## Omitted subject can still carry gender evidence
+
+An omitted/discourse-given subject does not mean that all agreement information is lost. Native review establishes the following contrast for the reviewed `cun` ongoing construction:
+
+- `Maydin cunaysaa?` — understood subject is feminine.
+- `Maydin cunayaa?` — understood subject is masculine.
+
+The identity of the omitted subject remains unknown from the sentence alone, but the reviewed verb morphology supplies gender agreement evidence. `idin` remains the second-person plural object and does not control this contrast.
+
+This must not be generalized blindly to every verb form. Unknown `maydin` constructions should remain unjudged until their paradigm is supported.
 
 ## Subject gender and verb agreement
 
@@ -66,6 +78,31 @@ Reviewed contrasts include:
 - `Libaaxadu maydin eryanaysaa?`
 
 These examples show that `libaaxa/libaaxada` and `libaaxu/libaaxadu` can belong to different constructions. A future checker must determine the construction before deciding whether a noun form is appropriate.
+
+## `arag` question and aspect evidence
+
+Native review confirms a contrast between simple/general and ongoing/current forms of `arag` in the reviewed examples:
+
+- `Ninka waan arkaa.` vs `Ninka waan arkayaa.`
+- `Guriga ma aragtaa?` vs `Guriga ma arkaysaa?`
+- `Carruurta waan arkaa.` vs `Carruurta waan arkayaa.`
+- `Ma arko.` vs `Ma arkayo.`
+
+The first member of each pair has a more general/simple reading, while the second has a more current/ongoing reading. The exact aspect labels should remain descriptive until cross-source validation is complete.
+
+Native review also confirms that both of these can be valid for a first-person subject with second-person plural object:
+
+- `Maan idin arkaa?`
+- `Maydin arkaa?`
+
+The checker must not automatically rewrite one into the other. The surface form `maydin` is construction-sensitive and cannot be assigned one global subject analysis.
+
+Additional reviewed role contrasts:
+
+- `Maad i aragtaan?` — second-person plural subject, first-person singular object.
+- `Ma is arkaysaan?` — reciprocal reading in the reviewed context (`is` ≈ each other).
+- `Ma la idin arkaa?` — impersonal `la` construction with `idin` as object.
+- `Ma la idin arki karaa?` — related impersonal construction with added ability/possibility meaning.
 
 ## Safety rule for the checker
 
