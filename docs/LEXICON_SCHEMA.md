@@ -40,6 +40,9 @@ The project now also stores reviewed lexical evidence extracted from `Qaamuuska 
 9. Regional preference is not grammatical validity. A recognized nonpreferred regional form must not be labeled wrong solely because the Jigjiga-first profile would generate a different form.
 10. Sense-sensitive variant pairs must remain context-required. For example, body-sense `jir` may correspond to preferred `jidh`, but the existential verb `jir-` is a different analysis; similarly, `maydh` relates only to the washing sense of polysemous `dhaq`.
 11. Morphological lemmatization must be evidence-constrained. The first morphology layer recognizes stored reviewed surface forms; it does not strip a suffix from an unseen word and assume the remainder is a valid lemma.
+12. Verb person must not be inferred from an ending when the paradigm is syncretic. Forms such as `cunaa`, `cunay`, `cuntaa`, and `cuntay` retain all source-supported person possibilities until sentence context resolves them.
+13. Irregular/suppletive verbs must be stored explicitly. The `dheh` family uses multiple stems (`dheh`, `iraah-/tiraah-/yiraah-/niraah-`, `iri/tiri/yiri/niri`, `oran-`) and must not be forced through an ordinary suffix-only template.
+14. Regional morphology provenance remains separate from source paradigms. Jigjiga-preferred `yidhi`, `tidhi`, and `odhan` are native-reviewed project evidence; they are not falsely attributed to a Qaamuus table that lists `yiri`, `tiri`, and `oran` in the corresponding source paradigm.
 
 ## Initial grammatical code mapping
 
@@ -74,8 +77,9 @@ This mapping is deliberately incomplete. New codes should be added only after ch
 The reviewed Qaamuus lexicon is split by purpose instead of putting every word in one growing file:
 
 - `data/lexical/qaamuus_2012_grammar_lexicon_seed.jsonl` — grammar terms, function words, and the first reviewed lexical bridge records.
-- `data/lexical/qaamuus_2012_everyday_lexicon_seed.jsonl` — ordinary vocabulary and lexical families mined from dictionary entries. Initial records include `inan`, `gaban`, `duwan`, `kor`, and the noun/verb homographs of `gabay`.
+- `data/lexical/qaamuus_2012_everyday_lexicon_seed.jsonl` — ordinary vocabulary and lexical families mined from dictionary entries.
 - `data/morphology/qaamuus_2012_reviewed_noun_forms.jsonl` — reviewed inflected noun surface forms linked to candidate lemmas and grammatical features.
+- `data/morphology/qaamuus_2012_reviewed_verb_forms.jsonl` — reviewed verb surfaces for ordinary and irregular paradigms, with tense/aspect/person ambiguity and regional provenance preserved.
 
 `src/lexicon.py` searches both lexical datasets by default and attaches reviewed morphology and regional evidence independently.
 
@@ -83,18 +87,25 @@ The reviewed Qaamuus lexicon is split by purpose instead of putting every word i
 
 `src/lexicon.py` preserves multiple dictionary analyses for homographs rather than selecting one without sentence context. Current exact-headword examples include three analyses for `ka`, two for `kee`, masculine/feminine analyses for `inan`, noun/verb analyses for `kor`, and noun/verb analyses for `gabay`.
 
-`src/morphology_candidates.py` now provides the first safe surface-form-to-lemma bridge. It performs exact matching against reviewed morphology records only. Current source-backed examples include:
+`src/morphology_candidates.py` provides the safe surface-form-to-lemma bridge. It performs exact matching against both reviewed noun and verb morphology records; it still performs no open-ended suffix stripping or productive conjugation guessing.
 
-- `buugga → buug` — masculine definite singular.
-- `marada → maro`, `badda → bad`, `qodaxda → qodax`, `bacda → bac`, `usha → ul`, `isha → il`, `bisha → bil` — feminine definite forms with source-described article allomorphy.
-- `buugag → buug`, `kabo → kab`, `gacmo → gacan`, `mindiyo → mindi` — plural patterns that must be stored rather than guessed from one universal plural suffix.
-- `buuggayga → buug`, `dalkeenna → dal`, `ushiinna → ul` — source-attested possessive surfaces.
-- `gabadha → gabadh` — currently stored as a documented derivation from the Qaamuus feminine-article rule plus the reviewed `gabadh` lemma; it is marked non-executable and must not be generalized mechanically to unseen words.
+Current noun examples include `buugga → buug`, `marada → maro`, `kabo → kab`, `gacmo → gacan`, `mindiyo → mindi`, `buuggayga → buug`, and the reviewed derivation `gabadha → gabadh`.
+
+Current verb examples include:
+
+- `cunaa → cun` with possible persons 1sg / 3sg masculine.
+- `cuntaa → cun` with possible persons 2sg / 3sg feminine.
+- `cunay → cun` with possible persons 1sg / 3sg masculine.
+- `cuntay → cun` with possible persons 2sg / 3sg feminine.
+- `cunnaa`, `cuntaan`, `cunaan`, `cunnay`, `cunteen`, `cuneen` with explicit plural-person evidence.
+- `cunin → cun` as a context-required negative form with several possible grammatical functions.
+- `dheh`, `dhaha`, `dhihi`, `oran`, `iraahdaa`, `tiraahdaa`, `yiraahdaa`, `niraahdaa`, `iri`, `tiri`, `yiri`, `niri` → the irregular lemma family `dheh`.
+- Jigjiga-preferred `yidhi`, `tidhi`, and `odhan` → `dheh`, stored as native-reviewed/regional evidence rather than rewritten source evidence.
 
 `src/regional_variants.py` attaches reviewed regional metadata separately. It distinguishes `preferred`, `co_preferred`, `recognized_variant`, and `candidate_unverified` forms. It does not rewrite user text.
 
-A morphology candidate does not by itself authorize a correction. All current reviewed noun morphology records remain `executable: false` while we expand coverage and validate ambiguity.
+A morphology candidate does not by itself authorize a correction. All current reviewed morphology records remain `executable: false` while coverage and contextual disambiguation grow.
 
 ## Next implementation stage
 
-Expand reviewed noun morphology with more dictionary families and sentence-context tests, then add verb-surface morphology in the same conservative style. Only after enough reviewed coverage should the project generalize article/plural/possessive rules beyond explicitly stored forms.
+Expand the reviewed verb layer beyond `cun` and `dheh` with representative regular conjugation classes and high-value irregular verbs. Then add sentence-context resolution so subject pronouns/focus markers can narrow person ambiguity without treating object clitics as agreement controllers. Continue enlarging noun/lexical coverage in parallel.
