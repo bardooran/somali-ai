@@ -83,8 +83,10 @@ def test_ambiguous_rule_is_not_auto_applied():
 def test_way_is_an_accepted_written_variant_not_a_correction():
     rules = load_rules(CONTRACTION_RULES)
     way_rule = next(rule for rule in rules if rule.id == "ORTH-CONTRACT-009")
+    assert way_rule.category == "accepted_variant"
     assert way_rule.forms == ["way", "waa ay"]
-    assert way_rule.status == "accepted_variant"
+    assert way_rule.status == "context_required"
+    assert way_rule.sources is not None and len(way_rule.sources) == 2
     assert not way_rule.is_executable_replacement
     assert not any(
         finding.rule_id == "ORTH-CONTRACT-009"
