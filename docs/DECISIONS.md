@@ -88,3 +88,11 @@ The grammar foundation combines sources by role instead of mixing them into one 
 ## 2026-08-30 — Overlapping corrections
 
 Automatic fixes must not apply multiple edits to the same text span. When safe findings overlap, the current checker prefers the longer, more specific span and applies only one compatible correction.
+
+## 2026-08-30 — Hargeisa/Jigjiga preferred output profile
+
+The project should recognize valid Somali regional variants rather than treating nonpreferred regional forms as grammatical errors. When the product needs to generate Somali, teach a default form, or offer an optional regional-style normalization, the preferred output profile is the Hargeisa/Jigjiga variety reviewed in this project.
+
+For the `dheh` family, preferred examples include `yidhi`, `tidhi`, and `odhan`, while forms such as `yiri`, `tiri`, and `oran` remain recognized regional variants. For the `aqaan` past paradigm family, the project prefers the `aqaannay / yaqaannay / naqaannay` type where appropriate while retaining `iqiin / yiqiin / niqiin` type forms as recognized variants/evidence.
+
+This preference must not be implemented as a blind string replacement. Regional alternations such as `r` / `dh` are lexical and paradigm-sensitive and must be validated pair by pair.
