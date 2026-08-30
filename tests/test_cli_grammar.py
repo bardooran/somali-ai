@@ -126,3 +126,27 @@ def test_cli_does_not_guess_unknown_negative_construction():
     output = run_cli("Ma baranayo.")
 
     assert "possible negation-paradigm conflict" not in output
+
+
+def test_cli_reports_reviewed_idinku_waad_conflict_without_autofix():
+    text = "Idinku waad cunay."
+    output = run_cli(text)
+
+    assert "Grammar findings:" in output
+    assert "possible reviewed second-person-plural agreement conflict" in output
+    assert "cunteen" in output
+    assert "Safe corrected text:" in output
+    assert text in output
+    assert "Idinku waad cunteen." not in output
+
+
+def test_cli_keeps_reviewed_idinku_waad_form_silent():
+    output = run_cli("Idinku waad cunteen.")
+
+    assert "possible reviewed second-person-plural agreement conflict" not in output
+
+
+def test_cli_leaves_unknown_idinku_waad_verb_unjudged():
+    output = run_cli("Idinku waad barateen.")
+
+    assert "possible reviewed second-person-plural agreement conflict" not in output
