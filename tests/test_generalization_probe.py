@@ -3,6 +3,7 @@ import sys
 
 from src.lexicon import lookup_word
 from src.morphology_candidates import analyze_surface_form
+from src.noun_subject_case import analyze_noun_subject_case
 
 
 NEW_SUBJECT_FORMS = (
@@ -15,12 +16,24 @@ NEW_SUBJECT_FORMS = (
 )
 
 
-def test_new_subject_forms_are_not_yet_morphologically_generalized():
-    """Diagnostic boundary: these native-reviewed subject forms are still unseen by the exact morphology layer."""
+def test_new_subject_forms_remain_outside_exact_lexicon_but_work_in_grammar_context():
+    """Grammar can generalize sentence role without inventing dictionary lemmas."""
+    sentences = (
+        "Dugsigu wuu weyn yahay.",
+        "Magaaladu way qurux badan tahay.",
+        "Eygu wuu ordayaa.",
+        "Naagtu way shaqaynaysaa.",
+        "Miisku wuu jabay.",
+        "Albaabku wuu xiran yahay.",
+    )
     for form in NEW_SUBJECT_FORMS:
         result = lookup_word(form)
         assert result.known is False
         assert analyze_surface_form(form) == ()
+    for sentence in sentences:
+        analysis = analyze_noun_subject_case(sentence)
+        assert analysis.recognized
+        assert analysis.agrees is True
 
 
 def test_known_controls_are_reached_by_the_live_repo():
@@ -46,18 +59,24 @@ def _run_checker(sentence: str) -> str:
     return completed.stdout.strip()
 
 
-def test_checker_does_not_yet_distinguish_buug_subject_case_pair():
+def test_checker_now_distinguishes_buug_subject_case_pair():
     correct = _run_checker("Buuggu wuu fiicanyahay.")
     wrong = _run_checker("Buugga wuu fiicanyahay.")
-    assert "Grammar findings:" not in correct
-    assert "Grammar findings:" not in wrong
-    assert "Buugga wuu fiicanyahay." in wrong or "No supported orthography or grammar findings found." in wrong
+    assert "possible definite-noun subject-case conflict" not in correct
+    assert "possible definite-noun subject-case conflict" in wrong
+    assert "'Buuggu'" in wrong
 
 
-def test_checker_does_not_yet_distinguish_gabadh_subject_case_pair():
+def test_checker_now_distinguishes_gabadh_subject_case_pair():
     correct = _run_checker("Gabadhu way fiicantahay.")
     wrong = _run_checker("Gabadha way fiicantahay.")
-    assert "Grammar findings:" not in correct
-    assert "Grammar findings:" not in wrong
-    # Orthography may expand the valid contraction way -> waa ay; that is separate from noun subject-case analysis.
-    assert "Gabadha" in wrong
+    assert "possible definite-noun subject-case conflict" not in correct
+    assert "possible definite-noun subject-case conflict" in wrong
+    assert "'Gabadhu'" in wrong
+    # Orthography may separately expand the valid contraction way -> waa ay;
+    # that behavior is independent from noun subject-case analysis.
+
+
+def test_focus_construction_is_not_collapsed_into_subject_u_form():
+    analysis = analyze_noun_subject_case("Libaaxa ayaa eryanayaa.")
+    assert analysis.recognized is False
