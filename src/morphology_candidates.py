@@ -134,6 +134,27 @@ def _default_records() -> list[dict]:
     return records
 
 
+def reviewed_candidates_for_lemma(
+    lemma: str,
+    analysis_type: str | None = None,
+) -> tuple[MorphologyCandidate, ...]:
+    """Return exact reviewed records for a lemma, optionally filtered by type.
+
+    This is an evidence lookup, not a generator. It is used when one analyzer
+    needs to confirm that a corresponding reviewed paradigm actually exists
+    before judging a contextual form.
+    """
+    lemma_key = lemma.strip().casefold()
+    result: list[MorphologyCandidate] = []
+    for record in _default_records():
+        if str(record.get("lemma", "")).casefold() != lemma_key:
+            continue
+        if analysis_type is not None and record.get("analysis_type") != analysis_type:
+            continue
+        result.append(_to_candidate(record))
+    return tuple(result)
+
+
 def analyze_surface_form(
     form: str,
     path: str | Path | None = None,
