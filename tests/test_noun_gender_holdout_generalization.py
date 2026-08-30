@@ -1,9 +1,10 @@
-"""Holdout tests for noun gender/number agreement generalization.
+"""Holdout tests for noun case and gender/number agreement generalization.
 
 These subjects are deliberately not added to the exact native-reviewed subject
 list. Their paired non-subject definite forms are already source-backed in the
 Qaamuus morphology data, so the runtime must combine that number evidence with
-reviewed subject-surface gender signals instead of memorizing whole sentences.
+reviewed subject-surface case and gender signals instead of memorizing whole
+sentences.
 """
 
 import subprocess
@@ -16,6 +17,7 @@ from src.noun_gender_agreement import (
     infer_subject_gender,
     infer_subject_number,
 )
+from src.noun_subject_case import analyze_noun_subject_case
 
 
 # subject surface -> source-backed paired non-subject surface
@@ -58,6 +60,19 @@ def test_holdout_gender_comes_from_subject_surface_not_exact_sentence_memory():
         assert evidence.startswith("strong_subject_suffix:")
 
 
+def test_holdout_subject_case_generalizes_from_source_backed_pairs():
+    for subject, non_subject in HOLDOUT_FEMININE_SINGULARS.items():
+        correct = analyze_noun_subject_case(f"{subject} way weyn tahay.")
+        assert correct.recognized
+        assert correct.agrees is True
+        assert correct.expected_subject_form.casefold() == subject
+
+        wrong = analyze_noun_subject_case(f"{non_subject} way weyn tahay.")
+        assert wrong.recognized
+        assert wrong.agrees is False
+        assert wrong.expected_subject_form.casefold() == subject
+
+
 def test_holdout_feminine_singular_agreement_generalizes():
     for subject in HOLDOUT_FEMININE_SINGULARS:
         result = analyze_noun_gender_agreement(f"{subject} way weyn tahay.")
@@ -90,6 +105,13 @@ def _run_checker(sentence: str) -> str:
         text=True,
     )
     return completed.stdout.strip()
+
+
+def test_cli_exposes_holdout_subject_case_conflict_without_autofixing():
+    output = _run_checker("Marada way weyn tahay.")
+    assert "possible definite-noun subject-case conflict" in output
+    assert "reviewed subject-form candidate is 'Maradu'" in output
+    assert "Safe corrected text:\nMarada way weyn tahay." in output
 
 
 def test_cli_exposes_holdout_gender_conflict_without_autofixing():
