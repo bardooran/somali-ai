@@ -8,6 +8,8 @@ The first schema is based on the SLS `resources/qaamuus/` collection. SLS descri
 
 The dictionary collection is descriptive evidence. It must not be treated as a final normative spelling authority.
 
+The project now also stores reviewed lexical evidence extracted from `Qaamuuska Af-Soomaaliga` (Puglielli & Mansuur, 2012). Source facts and project regional preferences remain separate layers.
+
 ## Proposed normalized record
 
 ```json
@@ -35,6 +37,8 @@ The dictionary collection is descriptive evidence. It must not be treated as a f
 6. Preserve homonym distinctions such as superscript-numbered entries.
 7. Record provenance for every imported lexical record.
 8. Validate extracted records with tests before the checker uses them for grammatical decisions.
+9. Regional preference is not grammatical validity. A recognized nonpreferred regional form must not be labeled wrong solely because the Jigjiga-first profile would generate a different form.
+10. Sense-sensitive variant pairs must remain context-required. For example, body-sense `jir` may correspond to preferred `jidh`, but the existential verb `jir-` is a different analysis; similarly, `maydh` relates only to the washing sense of polysemous `dhaq`.
 
 ## Initial grammatical code mapping
 
@@ -64,6 +68,14 @@ The dictionary collection is descriptive evidence. It must not be treated as a f
 
 This mapping is deliberately incomplete. New codes should be added only after checking the source abbreviation table.
 
+## Current reviewed lookup prototype
+
+`src/lexicon.py` performs exact lookup against the reviewed Qaamuus lexical seed. It preserves multiple analyses for homographs rather than selecting one without sentence context. Current examples include three separate analyses for `ka` and two for `kee`.
+
+`src/regional_variants.py` attaches reviewed regional metadata separately. It distinguishes `preferred`, `co_preferred`, `recognized_variant`, and `candidate_unverified` forms. It does not rewrite user text.
+
+The prototype intentionally does not lemmatize inflected surface forms. A query such as `gabadha` is therefore not silently converted to `gabadh` yet. That behavior must wait for a tested morphology/segmentation layer so that suffix stripping does not create false analyses.
+
 ## Next implementation stage
 
-Build a parser against a small reviewed sample first. Do not bulk-import the whole dictionary until parsing of headwords, compound grammatical codes, inflection notation, homonyms, definitions, and `ld`/`eeg` cross-references is reliable.
+Expand the reviewed Qaamuus lexical seed in coherent families, then connect exact lookup to tested Somali morphology. Morphology should propose one or more candidate lemmas while preserving ambiguity, after which dictionary, grammatical, regional, and source-provenance information can be combined into the future word-analyzer response.
