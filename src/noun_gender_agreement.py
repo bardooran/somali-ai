@@ -1,11 +1,10 @@
-"""Conservative noun-subject gender agreement analysis.
+"""Conservative noun-subject gender and number agreement analysis.
 
-The analyzer separates grammatical gender from number. Strong subject-surface
-suffixes can reveal gender, but they do not always reveal singular/plural. A
-third-person plural subject can also use ``way``. Therefore masculine subjects
-are only required to use ``wuu`` when singular number has independent project
-evidence. Feminine subject surfaces safely reject ``wuu`` because both 3sg
-feminine and 3pl use the ay/way family in the current project evidence.
+The analyzer treats grammatical gender and number as separate facts. Strong
+subject-surface suffixes can reveal gender, while singular/plural number must
+come from explicit native review or reviewed morphology. This matters because
+Somali noun plurals can change grammatical gender, and third-person plural
+statements use the ay/way family regardless of singular gender.
 
 This layer is review-only and never rewrites text.
 """
@@ -54,23 +53,37 @@ class NounGenderAgreementAnalysis:
     note: str = ""
 
 
-def _load_reviewed_singular_forms() -> dict[str, str]:
+def _load_rule_record(rule_id: str) -> dict:
     if not RULE_PATH.exists():
         return {}
     for line in RULE_PATH.read_text(encoding="utf-8").splitlines():
         if not line.strip():
             continue
         record = json.loads(line)
-        if record.get("id") != "GRAM-NGENDER-002":
-            continue
-        return {
-            item["form"].casefold(): item["gender"]
-            for item in record.get("forms", [])
-        }
+        if record.get("id") == rule_id:
+            return record
     return {}
 
 
+def _load_reviewed_singular_forms() -> dict[str, str]:
+    record = _load_rule_record("GRAM-NGENDER-002")
+    return {
+        item["form"].casefold(): item["gender"]
+        for item in record.get("forms", [])
+    }
+
+
+def _load_reviewed_plural_forms() -> set[str]:
+    record = _load_rule_record("GRAM-NGENDER-006")
+    return {
+        item["form"].casefold()
+        for item in record.get("forms", [])
+        if item.get("form")
+    }
+
+
 REVIEWED_SINGULAR_FORMS = _load_reviewed_singular_forms()
+REVIEWED_PLURAL_FORMS = _load_reviewed_plural_forms()
 
 
 def infer_subject_gender(form: str) -> tuple[str | None, str]:
@@ -91,18 +104,27 @@ def infer_subject_gender(form: str) -> tuple[str | None, str]:
 
 
 def infer_subject_number(form: str) -> tuple[str | None, str]:
-    """Infer singular only from explicit review or stored singular morphology."""
+    """Infer number only from explicit review or reviewed paired morphology."""
     folded = form.casefold().strip()
     if folded in REVIEWED_SINGULAR_FORMS:
         return "singular", "native_reviewed_singular_subject"
+    if folded in REVIEWED_PLURAL_FORMS:
+        return "plural", "native_reviewed_plural_subject"
 
     paired = expected_non_subject_form(form)
     if paired is None:
         return None, "number_not_safely_inferable"
 
-    for candidate in analyze_surface_form(paired):
-        if candidate.features.get("number") == "singular":
-            return "singular", "paired_reviewed_morphology"
+    candidates = analyze_surface_form(paired)
+    numbers = {
+        candidate.features.get("number")
+        for candidate in candidates
+        if candidate.features.get("number") in {"singular", "plural"}
+    }
+    if numbers == {"singular"}:
+        return "singular", "paired_reviewed_morphology"
+    if numbers == {"plural"}:
+        return "plural", "paired_reviewed_morphology"
 
     return None, "number_not_safely_inferable"
 
@@ -117,9 +139,10 @@ def _find_singular_copula(tokens: list[str], subject_index: int) -> str | None:
 def analyze_noun_gender_agreement(sentence: str) -> NounGenderAgreementAnalysis:
     """Analyze a noun subject followed by ``wuu``/``way``.
 
-    Gender is inferred conservatively. Number is independent. The analyzer can
-    therefore return a recognized construction while leaving a masculine
-    ``way`` sequence unresolved if singularity is not known.
+    Number takes priority for the statement clitic: reviewed plural subjects
+    expect ``way``. For singular subjects, grammatical gender controls
+    ``wuu``/``way`` and ``yahay``/``tahay``. If number is unknown, only the
+    conclusions that are safe from gender alone are returned.
     """
     tokens = TOKEN_RE.findall(sentence)
     if len(tokens) < 2:
@@ -134,26 +157,33 @@ def analyze_noun_gender_agreement(sentence: str) -> NounGenderAgreementAnalysis:
             continue
 
         gender, gender_evidence = infer_subject_gender(subject)
-        if gender is None:
+        number, number_evidence = infer_subject_number(subject)
+        if gender is None and number is None:
             continue
 
-        number, number_evidence = infer_subject_number(subject)
         expected_clitic: str | None = None
         clitic_agrees: bool | None = None
 
-        if gender == "feminine":
-            # Both reviewed 3sg feminine and 3pl statement patterns use ay/way;
-            # wuu is therefore incompatible even when number is unknown.
+        if number == "plural":
             expected_clitic = "way"
             clitic_agrees = clitic.casefold() == "way"
-        elif gender == "masculine" and number == "singular":
-            expected_clitic = "wuu"
-            clitic_agrees = clitic.casefold() == "wuu"
+        elif number == "singular":
+            if gender == "masculine":
+                expected_clitic = "wuu"
+                clitic_agrees = clitic.casefold() == "wuu"
+            elif gender == "feminine":
+                expected_clitic = "way"
+                clitic_agrees = clitic.casefold() == "way"
+        elif gender == "feminine":
+            # With unknown number, both reviewed feminine singular and plural
+            # statement patterns are compatible with way; wuu is not.
+            expected_clitic = "way"
+            clitic_agrees = clitic.casefold() == "way"
 
         copula = _find_singular_copula(tokens, index)
         expected_copula: str | None = None
         copula_agrees: bool | None = None
-        if copula is not None and number == "singular":
+        if copula is not None and number == "singular" and gender is not None:
             expected_copula = "yahay" if gender == "masculine" else "tahay"
             copula_agrees = copula.casefold() == expected_copula
 
@@ -170,8 +200,9 @@ def analyze_noun_gender_agreement(sentence: str) -> NounGenderAgreementAnalysis:
             expected_copula=expected_copula,
             copula_agrees=copula_agrees,
             note=(
-                f"Gender evidence: {gender_evidence}. Number is analyzed separately "
-                "so plural ay/way patterns are not collapsed into singular gender agreement."
+                f"Gender evidence: {gender_evidence}. Number evidence: {number_evidence}. "
+                "Number and gender remain separate because Somali pluralization can change "
+                "grammatical gender."
             ),
         )
 
