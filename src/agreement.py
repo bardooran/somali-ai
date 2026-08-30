@@ -1,8 +1,10 @@
-"""Conservative Somali pronoun–verb agreement analysis.
+"""Conservative Somali subject-marker–verb agreement analysis.
 
-This module intentionally works on explicit pronoun/verb pairs rather than
-trying to parse unrestricted Somali text. It only reports mismatches when both
-the pronoun features and the verb form are present in reviewed project data.
+This module intentionally works on explicit subject-marker/verb pairs rather
+than trying to parse unrestricted Somali text. Subject markers currently include
+reviewed independent subject pronouns and reviewed subject clitics. It only
+reports mismatches when both marker features and the verb form are present in
+reviewed project data.
 """
 
 from __future__ import annotations
@@ -39,11 +41,15 @@ def _load_jsonl(path: str | Path) -> list[dict]:
 
 
 def _subject_pronouns(records: Iterable[dict]) -> dict[str, dict]:
+    """Return reviewed independent subject pronouns and subject clitics."""
     result: dict[str, dict] = {}
     for record in records:
-        if record.get("pronoun_type") != "independent":
-            continue
-        if "subject" not in record.get("role", []):
+        is_independent_subject = (
+            record.get("pronoun_type") == "independent"
+            and "subject" in record.get("role", [])
+        )
+        is_subject_clitic = record.get("category") == "subject_clitic"
+        if not (is_independent_subject or is_subject_clitic):
             continue
         result[record["form"].casefold()] = record
     return result
@@ -78,11 +84,12 @@ def analyze_pronoun_verb(
     pronoun_path: str | Path = PRONOUN_PATH,
     agreement_path: str | Path = AGREEMENT_PATH,
 ) -> AgreementResult:
-    """Compare a known independent subject pronoun with a known verb form.
+    """Compare a reviewed subject marker with a reviewed verb form.
 
-    ``agrees`` is ``None`` when the project data is insufficient to decide.
-    No correction is generated because the current agreement references are
-    provisional and intentionally review-only.
+    The ``pronoun`` argument may be either an independent subject pronoun or a
+    reviewed subject clitic. ``agrees`` is ``None`` when project data is
+    insufficient to decide. No correction is generated because the current
+    agreement references are provisional and intentionally review-only.
     """
     pronouns = _subject_pronouns(_load_jsonl(pronoun_path))
     agreement_records = _load_jsonl(agreement_path)
@@ -103,7 +110,7 @@ def analyze_pronoun_verb(
             known_verb=verb.casefold() in all_known_forms,
             agrees=None,
             expected_forms=(),
-            note="Pronoun is not covered by the current reviewed subject-pronoun data.",
+            note="Subject marker is not covered by the current reviewed pronoun/clitic data.",
         )
 
     expected = _forms_for_subject(pronoun_record, agreement_records)
@@ -128,8 +135,8 @@ def analyze_pronoun_verb(
         agrees=agrees,
         expected_forms=tuple(sorted(expected)),
         note=(
-            "Pronoun and verb match the reviewed agreement evidence."
+            "Subject marker and verb match the reviewed agreement evidence."
             if agrees
-            else "Pronoun and verb conflict within the reviewed agreement evidence; review required."
+            else "Subject marker and verb conflict within the reviewed agreement evidence; review required."
         ),
     )
