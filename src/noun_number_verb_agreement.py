@@ -25,6 +25,7 @@ from src.noun_subject_case import PERSONAL_PRONOUN_FORMS
 TOKEN_RE = re.compile(r"[^\W\d_]+", flags=re.UNICODE)
 STATEMENT_CLITICS = {"wuu", "way"}
 MAX_VERB_GAP = 3
+FINITE_ANALYSIS_TYPES = {"finite_verb", "native_reviewed_finite_verb_surface"}
 
 
 @dataclass(frozen=True)
@@ -45,7 +46,7 @@ class NounNumberVerbAgreementAnalysis:
 def _finite_persons(candidate: MorphologyCandidate) -> tuple[str, ...]:
     if candidate.features.get("part_of_speech") != "verb":
         return ()
-    if candidate.analysis_type != "finite_verb":
+    if candidate.analysis_type not in FINITE_ANALYSIS_TYPES:
         return ()
 
     person = candidate.features.get("person")
