@@ -20,6 +20,7 @@ from src.noun_number_verb_agreement import analyze_noun_number_verb_agreement
 from src.noun_singular_verb_agreement import analyze_noun_singular_verb_agreement
 from src.noun_subject_case import analyze_noun_subject_case
 from src.object_agreement import analyze_object_agreement
+from src.past_habitual_auxiliary_agreement import analyze_past_habitual_auxiliary_agreement
 from src.predicate_sentence import scan_predicate_agreement
 from src.reviewed_sentence_agreement import analyze_reviewed_sentence_agreement
 from src.role_aware_sentences import analyze_role_aware_sentence
@@ -30,12 +31,7 @@ DEFAULT_RULES = Path("rules/orthography")
 
 
 def _scan_negation_conflicts(text: str):
-    """Return review-only conflicts for exact documented ``ma + verb`` spans.
-
-    The scanner is deliberately narrow. It considers short ``ma`` spans up to
-    three following tokens so documented multiword forms such as ``ma cuni
-    doono`` can be recognized, but unknown constructions remain unjudged.
-    """
+    """Return review-only conflicts for exact documented ``ma + verb`` spans."""
     tokens = re.findall(r"[^\W\d_]+", text, flags=re.UNICODE)
     conflicts = []
     for index, token in enumerate(tokens):
@@ -78,8 +74,6 @@ def main() -> None:
         and negative_finite_agreement.agrees is False
     )
     if negative_finite_conflict:
-        # Prefer the subject-aware negative finite warning over the older
-        # span-only pair checker for the same non-future paradigms.
         negation_conflicts = [
             result
             for result in negation_conflicts
@@ -108,6 +102,12 @@ def main() -> None:
         and noun_singular_verb_agreement.agrees is False
     )
 
+    past_habitual_auxiliary_agreement = analyze_past_habitual_auxiliary_agreement(args.text)
+    past_habitual_auxiliary_conflict = (
+        past_habitual_auxiliary_agreement.recognized
+        and past_habitual_auxiliary_agreement.agrees is False
+    )
+
     future_auxiliary_agreement = analyze_future_auxiliary_agreement(args.text)
     future_auxiliary_conflict = (
         future_auxiliary_agreement.recognized
@@ -122,8 +122,6 @@ def main() -> None:
         and negative_future_auxiliary_agreement.agrees is False
     )
     if negative_future_auxiliary_agreement.recognized:
-        # The subject-aware negative-future layer is more specific than the
-        # older span-only negation pair checker. Avoid duplicate future warnings.
         negation_conflicts = [
             result for result in negation_conflicts if result.paradigm != "future"
         ]
@@ -167,6 +165,7 @@ def main() -> None:
         and not noun_gender_copula_conflict
         and not noun_number_verb_conflict
         and not noun_singular_verb_conflict
+        and not past_habitual_auxiliary_conflict
         and not future_auxiliary_conflict
         and not negative_future_auxiliary_conflict
         and not negative_finite_conflict
@@ -196,6 +195,7 @@ def main() -> None:
         or noun_gender_copula_conflict
         or noun_number_verb_conflict
         or noun_singular_verb_conflict
+        or past_habitual_auxiliary_conflict
         or future_auxiliary_conflict
         or negative_future_auxiliary_conflict
         or negative_finite_conflict
@@ -282,11 +282,7 @@ def main() -> None:
                 f"- [REVIEW] {noun_gender_agreement.subject!r} + "
                 f"{noun_gender_agreement.clitic!r}: possible noun-subject gender/clitic "
                 f"agreement conflict; subject is analyzed as {noun_gender_agreement.gender}"
-                + (
-                    f" {noun_gender_agreement.number}"
-                    if noun_gender_agreement.number
-                    else ""
-                )
+                + (f" {noun_gender_agreement.number}" if noun_gender_agreement.number else "")
                 + f" and the supported clitic is {noun_gender_agreement.expected_clitic!r}. "
                 "Number and gender are analyzed separately; no automatic rewrite. "
                 f"({noun_gender_agreement.rule_id})"
@@ -323,6 +319,19 @@ def main() -> None:
                 f"Expected {noun_singular_verb_agreement.expected_person}. "
                 "Unknown verbs are not guessed; no automatic rewrite. "
                 f"({noun_singular_verb_agreement.rule_id})"
+            )
+
+        if past_habitual_auxiliary_conflict:
+            persons = ", ".join(past_habitual_auxiliary_agreement.auxiliary_persons)
+            print(
+                f"- [REVIEW] {past_habitual_auxiliary_agreement.subject!r} + "
+                f"{past_habitual_auxiliary_agreement.habitual_stem!r} "
+                f"{past_habitual_auxiliary_agreement.auxiliary!r}: possible past habitual "
+                f"auxiliary agreement conflict; the reviewed auxiliary has person(s): "
+                f"{persons or 'none'}. Expected {past_habitual_auxiliary_agreement.expected_person}. "
+                "The habitual stem is non-finite and agreement is carried by the auxiliary; "
+                "no automatic rewrite. "
+                f"({past_habitual_auxiliary_agreement.rule_id})"
             )
 
         if future_auxiliary_conflict:
