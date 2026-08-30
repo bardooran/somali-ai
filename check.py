@@ -10,6 +10,7 @@ from pathlib import Path
 from src.checker import check_file
 from src.focus_particle import scan_focus_particle_clitics
 from src.negation import analyze_ma_plus_verb
+from src.noun_gender_agreement import analyze_noun_gender_agreement
 from src.noun_subject_case import analyze_noun_subject_case
 from src.object_agreement import analyze_object_agreement
 from src.predicate_sentence import scan_predicate_agreement
@@ -63,7 +64,32 @@ def main() -> None:
     role_aware = analyze_role_aware_sentence(args.text)
     role_aware_conflict = role_aware.recognized and role_aware.agrees is False
     negation_conflicts = _scan_negation_conflicts(args.text)
+
+    noun_gender_agreement = analyze_noun_gender_agreement(args.text)
+    noun_gender_clitic_conflict = (
+        noun_gender_agreement.recognized
+        and noun_gender_agreement.clitic_agrees is False
+    )
+    noun_gender_copula_conflict = (
+        noun_gender_agreement.recognized
+        and noun_gender_agreement.copula_agrees is False
+    )
+
     predicate_conflicts = scan_predicate_agreement(args.text)
+    if (
+        noun_gender_copula_conflict
+        and noun_gender_agreement.subject
+        and noun_gender_agreement.copula
+    ):
+        predicate_conflicts = [
+            finding
+            for finding in predicate_conflicts
+            if not (
+                finding.subject.casefold() == noun_gender_agreement.subject.casefold()
+                and finding.copula.casefold() == noun_gender_agreement.copula.casefold()
+            )
+        ]
+
     reviewed_sentence_agreement = analyze_reviewed_sentence_agreement(args.text)
     reviewed_sentence_conflict = (
         reviewed_sentence_agreement.recognized
@@ -84,6 +110,8 @@ def main() -> None:
         and not predicate_conflicts
         and not reviewed_sentence_conflict
         and not noun_subject_case_conflict
+        and not noun_gender_clitic_conflict
+        and not noun_gender_copula_conflict
     ):
         print("No supported orthography or grammar findings found.")
         return
@@ -106,6 +134,8 @@ def main() -> None:
         or predicate_conflicts
         or reviewed_sentence_conflict
         or noun_subject_case_conflict
+        or noun_gender_clitic_conflict
+        or noun_gender_copula_conflict
     ):
         if findings:
             print()
@@ -172,6 +202,31 @@ def main() -> None:
                 f"reviewed subject-form candidate is {noun_subject_case.expected_subject_form!r}. "
                 "Sentence role matters; no automatic rewrite. "
                 f"({noun_subject_case.rule_id})"
+            )
+
+        if noun_gender_clitic_conflict:
+            print(
+                f"- [REVIEW] {noun_gender_agreement.subject!r} + "
+                f"{noun_gender_agreement.clitic!r}: possible noun-subject gender/clitic "
+                f"agreement conflict; subject is analyzed as {noun_gender_agreement.gender}"
+                + (
+                    f" {noun_gender_agreement.number}"
+                    if noun_gender_agreement.number
+                    else ""
+                )
+                + f" and the supported clitic is {noun_gender_agreement.expected_clitic!r}. "
+                "Number and gender are analyzed separately; no automatic rewrite. "
+                f"({noun_gender_agreement.rule_id})"
+            )
+
+        if noun_gender_copula_conflict:
+            print(
+                f"- [REVIEW] {noun_gender_agreement.subject!r} + "
+                f"{noun_gender_agreement.copula!r}: possible noun-subject predicate/copula "
+                f"agreement conflict; supported copula for this reviewed "
+                f"{noun_gender_agreement.gender} singular subject is "
+                f"{noun_gender_agreement.expected_copula!r}. No automatic rewrite. "
+                f"({noun_gender_agreement.rule_id})"
             )
 
     print("\nSafe corrected text:")
