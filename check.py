@@ -11,6 +11,7 @@ from src.checker import check_file
 from src.focus_particle import scan_focus_particle_clitics
 from src.future_auxiliary_agreement import analyze_future_auxiliary_agreement
 from src.negation import analyze_ma_plus_verb
+from src.negative_finite_agreement import analyze_negative_finite_agreement
 from src.negative_future_auxiliary_agreement import (
     analyze_negative_future_auxiliary_agreement,
 )
@@ -70,6 +71,20 @@ def main() -> None:
     role_aware = analyze_role_aware_sentence(args.text)
     role_aware_conflict = role_aware.recognized and role_aware.agrees is False
     negation_conflicts = _scan_negation_conflicts(args.text)
+
+    negative_finite_agreement = analyze_negative_finite_agreement(args.text)
+    negative_finite_conflict = (
+        negative_finite_agreement.recognized
+        and negative_finite_agreement.agrees is False
+    )
+    if negative_finite_conflict:
+        # Prefer the subject-aware negative finite warning over the older
+        # span-only pair checker for the same non-future paradigms.
+        negation_conflicts = [
+            result
+            for result in negation_conflicts
+            if result.paradigm not in {"present_general", "present_ongoing", "past_simple"}
+        ]
 
     noun_gender_agreement = analyze_noun_gender_agreement(args.text)
     noun_gender_clitic_conflict = (
@@ -154,6 +169,7 @@ def main() -> None:
         and not noun_singular_verb_conflict
         and not future_auxiliary_conflict
         and not negative_future_auxiliary_conflict
+        and not negative_finite_conflict
     ):
         print("No supported orthography or grammar findings found.")
         return
@@ -182,6 +198,7 @@ def main() -> None:
         or noun_singular_verb_conflict
         or future_auxiliary_conflict
         or negative_future_auxiliary_conflict
+        or negative_finite_conflict
     ):
         if findings:
             print()
@@ -221,6 +238,18 @@ def main() -> None:
                 f"- [REVIEW] {result.input_form!r}: possible negation-paradigm conflict; "
                 f"documented negative form for this paradigm: {result.paired_form!r}. "
                 "Review required; no automatic rewrite."
+            )
+
+        if negative_finite_conflict:
+            persons = ", ".join(negative_finite_agreement.verb_persons)
+            polarity = negative_finite_agreement.polarity or "unknown"
+            print(
+                f"- [REVIEW] {negative_finite_agreement.subject!r} + ma + "
+                f"{negative_finite_agreement.verb!r}: possible negative finite subject/verb "
+                f"agreement conflict; the reviewed form has polarity {polarity!r} and "
+                f"person(s): {persons or 'none'}. Expected {negative_finite_agreement.expected_person}. "
+                "Negative morphology is paradigm-specific; no automatic rewrite. "
+                f"({negative_finite_agreement.rule_id})"
             )
 
         for finding in predicate_conflicts:
