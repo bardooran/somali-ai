@@ -8,6 +8,7 @@ import re
 from pathlib import Path
 
 from src.checker import check_file
+from src.conditional_agreement import analyze_conditional_agreement
 from src.focus_particle import scan_focus_particle_clitics
 from src.future_auxiliary_agreement import analyze_future_auxiliary_agreement
 from src.negation import analyze_ma_plus_verb
@@ -69,12 +70,25 @@ def main() -> None:
     role_aware_conflict = role_aware.recognized and role_aware.agrees is False
     negation_conflicts = _scan_negation_conflicts(args.text)
 
+    conditional_agreement = analyze_conditional_agreement(args.text)
+    conditional_conflict = (
+        conditional_agreement.recognized
+        and conditional_agreement.agrees is False
+    )
+
     negative_finite_agreement = analyze_negative_finite_agreement(args.text)
     negative_finite_conflict = (
         negative_finite_agreement.recognized
         and negative_finite_agreement.agrees is False
     )
-    if negative_finite_conflict:
+    if (
+        conditional_agreement.recognized
+        and conditional_agreement.construction == "negative_conditional"
+    ):
+        # Conditional cuneen/cunteen surfaces overlap ordinary finite past forms.
+        # In explicit reviewed conditional context, prefer the conditional analysis.
+        negative_finite_conflict = False
+    elif negative_finite_conflict:
         negation_conflicts = [
             result
             for result in negation_conflicts
@@ -181,6 +195,7 @@ def main() -> None:
         and not negative_future_auxiliary_conflict
         and not negative_finite_conflict
         and not negative_past_aspect_conflict
+        and not conditional_conflict
     ):
         print("No supported orthography or grammar findings found.")
         return
@@ -212,6 +227,7 @@ def main() -> None:
         or negative_future_auxiliary_conflict
         or negative_finite_conflict
         or negative_past_aspect_conflict
+        or conditional_conflict
     ):
         if findings:
             print()
@@ -252,6 +268,30 @@ def main() -> None:
                 f"documented negative form for this paradigm: {result.paired_form!r}. "
                 "Review required; no automatic rewrite."
             )
+
+        if conditional_conflict:
+            persons = ", ".join(conditional_agreement.persons)
+            polarity = conditional_agreement.polarity or "unknown"
+            if conditional_agreement.construction == "negative_conditional":
+                print(
+                    f"- [REVIEW] {conditional_agreement.subject!r} + ma + "
+                    f"{conditional_agreement.verb_or_auxiliary!r}: possible negative conditional "
+                    f"agreement conflict; reviewed form polarity {polarity!r} and person(s): "
+                    f"{persons or 'none'}. Expected {conditional_agreement.expected_person}. "
+                    "The cited negative conditional is an irregular/syncretic paradigm; "
+                    "no ordinary-past substitution or automatic rewrite. "
+                    f"({conditional_agreement.rule_id})"
+                )
+            else:
+                print(
+                    f"- [REVIEW] {conditional_agreement.subject!r} + "
+                    f"{conditional_agreement.conditional_stem!r} "
+                    f"{conditional_agreement.verb_or_auxiliary!r}: possible conditional agreement "
+                    f"conflict; the reviewed auxiliary has person(s): {persons or 'none'}. "
+                    f"Expected {conditional_agreement.expected_person}. The conditional stem is "
+                    "non-finite and agreement is carried by the auxiliary; no automatic rewrite. "
+                    f"({conditional_agreement.rule_id})"
+                )
 
         if negative_finite_conflict:
             persons = ", ".join(negative_finite_agreement.verb_persons)
