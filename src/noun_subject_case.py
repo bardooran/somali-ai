@@ -18,6 +18,11 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 
+# Somali apostrophe/glottal-mark spellings can occur inside or at the end of a
+# lexical word (for example the source-backed noun bu'). Keep those marks inside
+# a token instead of silently splitting the word before grammar analysis.
+TOKEN_RE = re.compile(r"[^\W\d_]+(?:['’][^\W\d_]+)*['’]?", flags=re.UNICODE)
+
 # Longest suffixes first so -sha/-shu are not swallowed by -ha/-hu.
 NON_SUBJECT_TO_SUBJECT = (
     ("sha", "shu"),
@@ -100,7 +105,7 @@ def analyze_noun_subject_case(sentence: str) -> NounSubjectCaseAnalysis:
     ``-a`` surface is returned as a review-only conflict with the expected
     ``-u`` form. Personal pronouns and other contexts remain outside this rule.
     """
-    tokens = re.findall(r"[^\W\d_]+", sentence, flags=re.UNICODE)
+    tokens = TOKEN_RE.findall(sentence)
     if len(tokens) < 2:
         return NounSubjectCaseAnalysis(recognized=False)
 
