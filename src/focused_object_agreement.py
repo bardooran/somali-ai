@@ -2,14 +2,19 @@
 
 Executable scope is intentionally limited to lemmas with direct reviewed
 object-focus evidence. The explicit noun subject controls the contracted
-baa/ayaa + subject-pronoun form and the finite verb; intervening focused object
-material never controls agreement.
+baa/ayaa + subject-pronoun form and the finite verb; focused object material
+never controls agreement.
 
-Current licensed lemmas:
-- cun: project native review, e.g. ``Wiilku muus buu cunay``
+Current reviewed orders:
+- subject-first: ``Wiilku muus buu cunay``
+- object-first: ``Muus ayuu wiilku cunay``
+
+Current subject-first licensed lemmas:
+- cun: project native review
 - arag: Qaamuus 2012 focus example ``Gabadhu Cali bay aragtay``
 
-Other focus frames are left unjudged. The specialized leeyahay possession-focus
+The object-first analyzer is narrower and currently licenses cun only. Other
+focus frames are left unjudged. The specialized leeyahay possession-focus
 analyzer owns possession clauses, so this module does not duplicate them.
 """
 
@@ -18,6 +23,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 
+from src.fronted_object_focus_agreement import analyze_fronted_object_focus_agreement
 from src.noun_gender_agreement import infer_subject_gender, infer_subject_number
 from src.noun_subject_case import PERSONAL_PRONOUN_FORMS
 from src.reviewed_finite_verb import analyze_reviewed_finite_verb
@@ -68,18 +74,48 @@ def _expected_person(subject: str) -> tuple[str | None, str | None, str | None]:
     return None, number, gender
 
 
-def analyze_focused_object_agreement(sentence: str) -> FocusedObjectAgreementAnalysis:
-    """Analyze a reviewed noun-subject object-focus construction.
+def _convert_fronted(sentence: str) -> FocusedObjectAgreementAnalysis | None:
+    """Return the shared result shape when object-first focus is recognized."""
+    fronted = analyze_fronted_object_focus_agreement(sentence)
+    if not fronted.recognized:
+        return None
+    return FocusedObjectAgreementAnalysis(
+        recognized=True,
+        subject=fronted.subject,
+        subject_number=fronted.subject_number,
+        subject_gender=fronted.subject_gender,
+        focused_object=fronted.focused_object,
+        focus_clitic=fronted.focus_clitic,
+        focus_clitic_persons=fronted.focus_clitic_persons,
+        verb=fronted.verb,
+        verb_lemmas=fronted.verb_lemmas,
+        verb_persons=fronted.verb_persons,
+        expected_person=fronted.expected_person,
+        clitic_agrees=fronted.clitic_agrees,
+        verb_agrees=fronted.verb_agrees,
+        agrees=fronted.agrees,
+        rule_id=fronted.rule_id,
+        note=fronted.note,
+    )
 
-    Supported surface frame::
+
+def analyze_focused_object_agreement(sentence: str) -> FocusedObjectAgreementAnalysis:
+    """Analyze a reviewed Somali focused-object construction.
+
+    Supported frames are currently::
 
         SUBJECT + 1-4 focused tokens + buu/bay/ayuu/ayay + FINITE_VERB
+        1-4 focused tokens + ayuu/ayay + SUBJECT + FINITE_CUN
 
-    A full judgment requires independently reviewed subject number/gender and an
-    exact reviewed finite verb from a lemma licensed for object-focus use.
-    Unknown or unsupported verbs are not guessed. Possessive ``leeyahay`` forms
-    are delegated to the dedicated possession-focus analyzer.
+    The second frame is checked first because its sentence-initial noun is the
+    object rather than the subject. A full judgment requires independently
+    reviewed subject number/gender and exact reviewed finite morphology.
+    Unknown or unsupported verbs are not guessed.
     """
+    fronted = _convert_fronted(sentence)
+    if fronted is not None:
+        return fronted
+
     tokens = TOKEN_RE.findall(sentence)
     if len(tokens) < 4:
         return FocusedObjectAgreementAnalysis(recognized=False)
