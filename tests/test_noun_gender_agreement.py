@@ -1,12 +1,23 @@
 import json
 from pathlib import Path
 
+from src.noun_gender_agreement import (
+    analyze_noun_gender_agreement,
+    infer_subject_gender,
+    infer_subject_number,
+)
 
-RULE_PATH = Path("rules/grammar/noun_gender_agreement.jsonl")
+
+REFERENCE_RULE_PATH = Path("rules/grammar/noun_gender_agreement.jsonl")
+EXECUTABLE_RULE_PATH = Path("rules/grammar/noun_subject_gender_agreement.jsonl")
 
 
-def load_rules():
-    return [json.loads(line) for line in RULE_PATH.read_text(encoding="utf-8").splitlines() if line.strip()]
+def load_rules(path=REFERENCE_RULE_PATH):
+    return [
+        json.loads(line)
+        for line in path.read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
 
 
 def test_ids_are_unique():
@@ -39,3 +50,94 @@ def test_reference_layer_is_not_autocorrection_data():
         assert rule["status"] == "descriptive"
         assert "replacement" not in rule
         assert "preferred_written" not in rule
+
+
+def test_executable_gender_rule_ids_are_unique():
+    ids = [record["id"] for record in load_rules(EXECUTABLE_RULE_PATH)]
+    assert len(ids) == len(set(ids))
+
+
+def test_strong_subject_suffixes_infer_gender_without_inventing_number():
+    assert infer_subject_gender("Macallinku")[0] == "masculine"
+    assert infer_subject_gender("Magaaladu")[0] == "feminine"
+    assert infer_subject_gender("Meeshu")[0] == "feminine"
+    # A completely unseen strong-suffix form can carry gender evidence while
+    # number remains unknown.
+    assert infer_subject_number("Tijaabogu")[0] is None
+
+
+def test_ambiguous_hu_surface_is_not_guessed_without_review():
+    gender, evidence = infer_subject_gender("Rahhu")
+    assert gender is None
+    assert evidence == "gender_not_safely_inferable"
+
+
+def test_reviewed_gabadhu_can_use_exact_native_evidence_despite_hu_ambiguity():
+    gender, evidence = infer_subject_gender("Gabadhu")
+    number, number_evidence = infer_subject_number("Gabadhu")
+    assert gender == "feminine"
+    assert evidence == "native_reviewed_singular_subject"
+    assert number == "singular"
+    assert number_evidence == "native_reviewed_singular_subject"
+
+
+def test_meeshu_full_feminine_agreement_is_accepted():
+    result = analyze_noun_gender_agreement("Meeshu way weyn tahay.")
+    assert result.recognized
+    assert result.gender == "feminine"
+    assert result.number == "singular"
+    assert result.clitic_agrees is True
+    assert result.expected_clitic == "way"
+    assert result.copula_agrees is True
+    assert result.expected_copula == "tahay"
+
+
+def test_meeshu_rejects_masculine_clitic_and_copula():
+    result = analyze_noun_gender_agreement("Meeshu wuu weyn yahay.")
+    assert result.recognized
+    assert result.clitic_agrees is False
+    assert result.expected_clitic == "way"
+    assert result.copula_agrees is False
+    assert result.expected_copula == "tahay"
+
+
+def test_dugsigu_full_masculine_singular_agreement_is_accepted():
+    result = analyze_noun_gender_agreement("Dugsigu wuu weyn yahay.")
+    assert result.recognized
+    assert result.gender == "masculine"
+    assert result.number == "singular"
+    assert result.clitic_agrees is True
+    assert result.expected_clitic == "wuu"
+    assert result.copula_agrees is True
+    assert result.expected_copula == "yahay"
+
+
+def test_dugsigu_feminine_clitic_is_flagged_because_singularity_is_reviewed():
+    result = analyze_noun_gender_agreement("Dugsigu way weyn yahay.")
+    assert result.recognized
+    assert result.clitic_agrees is False
+    assert result.expected_clitic == "wuu"
+
+
+def test_unreviewed_masculine_surface_with_way_stays_number_ambiguous():
+    result = analyze_noun_gender_agreement("Macallinku way hadlayaan.")
+    assert result.recognized
+    assert result.gender == "masculine"
+    assert result.number is None
+    assert result.expected_clitic is None
+    assert result.clitic_agrees is None
+
+
+def test_plural_way_safety_is_preserved_for_reviewed_examples():
+    for sentence in ("Baabuurtu way socdaan.", "Carruurtu way ciyaarayaan."):
+        result = analyze_noun_gender_agreement(sentence)
+        assert result.recognized
+        assert result.gender == "feminine"
+        assert result.clitic_agrees is True
+        assert result.expected_clitic == "way"
+        assert result.copula is None
+
+
+def test_personal_pronouns_are_not_reclassified_as_nouns():
+    assert analyze_noun_gender_agreement("Iyada way keentay.").recognized is False
+    assert infer_subject_gender("Iyadu")[0] is None
