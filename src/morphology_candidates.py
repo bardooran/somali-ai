@@ -33,6 +33,9 @@ REVIEWED_CLASS2_3_PAST_FORMS_PATH = Path(
 REVIEWED_FUTURE_AUXILIARY_FORMS_PATH = Path(
     "data/morphology/qaamuus_2012_reviewed_future_auxiliary_forms.jsonl"
 )
+REVIEWED_NEGATIVE_FINITE_FORMS_PATH = Path(
+    "data/morphology/qaamuus_2012_reviewed_negative_finite_forms.jsonl"
+)
 NATIVE_REVIEW_MAYDH_FORMS_PATH = Path(
     "data/morphology/native_review_jigjiga_maydh_forms.jsonl"
 )
@@ -47,6 +50,7 @@ DEFAULT_MORPHOLOGY_PATHS = (
     REVIEWED_CLASS1_PAST_FORMS_PATH,
     REVIEWED_CLASS2_3_PAST_FORMS_PATH,
     REVIEWED_FUTURE_AUXILIARY_FORMS_PATH,
+    REVIEWED_NEGATIVE_FINITE_FORMS_PATH,
     NATIVE_REVIEW_MAYDH_FORMS_PATH,
     NATIVE_REVIEW_DERIVATIONAL_FORMS_PATH,
 )
