@@ -39,13 +39,16 @@ def test_native_review_preserves_masculine_and_feminine_clitic_models():
     assert by_id["GRAM-FOCUS-005"]["negative_example"] == "Maryan muus baa cuntay."
 
 
-def test_disputed_bare_baa_example_is_not_treated_as_project_accepted():
+def test_disputed_bare_baa_example_preserves_semantic_role_review():
     by_id = {rule["id"]: rule for rule in load_rules()}
     rule = by_id["GRAM-FOCUS-002"]
     assert "Moos baa wiilkii cunay." in rule["source_examples"]
     assert "Muus ayuu wiilku cunay." in rule["reviewed_preferred_examples"]
     assert "Moos baa wiilkii cunay." not in rule["reviewed_preferred_examples"]
-    assert rule["review_evidence"] == "native_speaker_project_review"
+    review = rule["native_review_interpretation"]
+    assert review["reviewer_reading"] == "The banana ate the boy."
+    assert review["intended_boy_eats_banana_reading"] is False
+    assert review["evidence"] == "native_speaker_project_review"
 
 
 def test_focus_rules_are_reference_only_not_replacement_rules():
