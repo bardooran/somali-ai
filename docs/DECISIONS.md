@@ -28,6 +28,43 @@ Project native review confirms ordinary second-person plural statements with `id
 
 `Waydinkii` may occur in a different construction, with project examples such as `Waydinkii shalay yimid.` and `Waydinkii ballanka qaaday.` This is stored as a separate item for future analysis; it is not evidence that ordinary `waydin + verb` is valid.
 
+## 2026-08-30 — `idin` can be an object, not a subject
+
+Project native review confirms that `idin` is the second-person plural object in constructions such as `Maydin cuntaa?`, `Maydin cunaysaa?`, `Libaaxu maydin eryanayaa?`, and `Libaaxu muu idin eryanayaa?`. The people referred to by `idin` receive the action and do not control verb agreement.
+
+Accordingly, `waydin` and `maydin` must not be globally analyzed as second-person plural subject forms. Their role must be resolved from the whole construction.
+
+## 2026-08-30 — Omitted subjects can retain gender agreement
+
+For the reviewed ongoing `cun` construction, native review confirms:
+
+- `Maydin cunaysaa?` — understood/discourse-given subject is feminine.
+- `Maydin cunayaa?` — understood/discourse-given subject is masculine.
+
+`idin` remains the second-person plural object in both. This evidence is currently limited to the reviewed paradigm and must not be generalized to arbitrary verbs without support.
+
+## 2026-08-30 — Subject gender controls lion verb agreement
+
+Project native review confirms the contrast `Libaaxu ... eryanayaa` for a masculine lion and `Libaaxadu ... eryanaysaa` for a feminine lion. Object clitics such as `idin` and `na` do not control the masculine/feminine verb contrast.
+
+The forms `Libaaxa/Libaaxada` are also valid in other constructions, including reviewed `ayaa` examples. The checker must not globally normalize `libaaxa` to `libaaxu` or `libaaxada` to `libaaxadu`; noun form selection is construction-sensitive.
+
+## 2026-08-30 — `arag` simple/general vs ongoing/current contrast
+
+Project native review confirms a meaning contrast between forms such as `arkaa` and `arkayaa`, and corresponding pairs including `aragtaa/arkaysaa` and `arko/arkayo`. In the reviewed examples, the first form has a more general/simple reading and the second a more ongoing/current reading.
+
+Reviewed examples include `Ninka waan arkaa.` / `Ninka waan arkayaa.`, `Guriga ma aragtaa?` / `Guriga ma arkaysaa?`, and `Ma arko.` / `Ma arkayo.`. Exact formal aspect labels remain provisional pending cross-source validation.
+
+## 2026-08-30 — Multiple valid first-person `idin` questions
+
+Project native review confirms both `Maan idin arkaa?` and `Maydin arkaa?` as valid ways to ask whether the speaker can/does see a second-person plural object. The checker must recognize both rather than rewriting one into the other.
+
+The `maydin` surface therefore has construction-dependent subject interpretation and must not be assigned one universal default subject by the grammar engine.
+
+## 2026-08-30 — Reciprocal and impersonal `arag` constructions
+
+Project native review confirms the role contrasts in `Maad i aragtaan?`, `Ma is arkaysaan?`, `Ma la idin arkaa?`, and `Ma la idin arki karaa?`. In the reviewed examples, `i` is first-person singular object, `is` carries a reciprocal reading, and `la` introduces an impersonal construction. `arki karaa` adds an ability/possibility meaning. These labels remain provisional where broader syntactic validation is still needed.
+
 ## 2026-08-30 — Context-sensitive corrections
 
 A grammar checker must distinguish safe deterministic corrections from ambiguous forms. Ambiguous contractions such as `bay` must not be automatically expanded without enough grammatical context.
