@@ -42,3 +42,26 @@ def test_cli_can_show_orthography_and_grammar_findings_together():
     assert "Grammar findings:" in output
     assert "Safe corrected text:" in output
     assert "Iyada" in output
+
+
+def test_cli_reports_focus_particle_clitic_omission_as_review_only():
+    text = "Adigu moos baa cuntay."
+    output = run_cli(text)
+
+    assert "Grammar findings:" in output
+    assert "possible missing subject clitic" in output
+    assert "GRAM-FOCUS-004" in output
+    assert "Safe corrected text:" in output
+    assert text in output
+
+
+def test_cli_does_not_report_valid_contracted_focus_particle_form():
+    output = run_cli("Adigu moos baad cuntay.")
+
+    assert "possible missing subject clitic" not in output
+
+
+def test_cli_does_not_report_optional_third_person_focus_structure():
+    output = run_cli("Moos baa wiilkii cunay.")
+
+    assert "possible missing subject clitic" not in output
