@@ -1,10 +1,10 @@
 """Conservative Somali subject-marker–verb agreement analysis.
 
 This module intentionally works on explicit subject-marker/verb pairs rather
-than trying to parse unrestricted Somali text. Subject markers currently include
-reviewed independent subject pronouns and reviewed subject clitics. It only
-reports mismatches when both marker features and the verb form are present in
-reviewed project data.
+than trying to parse unrestricted Somali text. A surface subject marker may
+have more than one grammatical analysis (for example, ``ay`` can represent
+more than one subject feature set), so analyses are retained rather than
+silently overwritten.
 """
 
 from __future__ import annotations
@@ -28,6 +28,7 @@ class AgreementResult:
     agrees: bool | None
     expected_forms: tuple[str, ...]
     note: str
+    analyses_count: int = 0
 
 
 def _load_jsonl(path: str | Path) -> list[dict]:
@@ -40,9 +41,9 @@ def _load_jsonl(path: str | Path) -> list[dict]:
     return records
 
 
-def _subject_pronouns(records: Iterable[dict]) -> dict[str, dict]:
-    """Return reviewed independent subject pronouns and subject clitics."""
-    result: dict[str, dict] = {}
+def _subject_pronouns(records: Iterable[dict]) -> dict[str, list[dict]]:
+    """Return every reviewed subject analysis for each surface form."""
+    result: dict[str, list[dict]] = {}
     for record in records:
         is_independent_subject = (
             record.get("pronoun_type") == "independent"
@@ -51,7 +52,7 @@ def _subject_pronouns(records: Iterable[dict]) -> dict[str, dict]:
         is_subject_clitic = record.get("category") == "subject_clitic"
         if not (is_independent_subject or is_subject_clitic):
             continue
-        result[record["form"].casefold()] = record
+        result.setdefault(record["form"].casefold(), []).append(record)
     return result
 
 
@@ -86,14 +87,14 @@ def analyze_pronoun_verb(
 ) -> AgreementResult:
     """Compare a reviewed subject marker with a reviewed verb form.
 
-    The ``pronoun`` argument may be either an independent subject pronoun or a
-    reviewed subject clitic. ``agrees`` is ``None`` when project data is
-    insufficient to decide. No correction is generated because the current
-    agreement references are provisional and intentionally review-only.
+    If a surface marker has multiple analyses, expected verb forms are the
+    union of all compatible analyses. A reviewed verb agrees when it matches
+    any one of them. This prevents ambiguous clitics from being forced into a
+    single person/number/gender interpretation.
     """
     pronouns = _subject_pronouns(_load_jsonl(pronoun_path))
     agreement_records = _load_jsonl(agreement_path)
-    pronoun_record = pronouns.get(pronoun.casefold())
+    pronoun_records = pronouns.get(pronoun.casefold(), [])
 
     all_known_forms = {
         value.casefold()
@@ -102,7 +103,7 @@ def analyze_pronoun_verb(
         if key != "lemma" and isinstance(value, str)
     }
 
-    if pronoun_record is None:
+    if not pronoun_records:
         return AgreementResult(
             pronoun=pronoun,
             verb=verb,
@@ -111,9 +112,13 @@ def analyze_pronoun_verb(
             agrees=None,
             expected_forms=(),
             note="Subject marker is not covered by the current reviewed pronoun/clitic data.",
+            analyses_count=0,
         )
 
-    expected = _forms_for_subject(pronoun_record, agreement_records)
+    expected: set[str] = set()
+    for pronoun_record in pronoun_records:
+        expected.update(_forms_for_subject(pronoun_record, agreement_records))
+
     known_verb = verb.casefold() in all_known_forms
     if not known_verb:
         return AgreementResult(
@@ -124,9 +129,15 @@ def analyze_pronoun_verb(
             agrees=None,
             expected_forms=tuple(sorted(expected)),
             note="Verb form is outside the current reviewed agreement paradigms.",
+            analyses_count=len(pronoun_records),
         )
 
     agrees = verb.casefold() in expected
+    ambiguity_note = (
+        " Surface marker has multiple reviewed subject analyses."
+        if len(pronoun_records) > 1
+        else ""
+    )
     return AgreementResult(
         pronoun=pronoun,
         verb=verb,
@@ -138,5 +149,6 @@ def analyze_pronoun_verb(
             "Subject marker and verb match the reviewed agreement evidence."
             if agrees
             else "Subject marker and verb conflict within the reviewed agreement evidence; review required."
-        ),
+        ) + ambiguity_note,
+        analyses_count=len(pronoun_records),
     )
