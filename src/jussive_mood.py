@@ -16,6 +16,7 @@ from pathlib import Path
 PAIR_PATHS = (
     Path("data/morphology/qaamuus_2012_reviewed_jussive_pairs.jsonl"),
     Path("data/morphology/qaamuus_2012_reviewed_imow_jussive_pairs.jsonl"),
+    Path("data/morphology/qaamuus_2012_reviewed_aqaan_jussive_pairs.jsonl"),
 )
 TOKEN_RE = re.compile(r"[^\W\d_]+(?:['’][^\W\d_]+)*", flags=re.UNICODE)
 
