@@ -28,4 +28,15 @@ A morphology pattern can become executable only after we know:
 
 `verb_aspect_arag.jsonl` stores native-reviewed `arag` aspect contrasts independently from object-clitic parsing. It preserves pairs such as `arkaa` / `arkayaa`, `aragtaa` / `arkaysaa`, and `ma arko` / `ma arkayo`, plus the reviewed fact that both `Maydin arkaa?` and `Maan idin arkaa?` can be valid first-person constructions in project evidence. These records are not autocorrection rules.
 
+The reviewed surface-form analyzer under `data/morphology/` now covers source-attested noun morphology, the `cun` and irregular `dheh` verb families, and representative Qaamuus verb classes:
+
+- Class I: `jab`, with reviewed signature-derived forms such as `jabay` and `jabtay`.
+- Class II: `jabi` and `adkee`, including `jabiyay` / `jabisay` and `adkeeyay` / `adkaysay`.
+- Class III: `jabso` and `adkow`, including `jabsaday` / `jabsatay` and `adkaaday` / `adkaatay`.
+- Class IV / fal-sifo: explicit appendix forms for `adag` (IVa) and `fiican` (IVb), including `adagtahay`, `adagyahay`, `adkaa`, `fiicantahay`, `fiicanyahay`, and `fiicnaa`.
+
+The Jigjiga-preferred washing verb `maydh` is stored separately as native-review evidence. Only the reviewed forms `maydh` and `maydho` are currently linked to the lemma. The project intentionally does not infer a conjugation class, person, tense, or mood for `maydho` yet. `dhaq` remains a recognized other-regional/common form, not the preferred Jigjiga output for the washing sense.
+
+The analyzer remains exact and conservative: it loads reviewed surface records and returns candidate lemmas and grammatical features, but it does not generate analyses for unseen forms by blindly stripping or adding endings.
+
 One important noun property is **gender polarity**: several noun classes change grammatical gender between singular and plural. This means a future grammar checker cannot determine agreement by simply assigning one permanent gender to a lemma.
