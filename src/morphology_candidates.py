@@ -30,6 +30,9 @@ REVIEWED_IMOW_FORMS_PATH = Path(
 REVIEWED_AQAAN_FORMS_PATH = Path(
     "data/morphology/qaamuus_2012_reviewed_aqaan_forms.jsonl"
 )
+REVIEWED_AAL_YAAL_FORMS_PATH = Path(
+    "data/morphology/qaamuus_2012_reviewed_aal_yaal_forms.jsonl"
+)
 REVIEWED_VERB_CLASS_FORMS_PATH = Path(
     "data/morphology/qaamuus_2012_reviewed_verb_class_forms.jsonl"
 )
@@ -67,6 +70,7 @@ DEFAULT_MORPHOLOGY_PATHS = (
     REVIEWED_DHEH_EXPANSION_FORMS_PATH,
     REVIEWED_IMOW_FORMS_PATH,
     REVIEWED_AQAAN_FORMS_PATH,
+    REVIEWED_AAL_YAAL_FORMS_PATH,
     REVIEWED_VERB_CLASS_FORMS_PATH,
     REVIEWED_CLASS1_PAST_FORMS_PATH,
     REVIEWED_CLASS2_3_PAST_FORMS_PATH,
