@@ -20,6 +20,7 @@ Automatic rewriting should be limited to rules that have been explicitly promote
 - `subject_verb_agreement.jsonl` — reviewed agreement reference forms.
 - `focus_particle_subject_clitic.jsonl` — `baa/ayaa` and related subject-clitic/focus evidence.
 - `object_clitic_subject_agreement.jsonl` — constructions where object clitics such as `idin` must remain separate from the agreement controller.
+- `special_clitics.jsonl` — context-sensitive `is` reflexive/reciprocal evidence and `la` impersonal constructions, including reviewed `la + idin` examples.
 - `waydinkii_construction.jsonl` — separate context-sensitive `waydinkii` evidence.
 - `negation_patterns.jsonl` — paradigm-sensitive verb negation and conjugation-class samples.
 
