@@ -24,6 +24,9 @@ REVIEWED_VERB_FORMS_PATH = Path(
 REVIEWED_VERB_CLASS_FORMS_PATH = Path(
     "data/morphology/qaamuus_2012_reviewed_verb_class_forms.jsonl"
 )
+REVIEWED_CLASS1_PAST_FORMS_PATH = Path(
+    "data/morphology/qaamuus_corpus_reviewed_class1_past_forms.jsonl"
+)
 NATIVE_REVIEW_MAYDH_FORMS_PATH = Path(
     "data/morphology/native_review_jigjiga_maydh_forms.jsonl"
 )
@@ -35,6 +38,7 @@ DEFAULT_MORPHOLOGY_PATHS = (
     REVIEWED_PLURAL_DEFINITE_FORMS_PATH,
     REVIEWED_VERB_FORMS_PATH,
     REVIEWED_VERB_CLASS_FORMS_PATH,
+    REVIEWED_CLASS1_PAST_FORMS_PATH,
     NATIVE_REVIEW_MAYDH_FORMS_PATH,
     NATIVE_REVIEW_DERIVATIONAL_FORMS_PATH,
 )
