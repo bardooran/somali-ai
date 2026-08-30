@@ -3,6 +3,10 @@
 The current lexicon intentionally supports exact headword lookup only. It does
 not guess lemmas from inflected surface forms yet. Homographs are preserved as
 multiple entries and regional-variant metadata is attached separately.
+
+Default lookup now combines multiple reviewed Qaamuus datasets so grammar
+terms and ordinary vocabulary can grow independently without being mixed into
+one file.
 """
 
 from __future__ import annotations
@@ -14,6 +18,8 @@ from pathlib import Path
 from src.regional_variants import RegionalVariantAnalysis, analyze_regional_form
 
 LEXICON_PATH = Path("data/lexical/qaamuus_2012_grammar_lexicon_seed.jsonl")
+EVERYDAY_LEXICON_PATH = Path("data/lexical/qaamuus_2012_everyday_lexicon_seed.jsonl")
+DEFAULT_LEXICON_PATHS = (LEXICON_PATH, EVERYDAY_LEXICON_PATH)
 
 
 @dataclass(frozen=True)
@@ -63,11 +69,22 @@ def _to_entry(record: dict) -> LexiconEntry:
     )
 
 
+def _default_records() -> list[dict]:
+    records: list[dict] = []
+    for path in DEFAULT_LEXICON_PATHS:
+        records.extend(_load_jsonl(path))
+    return records
+
+
 def lookup_word(
     form: str,
-    lexicon_path: str | Path = LEXICON_PATH,
+    lexicon_path: str | Path | None = None,
 ) -> WordLookup:
     """Look up an exact Somali headword and reviewed regional metadata.
+
+    By default, all reviewed seed datasets in ``DEFAULT_LEXICON_PATHS`` are
+    searched. ``lexicon_path`` remains available for tests or callers that need
+    to search one explicit JSONL dataset.
 
     This first-stage API deliberately does not stem or normalize inflected
     words. For example, a query such as ``gabadha`` is not silently reduced to
@@ -75,9 +92,10 @@ def lookup_word(
     """
     query = form.strip()
     folded = query.casefold()
+    records = _load_jsonl(lexicon_path) if lexicon_path is not None else _default_records()
     entries = tuple(
         _to_entry(record)
-        for record in _load_jsonl(lexicon_path)
+        for record in records
         if record.get("lemma", "").casefold() == folded
     )
     regional = analyze_regional_form(query)
