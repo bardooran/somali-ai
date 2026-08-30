@@ -20,7 +20,14 @@ from src.regional_variants import RegionalVariantAnalysis, analyze_regional_form
 
 LEXICON_PATH = Path("data/lexical/qaamuus_2012_grammar_lexicon_seed.jsonl")
 EVERYDAY_LEXICON_PATH = Path("data/lexical/qaamuus_2012_everyday_lexicon_seed.jsonl")
-DEFAULT_LEXICON_PATHS = (LEXICON_PATH, EVERYDAY_LEXICON_PATH)
+EVERYDAY_VERB_LEXICON_PATH = Path(
+    "data/lexical/qaamuus_2012_everyday_verb_lexicon_seed.jsonl"
+)
+DEFAULT_LEXICON_PATHS = (
+    LEXICON_PATH,
+    EVERYDAY_LEXICON_PATH,
+    EVERYDAY_VERB_LEXICON_PATH,
+)
 
 
 @dataclass(frozen=True)
