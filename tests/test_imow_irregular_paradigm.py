@@ -54,7 +54,7 @@ def test_imow_present_habitual_uses_shared_noun_agreement_engine():
     assert analyze_noun_number_verb_agreement("Macallimiintu way timaaddaan.").agrees is False
 
 
-def test_imow_progressive_and_past_forms_are ordinary_reviewed_finite_verbs():
+def test_imow_progressive_and_past_forms_are_ordinary_reviewed_finite_verbs():
     assert analyze_noun_singular_verb_agreement("Ninku wuu imanayaa.").agrees is True
     assert analyze_noun_singular_verb_agreement("Gabadhu way imanaysaa.").agrees is True
     assert analyze_noun_number_verb_agreement("Macallimiintu way imanayaan.").agrees is True
