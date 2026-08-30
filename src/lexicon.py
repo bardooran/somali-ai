@@ -1,12 +1,12 @@
 """Small, source-backed Somali word lookup prototype.
 
-The current lexicon intentionally supports exact headword lookup only. It does
-not guess lemmas from inflected surface forms yet. Homographs are preserved as
-multiple entries and regional-variant metadata is attached separately.
+Default lookup combines multiple reviewed Qaamuus lexical datasets, reviewed
+regional-variant metadata, and a conservative morphology-candidate layer.
+Homographs are preserved as multiple analyses.
 
-Default lookup now combines multiple reviewed Qaamuus datasets so grammar
-terms and ordinary vocabulary can grow independently without being mixed into
-one file.
+Inflected forms are only linked to lemmas when the exact surface form is stored
+in the reviewed morphology dataset. The module does not perform open-ended
+suffix stripping or guess unseen lemmas.
 """
 
 from __future__ import annotations
@@ -15,6 +15,7 @@ import json
 from dataclasses import dataclass
 from pathlib import Path
 
+from src.morphology_candidates import MorphologyCandidate, analyze_surface_form
 from src.regional_variants import RegionalVariantAnalysis, analyze_regional_form
 
 LEXICON_PATH = Path("data/lexical/qaamuus_2012_grammar_lexicon_seed.jsonl")
@@ -39,6 +40,7 @@ class LexiconEntry:
 class WordLookup:
     query: str
     exact_entries: tuple[LexiconEntry, ...]
+    morphology_candidates: tuple[MorphologyCandidate, ...]
     regional_analyses: tuple[RegionalVariantAnalysis, ...]
     known: bool
     note: str
@@ -80,15 +82,15 @@ def lookup_word(
     form: str,
     lexicon_path: str | Path | None = None,
 ) -> WordLookup:
-    """Look up an exact Somali headword and reviewed regional metadata.
+    """Look up a Somali surface form across reviewed evidence layers.
 
-    By default, all reviewed seed datasets in ``DEFAULT_LEXICON_PATHS`` are
-    searched. ``lexicon_path`` remains available for tests or callers that need
-    to search one explicit JSONL dataset.
+    Exact dictionary headwords, exact reviewed morphology mappings, and
+    regional-variant metadata are returned independently. Multiple analyses are
+    deliberately retained so callers can resolve them using sentence context.
 
-    This first-stage API deliberately does not stem or normalize inflected
-    words. For example, a query such as ``gabadha`` is not silently reduced to
-    ``gabadh`` until a tested morphology layer is connected.
+    ``lexicon_path`` can restrict only the dictionary dataset for tests or
+    specialized callers; reviewed morphology and regional evidence still use
+    their normal project datasets.
     """
     query = form.strip()
     folded = query.casefold()
@@ -98,21 +100,29 @@ def lookup_word(
         for record in records
         if record.get("lemma", "").casefold() == folded
     )
+    morphology = analyze_surface_form(query)
     regional = analyze_regional_form(query)
-    known = bool(entries or regional)
+    known = bool(entries or morphology or regional)
 
     if entries and len(entries) > 1:
         note = "Exact headword has multiple dictionary analyses; context is required to choose among them."
+    elif entries and morphology:
+        note = "Exact source-backed headword and reviewed morphology evidence found."
     elif entries:
         note = "Exact source-backed headword found."
+    elif morphology and len(morphology) > 1:
+        note = "Reviewed surface form has multiple morphology candidates; context is required to choose a lemma."
+    elif morphology:
+        note = "Reviewed morphology mapping found; lemma is linked from stored evidence rather than guessed by suffix stripping."
     elif regional:
-        note = "No exact seed-dictionary entry yet, but reviewed regional-variant evidence exists."
+        note = "No exact seed-dictionary or morphology entry yet, but reviewed regional-variant evidence exists."
     else:
-        note = "Word is outside the current reviewed lexical seed; no analysis is guessed."
+        note = "Word is outside the current reviewed lexical and morphology datasets; no analysis is guessed."
 
     return WordLookup(
         query=query,
         exact_entries=entries,
+        morphology_candidates=morphology,
         regional_analyses=regional,
         known=known,
         note=note,
