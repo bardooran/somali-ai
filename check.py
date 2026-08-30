@@ -12,6 +12,7 @@ from src.focus_particle import scan_focus_particle_clitics
 from src.negation import analyze_ma_plus_verb
 from src.object_agreement import analyze_object_agreement
 from src.predicate_sentence import scan_predicate_agreement
+from src.reviewed_sentence_agreement import analyze_reviewed_sentence_agreement
 from src.sentence_agreement import scan_sentence_agreement
 
 
@@ -59,8 +60,21 @@ def main() -> None:
     object_agreement_conflict = object_agreement.recognized and object_agreement.agrees is False
     negation_conflicts = _scan_negation_conflicts(args.text)
     predicate_conflicts = scan_predicate_agreement(args.text)
+    reviewed_sentence_agreement = analyze_reviewed_sentence_agreement(args.text)
+    reviewed_sentence_conflict = (
+        reviewed_sentence_agreement.recognized
+        and reviewed_sentence_agreement.agrees is False
+    )
 
-    if not findings and not agreement_findings and not focus_findings and not object_agreement_conflict and not negation_conflicts and not predicate_conflicts:
+    if (
+        not findings
+        and not agreement_findings
+        and not focus_findings
+        and not object_agreement_conflict
+        and not negation_conflicts
+        and not predicate_conflicts
+        and not reviewed_sentence_conflict
+    ):
         print("No supported orthography or grammar findings found.")
         return
 
@@ -73,7 +87,14 @@ def main() -> None:
                 f"({finding.rule_id})"
             )
 
-    if agreement_findings or focus_findings or object_agreement_conflict or negation_conflicts or predicate_conflicts:
+    if (
+        agreement_findings
+        or focus_findings
+        or object_agreement_conflict
+        or negation_conflicts
+        or predicate_conflicts
+        or reviewed_sentence_conflict
+    ):
         if findings:
             print()
         print("Grammar findings:")
@@ -111,6 +132,15 @@ def main() -> None:
                 f"- [REVIEW] {finding.subject!r} + {finding.copula!r}: "
                 f"possible predicate/copula agreement conflict; reviewed copula for this subject is "
                 f"{finding.expected_copula!r}. Review required; no automatic rewrite."
+            )
+
+        if reviewed_sentence_conflict:
+            expected = ", ".join(reviewed_sentence_agreement.expected_forms)
+            print(
+                f"- [REVIEW] {reviewed_sentence_agreement.subject!r} + "
+                f"{reviewed_sentence_agreement.verb!r}: possible reviewed second-person-plural "
+                f"agreement conflict; current reviewed Idinku waad forms include: {expected}. "
+                "Review required; no automatic rewrite."
             )
 
     print("\nSafe corrected text:")
