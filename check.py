@@ -12,6 +12,7 @@ from src.conditional_agreement import analyze_conditional_agreement
 from src.dependent_mood import analyze_dependent_mood
 from src.focus_particle import scan_focus_particle_clitics
 from src.future_auxiliary_agreement import analyze_future_auxiliary_agreement
+from src.jussive_mood import analyze_jussive_mood
 from src.negation import analyze_ma_plus_verb
 from src.negative_finite_agreement import analyze_negative_finite_agreement
 from src.negative_future_auxiliary_agreement import (
@@ -73,6 +74,9 @@ def main() -> None:
 
     dependent_mood = analyze_dependent_mood(args.text)
     dependent_mood_conflict = dependent_mood.recognized and dependent_mood.agrees is False
+
+    jussive_mood = analyze_jussive_mood(args.text)
+    jussive_mood_conflict = jussive_mood.recognized and jussive_mood.agrees is False
 
     conditional_agreement = analyze_conditional_agreement(args.text)
     conditional_conflict = (
@@ -201,6 +205,7 @@ def main() -> None:
         and not negative_past_aspect_conflict
         and not conditional_conflict
         and not dependent_mood_conflict
+        and not jussive_mood_conflict
     ):
         print("No supported orthography or grammar findings found.")
         return
@@ -234,6 +239,7 @@ def main() -> None:
         or negative_past_aspect_conflict
         or conditional_conflict
         or dependent_mood_conflict
+        or jussive_mood_conflict
     ):
         if findings:
             print()
@@ -266,6 +272,21 @@ def main() -> None:
                 f"polarity(s): {verb_polarities or 'none'}. Exact reviewed dependent pairs "
                 "are required; no automatic rewrite. "
                 f"({dependent_mood.rule_id})"
+            )
+
+        if jussive_mood_conflict:
+            marker_persons = ", ".join(jussive_mood.marker_persons)
+            marker_polarities = ", ".join(jussive_mood.marker_polarities)
+            verb_persons = ", ".join(jussive_mood.verb_persons)
+            verb_polarities = ", ".join(jussive_mood.verb_polarities)
+            print(
+                f"- [REVIEW] {jussive_mood.marker!r} + {jussive_mood.verb!r}: "
+                "possible hab talo marker/verb conflict; "
+                f"marker person(s): {marker_persons or 'none'}, polarity(s): "
+                f"{marker_polarities or 'none'}; verb person(s): {verb_persons or 'none'}, "
+                f"polarity(s): {verb_polarities or 'none'}. Exact reviewed hab-talo pairs "
+                "are required; no automatic rewrite. "
+                f"({jussive_mood.rule_id})"
             )
 
         if object_agreement_conflict:
