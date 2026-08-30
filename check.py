@@ -7,6 +7,7 @@ import argparse
 from pathlib import Path
 
 from src.checker import check_file
+from src.focus_particle import scan_focus_particle_clitics
 from src.sentence_agreement import scan_sentence_agreement
 
 
@@ -25,10 +26,11 @@ def main() -> None:
     args = parser.parse_args()
 
     findings, corrected = check_file(args.text, args.rules)
-    grammar_findings = scan_sentence_agreement(args.text)
+    agreement_findings = scan_sentence_agreement(args.text)
+    focus_findings = scan_focus_particle_clitics(args.text)
 
-    if not findings and not grammar_findings:
-        print("No supported orthography or agreement findings found.")
+    if not findings and not agreement_findings and not focus_findings:
+        print("No supported orthography or grammar findings found.")
         return
 
     if findings:
@@ -40,15 +42,23 @@ def main() -> None:
                 f"({finding.rule_id})"
             )
 
-    if grammar_findings:
+    if agreement_findings or focus_findings:
         if findings:
             print()
         print("Grammar findings:")
-        for finding in grammar_findings:
+
+        for finding in agreement_findings:
             expected = ", ".join(finding.expected_forms)
             print(
                 f"- [REVIEW] {finding.pronoun!r} + {finding.verb!r}: "
                 f"possible subject-verb agreement conflict; reviewed forms for this subject include: {expected}"
+            )
+
+        for finding in focus_findings:
+            print(
+                f"- [REVIEW] {finding.subject!r} ... {finding.particle!r}: "
+                f"possible missing subject clitic in a baa/ayaa focus construction "
+                f"({finding.rule_id})"
             )
 
     print("\nSafe corrected text:")
