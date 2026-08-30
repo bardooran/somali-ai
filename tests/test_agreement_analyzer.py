@@ -77,9 +77,14 @@ def test_aad_supports_second_singular_and_second_plural():
     assert plural.analyses_count == 2
 
 
-def test_unambiguous_plural_subject_clitics_are_supported():
+def test_aannu_plural_subject_clitic_is_supported():
     assert analyze_pronoun_verb("aannu", "keennay").agrees is True
-    assert analyze_pronoun_verb("aydin", "keenteen").agrees is True
+
+
+def test_context_required_aydin_is_not_executable_subject_evidence():
+    result = analyze_pronoun_verb("aydin", "keenteen")
+    assert not result.known_pronoun
+    assert result.agrees is None
 
 
 def test_object_clitic_is_not_treated_as_subject():
