@@ -90,3 +90,38 @@ def test_cli_does_not_reclassify_independent_pronoun_as_noun():
     output = run_cli("Iyada way keentay.")
     assert "possible noun-subject gender/clitic agreement conflict" not in output
     assert "possible noun-subject predicate/copula agreement conflict" not in output
+
+
+def test_cli_accepts_reviewed_plural_past_and_progressive_verb_forms():
+    for text in (
+        "Macallimiintu way cuneen.",
+        "Macallimiintu way cunayaan.",
+    ):
+        output = run_cli(text)
+        assert "possible plural noun-subject/verb agreement conflict" not in output
+
+
+def test_cli_reports_plural_subject_with_singular_compatible_past_verb():
+    text = "Macallimiintu way cunay."
+    output = run_cli(text)
+    assert "Grammar findings:" in output
+    assert "possible plural noun-subject/verb agreement conflict" in output
+    assert "Expected 3pl" in output
+    assert "1sg, 3sg_m" in output
+    assert "Safe corrected text:" in output
+    assert text in output
+    assert "Macallimiintu way cuneen." not in output
+
+
+def test_cli_reports_plural_subject_with_singular_compatible_progressive_verb():
+    text = "Macallimiintu way cunayaa."
+    output = run_cli(text)
+    assert "possible plural noun-subject/verb agreement conflict" in output
+    assert "Expected 3pl" in output
+    assert "1sg, 3sg_m" in output
+    assert text in output
+
+
+def test_cli_keeps_unknown_plural_subject_verb_unjudged():
+    output = run_cli("Macallimiintu way tijaabxyz.")
+    assert "possible plural noun-subject/verb agreement conflict" not in output
