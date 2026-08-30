@@ -141,7 +141,7 @@ def test_imaan_reuses_generic_habitual_and_future_auxiliary_layers():
 def test_imow_conditional_uses_shared_auxiliary_but_exact_negative_paradigm():
     assert analyze_conditional_agreement("Ninku wuu imaan lahaa.").agrees is True
     assert analyze_conditional_agreement("Gabadhu way imaan lahayd.").agrees is True
-    assert analyze_conditional_agreement("Macallimiintu way imaan lahayeen.").agrees is True
+    assert analyze_conditional_agreement("Macallimiintu way imaan lahaayeen.").agrees is True
     assert analyze_conditional_agreement("Ninku wuu imaan lahayd.").agrees is False
 
     masculine = analyze_conditional_agreement("Ninku ma yimaadeen.")
