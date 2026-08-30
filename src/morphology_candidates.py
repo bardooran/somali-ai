@@ -1,10 +1,10 @@
 """Conservative morphology candidate lookup for reviewed Somali surface forms.
 
-This module intentionally does not perform open-ended suffix stripping. It only
-returns analyses for surface forms that are explicitly stored in the reviewed
-morphology dataset. That gives the word analyzer a safe bridge from inflected
-surface forms to candidate lemmas while broader morphology remains under
-validation.
+This module intentionally does not perform open-ended suffix stripping or
+productive conjugation guessing. It only returns analyses for surface forms
+stored in reviewed morphology datasets. That gives the word analyzer a safe
+bridge from inflected surface forms to candidate lemmas while broader Somali
+morphology remains under validation.
 """
 
 from __future__ import annotations
@@ -15,6 +15,13 @@ from pathlib import Path
 
 REVIEWED_NOUN_FORMS_PATH = Path(
     "data/morphology/qaamuus_2012_reviewed_noun_forms.jsonl"
+)
+REVIEWED_VERB_FORMS_PATH = Path(
+    "data/morphology/qaamuus_2012_reviewed_verb_forms.jsonl"
+)
+DEFAULT_REVIEWED_FORM_PATHS = (
+    REVIEWED_NOUN_FORMS_PATH,
+    REVIEWED_VERB_FORMS_PATH,
 )
 
 
@@ -44,6 +51,13 @@ def _load_jsonl(path: str | Path) -> list[dict]:
     return records
 
 
+def _default_records() -> list[dict]:
+    records: list[dict] = []
+    for path in DEFAULT_REVIEWED_FORM_PATHS:
+        records.extend(_load_jsonl(path))
+    return records
+
+
 def _to_candidate(record: dict) -> MorphologyCandidate:
     return MorphologyCandidate(
         surface=record["surface"],
@@ -63,18 +77,22 @@ def _to_candidate(record: dict) -> MorphologyCandidate:
 
 def analyze_surface_form(
     form: str,
-    path: str | Path = REVIEWED_NOUN_FORMS_PATH,
+    path: str | Path | None = None,
 ) -> tuple[MorphologyCandidate, ...]:
     """Return reviewed morphology candidates for an exact surface form.
 
+    By default both reviewed noun and verb datasets are searched. ``path`` can
+    restrict analysis to one explicit JSONL file for tests/research.
+
     Matching is case-insensitive, but no characters are removed, replaced, or
     normalized beyond Unicode-preserving Python ``casefold`` comparison. If a
-    form is absent from the reviewed dataset, the function returns an empty
+    form is absent from the reviewed datasets, the function returns an empty
     tuple rather than guessing a lemma.
     """
     query = form.strip().casefold()
+    records = _load_jsonl(path) if path is not None else _default_records()
     return tuple(
         _to_candidate(record)
-        for record in _load_jsonl(path)
+        for record in records
         if record.get("surface", "").casefold() == query
     )
