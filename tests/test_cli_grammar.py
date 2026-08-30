@@ -96,3 +96,33 @@ def test_cli_does_not_guess_hidden_subject_gender_for_bare_maydin():
     output = run_cli("Maydin cunaysaa?")
 
     assert "possible subject-gender/verb agreement conflict" not in output
+
+
+def test_cli_reports_documented_negation_paradigm_conflict_without_autofix():
+    text = "Ma cunaa."
+    output = run_cli(text)
+
+    assert "Grammar findings:" in output
+    assert "possible negation-paradigm conflict" in output
+    assert "ma cuno" in output
+    assert "Review required; no automatic rewrite." in output
+    assert "Safe corrected text:" in output
+    assert text in output
+
+
+def test_cli_keeps_documented_negative_form_silent():
+    output = run_cli("Ma cuno.")
+
+    assert "possible negation-paradigm conflict" not in output
+
+
+def test_cli_keeps_documented_multiword_future_negative_silent():
+    output = run_cli("Ma cuni doono.")
+
+    assert "possible negation-paradigm conflict" not in output
+
+
+def test_cli_does_not_guess_unknown_negative_construction():
+    output = run_cli("Ma baranayo.")
+
+    assert "possible negation-paradigm conflict" not in output
