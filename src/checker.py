@@ -179,14 +179,40 @@ def check_text(text: str, rules: Iterable[Rule]) -> list[Finding]:
     return sorted(findings, key=lambda item: (item.start, item.end, item.rule_id))
 
 
-def apply_safe_fixes(text: str, findings: Iterable[Finding]) -> str:
-    """Apply only findings that do not require contextual review.
+def _overlaps(left: Finding, right: Finding) -> bool:
+    return left.start < right.end and right.start < left.end
 
-    Replacements are applied from right to left so character offsets stay valid.
+
+def _select_non_overlapping_fixes(findings: Iterable[Finding]) -> list[Finding]:
+    """Choose deterministic safe edits, preferring the most specific span.
+
+    A longer lexical correction supersedes a shorter detector finding that
+    touches the same text. This prevents edits such as sentence-start
+    capitalization and proper-name capitalization from being applied twice to
+    the same characters.
     """
     safe = [
         finding for finding in findings if finding.status not in NON_AUTOFIX_STATUSES
     ]
+    candidates = sorted(
+        safe,
+        key=lambda item: (-(item.end - item.start), item.start, item.rule_id),
+    )
+    selected: list[Finding] = []
+    for candidate in candidates:
+        if any(_overlaps(candidate, existing) for existing in selected):
+            continue
+        selected.append(candidate)
+    return selected
+
+
+def apply_safe_fixes(text: str, findings: Iterable[Finding]) -> str:
+    """Apply only compatible findings that do not require contextual review.
+
+    Overlapping edits are resolved first, then replacements are applied from
+    right to left so character offsets stay valid.
+    """
+    safe = _select_non_overlapping_fixes(findings)
     result = text
     for finding in sorted(safe, key=lambda item: item.start, reverse=True):
         replacement = finding.suggestion
