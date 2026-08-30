@@ -1,9 +1,10 @@
-"""Sentence-level wrapper around the conservative Somali agreement analyzer.
+"""Sentence-level wrapper around conservative Somali agreement analyzers.
 
 The scanner is intentionally narrow. It considers reviewed independent subject
-pronouns in a short local window, plus subject clitics only in anchored
-``baa/ayaa/waa + clitic`` contexts. Unknown verbs are ignored rather than
-treated as errors.
+pronouns in a short local window, subject clitics only in anchored
+``baa/ayaa/waa + clitic`` contexts, and exact native-reviewed true subject-focus
+``SUBJECT + baa + predicate`` frames. Unknown verbs are ignored or left
+unjudged rather than treated as errors.
 """
 
 from __future__ import annotations
@@ -12,6 +13,7 @@ import re
 from dataclasses import dataclass
 
 from src.agreement import analyze_pronoun_verb, _load_jsonl, PRONOUN_PATH, AGREEMENT_PATH
+from src.subject_focus_agreement import analyze_subject_focus_agreement
 
 
 TOKEN_RE = re.compile(r"[A-Za-zÀ-ÖØ-öø-ÿʼ’'-]+", re.UNICODE)
@@ -78,14 +80,52 @@ def _append_mismatch(
     )
 
 
+def _append_subject_focus_mismatches(
+    findings: list[SentenceAgreementFinding],
+    tokens: list[re.Match[str]],
+) -> None:
+    """Append exact reviewed true-subject-focus conflicts.
+
+    The first noun in these frames is the focused subject itself, so bare ``baa``
+    is valid. This path only reports predicate-person conflicts from the dedicated
+    exact-evidence analyzer; matching and unknown predicates stay silent.
+    """
+    for index in range(len(tokens) - 2):
+        subject_match, particle_match, predicate_match = tokens[index : index + 3]
+        if particle_match.group(0).casefold() != "baa":
+            continue
+        candidate = " ".join(
+            (subject_match.group(0), particle_match.group(0), predicate_match.group(0))
+        )
+        result = analyze_subject_focus_agreement(candidate)
+        if not result.recognized or result.agrees is not False:
+            continue
+        expected = result.expected_person or "reviewed subject person"
+        findings.append(
+            SentenceAgreementFinding(
+                pronoun=subject_match.group(0),
+                verb=predicate_match.group(0),
+                pronoun_start=subject_match.start(),
+                verb_start=predicate_match.start(),
+                agrees=False,
+                expected_forms=(f"a reviewed {expected} predicate",),
+                note=result.note,
+            )
+        )
+
+
 def scan_sentence_agreement(text: str) -> list[SentenceAgreementFinding]:
-    """Find reviewed pronoun/verb agreement conflicts in conservative contexts.
+    """Find reviewed subject/verb agreement conflicts in conservative contexts.
 
     Independent subject pronouns are checked in a short local window. Subject
     clitics are checked only when immediately preceded by ``baa``, ``ayaa`` or
     ``waa``. A clitic check is skipped when an independent subject pronoun is
     already present in the nearby left context, preventing duplicate reports.
-    Matching pairs and unknown forms stay silent. No corrections are generated.
+
+    Exact native-reviewed true subject-focus frames are also checked. In those
+    frames bare ``baa`` is licensed because the noun before it is the focused
+    subject; only predicate-person conflict is reportable. Matching pairs and
+    unknown forms stay silent. No corrections are generated.
     """
     tokens = list(TOKEN_RE.finditer(text))
     pronouns = _known_subject_pronouns()
@@ -127,4 +167,5 @@ def scan_sentence_agreement(text: str) -> list[SentenceAgreementFinding]:
             _append_mismatch(findings, token_match, candidate)
             break
 
+    _append_subject_focus_mismatches(findings, tokens)
     return findings
