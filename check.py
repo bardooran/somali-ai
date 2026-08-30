@@ -15,6 +15,7 @@ from src.negative_finite_agreement import analyze_negative_finite_agreement
 from src.negative_future_auxiliary_agreement import (
     analyze_negative_future_auxiliary_agreement,
 )
+from src.negative_past_aspect_agreement import analyze_negative_past_aspect_agreement
 from src.noun_gender_agreement import analyze_noun_gender_agreement
 from src.noun_number_verb_agreement import analyze_noun_number_verb_agreement
 from src.noun_singular_verb_agreement import analyze_noun_singular_verb_agreement
@@ -78,6 +79,16 @@ def main() -> None:
             result
             for result in negation_conflicts
             if result.paradigm not in {"present_general", "present_ongoing", "past_simple"}
+        ]
+
+    negative_past_aspect_agreement = analyze_negative_past_aspect_agreement(args.text)
+    negative_past_aspect_conflict = (
+        negative_past_aspect_agreement.recognized
+        and negative_past_aspect_agreement.agrees is False
+    )
+    if negative_past_aspect_agreement.recognized:
+        negation_conflicts = [
+            result for result in negation_conflicts if result.paradigm != "past_habitual"
         ]
 
     noun_gender_agreement = analyze_noun_gender_agreement(args.text)
@@ -169,6 +180,7 @@ def main() -> None:
         and not future_auxiliary_conflict
         and not negative_future_auxiliary_conflict
         and not negative_finite_conflict
+        and not negative_past_aspect_conflict
     ):
         print("No supported orthography or grammar findings found.")
         return
@@ -199,6 +211,7 @@ def main() -> None:
         or future_auxiliary_conflict
         or negative_future_auxiliary_conflict
         or negative_finite_conflict
+        or negative_past_aspect_conflict
     ):
         if findings:
             print()
@@ -250,6 +263,19 @@ def main() -> None:
                 f"person(s): {persons or 'none'}. Expected {negative_finite_agreement.expected_person}. "
                 "Negative morphology is paradigm-specific; no automatic rewrite. "
                 f"({negative_finite_agreement.rule_id})"
+            )
+
+        if negative_past_aspect_conflict:
+            persons = ", ".join(negative_past_aspect_agreement.persons)
+            polarity = negative_past_aspect_agreement.polarity or "unknown"
+            print(
+                f"- [REVIEW] {negative_past_aspect_agreement.subject!r} + ma + "
+                f"{negative_past_aspect_agreement.verb_or_auxiliary!r}: possible negative past-aspect conflict; "
+                f"construction {negative_past_aspect_agreement.tense_aspect!r}, reviewed form polarity "
+                f"{polarity!r}, person(s): {persons or 'none'}. "
+                "The cited negative past-aspect paradigm neutralizes person where documented; "
+                "no automatic rewrite. "
+                f"({negative_past_aspect_agreement.rule_id})"
             )
 
         for finding in predicate_conflicts:
