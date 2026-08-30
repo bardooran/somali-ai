@@ -1,13 +1,15 @@
-"""Conservative Somali predicate/copuIa agreement analysis.
+"""Conservative Somali predicate/copula agreement analysis.
 
-Only exact subject/copula pairs backed by the current project evidence are
-recognized. The analyzer never rewrites text automatically and leaves unknown
-constructions unjudged.
+Agreement is inferred only when the existing reviewed noun evidence safely
+resolves subject number and, for singular subjects, grammatical gender. Unknown
+subjects remain unjudged and no automatic rewrite is performed.
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass
+
+from src.noun_gender_agreement import infer_subject_gender, infer_subject_number
 
 
 @dataclass(frozen=True)
@@ -20,16 +22,24 @@ class PredicateAgreementResult:
     note: str
 
 
-_REVIEWED_SUBJECTS = {
-    "ninku": "yahay",
-    "naagtu": "tahay",
-}
-
-
 def analyze_predicate_agreement(subject: str, copula: str) -> PredicateAgreementResult:
-    subject_norm = subject.casefold().strip()
-    copula_norm = copula.casefold().strip()
-    expected = _REVIEWED_SUBJECTS.get(subject_norm)
+    """Check reviewed noun evidence against the present copular paradigm.
+
+    Reviewed plural subjects expect ``yihiin``. Reviewed singular masculine
+    subjects expect ``yahay`` and reviewed singular feminine subjects expect
+    ``tahay``. Number and gender are resolved by the shared noun-evidence layer;
+    unresolved subjects are left unjudged rather than guessed from a copula.
+    """
+    number, number_evidence = infer_subject_number(subject)
+    gender, gender_evidence = infer_subject_gender(subject)
+
+    expected: str | None = None
+    if number == "plural":
+        expected = "yihiin"
+    elif number == "singular" and gender == "masculine":
+        expected = "yahay"
+    elif number == "singular" and gender == "feminine":
+        expected = "tahay"
 
     if expected is None:
         return PredicateAgreementResult(
@@ -38,10 +48,13 @@ def analyze_predicate_agreement(subject: str, copula: str) -> PredicateAgreement
             False,
             None,
             None,
-            "Subject form is outside the current reviewed predicate-agreement evidence.",
+            (
+                "Subject number/gender is outside the safely reviewed predicate-agreement evidence. "
+                f"Number evidence: {number_evidence}; gender evidence: {gender_evidence}."
+            ),
         )
 
-    agrees = copula_norm == expected
+    agrees = copula.casefold().strip() == expected
     return PredicateAgreementResult(
         subject,
         copula,
@@ -49,8 +62,8 @@ def analyze_predicate_agreement(subject: str, copula: str) -> PredicateAgreement
         agrees,
         expected,
         (
-            "Subject and predicate copula match the current reviewed gender evidence."
+            "Subject and present predicate copula match reviewed number/gender evidence."
             if agrees
-            else "Subject and predicate copula conflict within the current reviewed gender evidence; review required."
+            else "Subject and present predicate copula conflict with reviewed number/gender evidence; review required."
         ),
     )
