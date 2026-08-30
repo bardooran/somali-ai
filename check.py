@@ -11,6 +11,7 @@ from src.checker import check_file
 from src.focus_particle import scan_focus_particle_clitics
 from src.negation import analyze_ma_plus_verb
 from src.noun_gender_agreement import analyze_noun_gender_agreement
+from src.noun_number_verb_agreement import analyze_noun_number_verb_agreement
 from src.noun_subject_case import analyze_noun_subject_case
 from src.object_agreement import analyze_object_agreement
 from src.predicate_sentence import scan_predicate_agreement
@@ -75,6 +76,12 @@ def main() -> None:
         and noun_gender_agreement.copula_agrees is False
     )
 
+    noun_number_verb_agreement = analyze_noun_number_verb_agreement(args.text)
+    noun_number_verb_conflict = (
+        noun_number_verb_agreement.recognized
+        and noun_number_verb_agreement.agrees is False
+    )
+
     predicate_conflicts = scan_predicate_agreement(args.text)
     if (
         noun_gender_copula_conflict
@@ -112,6 +119,7 @@ def main() -> None:
         and not noun_subject_case_conflict
         and not noun_gender_clitic_conflict
         and not noun_gender_copula_conflict
+        and not noun_number_verb_conflict
     ):
         print("No supported orthography or grammar findings found.")
         return
@@ -136,6 +144,7 @@ def main() -> None:
         or noun_subject_case_conflict
         or noun_gender_clitic_conflict
         or noun_gender_copula_conflict
+        or noun_number_verb_conflict
     ):
         if findings:
             print()
@@ -227,6 +236,17 @@ def main() -> None:
                 f"{noun_gender_agreement.gender} singular subject is "
                 f"{noun_gender_agreement.expected_copula!r}. No automatic rewrite. "
                 f"({noun_gender_agreement.rule_id})"
+            )
+
+        if noun_number_verb_conflict:
+            persons = ", ".join(noun_number_verb_agreement.verb_persons)
+            print(
+                f"- [REVIEW] {noun_number_verb_agreement.subject!r} + "
+                f"{noun_number_verb_agreement.verb!r}: possible plural noun-subject/verb "
+                f"agreement conflict; subject has reviewed plural number, but the exact "
+                f"reviewed verb analysis has person(s): {persons}. Expected 3pl. "
+                "Unknown verbs are not guessed; no automatic rewrite. "
+                f"({noun_number_verb_agreement.rule_id})"
             )
 
     print("\nSafe corrected text:")
