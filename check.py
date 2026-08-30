@@ -13,6 +13,7 @@ from src.negation import analyze_ma_plus_verb
 from src.object_agreement import analyze_object_agreement
 from src.predicate_sentence import scan_predicate_agreement
 from src.reviewed_sentence_agreement import analyze_reviewed_sentence_agreement
+from src.role_aware_sentences import analyze_role_aware_sentence
 from src.sentence_agreement import scan_sentence_agreement
 
 
@@ -58,6 +59,8 @@ def main() -> None:
     focus_findings = scan_focus_particle_clitics(args.text)
     object_agreement = analyze_object_agreement(args.text)
     object_agreement_conflict = object_agreement.recognized and object_agreement.agrees is False
+    role_aware = analyze_role_aware_sentence(args.text)
+    role_aware_conflict = role_aware.recognized and role_aware.agrees is False
     negation_conflicts = _scan_negation_conflicts(args.text)
     predicate_conflicts = scan_predicate_agreement(args.text)
     reviewed_sentence_agreement = analyze_reviewed_sentence_agreement(args.text)
@@ -71,6 +74,7 @@ def main() -> None:
         and not agreement_findings
         and not focus_findings
         and not object_agreement_conflict
+        and not role_aware_conflict
         and not negation_conflicts
         and not predicate_conflicts
         and not reviewed_sentence_conflict
@@ -91,6 +95,7 @@ def main() -> None:
         agreement_findings
         or focus_findings
         or object_agreement_conflict
+        or role_aware_conflict
         or negation_conflicts
         or predicate_conflicts
         or reviewed_sentence_conflict
@@ -118,6 +123,16 @@ def main() -> None:
                 f"- [REVIEW] {object_agreement.subject!r} + {object_agreement.object_clitic!r} + "
                 f"{object_agreement.verb!r}: possible subject-gender/verb agreement conflict; "
                 f"{object_agreement.note} ({object_agreement.rule_id})"
+            )
+
+        # Avoid duplicate output for the same maydin/idin lion conflict. The
+        # role-aware layer adds useful coverage for explicit na-object forms.
+        if role_aware_conflict and not object_agreement_conflict:
+            print(
+                f"- [REVIEW] {role_aware.subject!r} + object {role_aware.object_clitic!r} + "
+                f"{role_aware.verb!r}: possible role-aware subject/verb agreement conflict; "
+                f"reviewed verb for this subject is {role_aware.expected_verb!r}. "
+                "The object clitic does not control agreement; no automatic rewrite."
             )
 
         for result in negation_conflicts:
