@@ -49,12 +49,15 @@ def _run_checker(sentence: str) -> str:
 def test_checker_does_not_yet_distinguish_buug_subject_case_pair():
     correct = _run_checker("Buuggu wuu fiicanyahay.")
     wrong = _run_checker("Buugga wuu fiicanyahay.")
-    assert correct == "No supported orthography or grammar findings found."
-    assert wrong == "No supported orthography or grammar findings found."
+    assert "Grammar findings:" not in correct
+    assert "Grammar findings:" not in wrong
+    assert "Buugga wuu fiicanyahay." in wrong or "No supported orthography or grammar findings found." in wrong
 
 
 def test_checker_does_not_yet_distinguish_gabadh_subject_case_pair():
     correct = _run_checker("Gabadhu way fiicantahay.")
     wrong = _run_checker("Gabadha way fiicantahay.")
-    assert correct == "No supported orthography or grammar findings found."
-    assert wrong == "No supported orthography or grammar findings found."
+    assert "Grammar findings:" not in correct
+    assert "Grammar findings:" not in wrong
+    # Orthography may expand the valid contraction way -> waa ay; that is separate from noun subject-case analysis.
+    assert "Gabadha" in wrong
