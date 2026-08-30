@@ -1,8 +1,8 @@
 """Conservative analyzer for reviewed Somali ``habka dhimman`` pairs.
 
-The source table presents dependent subject markers in parentheses together with
-finite verb forms, e.g. ``(uu) cuno``, ``(ay) cunto``, and negative
-``(uusan) cunin``. This module treats the marker and verb as one contextual
+The source tables present dependent subject markers in parentheses together with
+finite verb forms, e.g. ``(uu) cuno`` / ``(ay) cunto`` and ``(uu) yimaaddo`` /
+``(ay) timaaddo``. This module treats the marker and verb as one contextual
 agreement pair. It does not reinterpret these as ordinary main-clause
 ``wuu/way`` constructions and never derives unseen forms from suffixes.
 """
@@ -14,7 +14,10 @@ import re
 from dataclasses import dataclass
 from pathlib import Path
 
-PAIR_PATH = Path("data/morphology/qaamuus_2012_reviewed_dependent_pairs.jsonl")
+PAIR_PATHS = (
+    Path("data/morphology/qaamuus_2012_reviewed_dependent_pairs.jsonl"),
+    Path("data/morphology/qaamuus_2012_reviewed_imow_dependent_pairs.jsonl"),
+)
 TOKEN_RE = re.compile(r"[^\W\d_]+(?:['’][^\W\d_]+)*", flags=re.UNICODE)
 
 
@@ -40,11 +43,12 @@ class DependentMoodAnalysis:
 
 def _records() -> list[dict]:
     records: list[dict] = []
-    with PAIR_PATH.open("r", encoding="utf-8") as handle:
-        for line in handle:
-            stripped = line.strip()
-            if stripped:
-                records.append(json.loads(stripped))
+    for path in PAIR_PATHS:
+        with path.open("r", encoding="utf-8") as handle:
+            for line in handle:
+                stripped = line.strip()
+                if stripped:
+                    records.append(json.loads(stripped))
     return records
 
 
@@ -92,7 +96,7 @@ def analyze_dependent_mood(sentence: str) -> DependentMoodAnalysis:
     """Analyze the first reviewed adjacent ``marker + verb`` dependent pair.
 
     Exact reviewed pairs are accepted. If both the marker and verb are known in
-    the reviewed dependent table but the exact pairing is absent, the result is
+    the reviewed dependent tables but the exact pairing is absent, the result is
     a review-only conflict. A known marker followed by an unseen verb remains
     unjudged rather than being guessed.
     """
@@ -164,7 +168,7 @@ def analyze_dependent_mood(sentence: str) -> DependentMoodAnalysis:
                 agrees=False,
                 note=(
                     "The marker and verb are both reviewed in habka dhimman, but this exact pair is "
-                    "not licensed by the cited paradigm. This may be a person or polarity conflict; "
+                    "not licensed by the cited paradigms. This may be a person or polarity conflict; "
                     "review required and no automatic rewrite is made."
                 ),
             )
@@ -179,7 +183,7 @@ def analyze_dependent_mood(sentence: str) -> DependentMoodAnalysis:
             agrees=None,
             note=(
                 "A reviewed dependent marker was found, but the following verb is absent from the "
-                "reviewed dependent table. The form is left unjudged; no suffix inference is used."
+                "reviewed dependent tables. The form is left unjudged; no suffix inference is used."
             ),
         )
 
