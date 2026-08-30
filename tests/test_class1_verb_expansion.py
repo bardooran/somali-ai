@@ -93,7 +93,7 @@ def test_live_cli_reports_cross_family_plural_verb_conflicts_without_rewriting()
         "Miisasku way jabay.",
     ):
         output = run_cli(text)
-        assert "possible noun-number/verb-person agreement conflict" in output
+        assert "possible plural noun-subject/verb agreement conflict" in output
         assert "expected finite-verb person is '3pl'" in output
         assert "Safe corrected text:" in output
         assert text in output
@@ -107,4 +107,4 @@ def test_live_cli_accepts_reviewed_class1_plural_forms():
         "Miisasku way jabeen.",
     ):
         output = run_cli(text)
-        assert "possible noun-number/verb-person agreement conflict" not in output
+        assert "possible plural noun-subject/verb agreement conflict" not in output
