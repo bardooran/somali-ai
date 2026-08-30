@@ -162,5 +162,5 @@ def test_cli_does_not_invent_present_negative_conflict_for_aal_yaal():
 
 def test_cli_reports_reviewed_past_polarity_conflict():
     output = _run_checker("Ninku ma yiil.")
-    assert "possible negative finite agreement/polarity conflict" in output
+    assert "possible negative finite subject/verb agreement conflict" in output
     assert "Safe corrected text:\nNinku ma yiil." in output
