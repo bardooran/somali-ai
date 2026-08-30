@@ -20,7 +20,9 @@ from src.morphology_candidates import analyze_surface_form
 from src.noun_subject_case import PERSONAL_PRONOUN_FORMS, expected_non_subject_form
 
 RULE_PATH = Path("rules/grammar/noun_subject_gender_agreement.jsonl")
-TOKEN_RE = re.compile(r"[^\W\d_]+", flags=re.UNICODE)
+# Keep Somali apostrophe/glottal-mark spellings (for example bu') inside one
+# grammar token rather than splitting the lexical surface.
+TOKEN_RE = re.compile(r"[^\W\d_]+(?:['’][^\W\d_]+)*['’]?", flags=re.UNICODE)
 
 # Surface signals whose consonant belongs to a sufficiently clear determiner
 # family in the currently reviewed data. -hu/-u are intentionally excluded.
