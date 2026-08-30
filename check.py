@@ -10,6 +10,7 @@ from pathlib import Path
 from src.checker import check_file
 from src.focus_particle import scan_focus_particle_clitics
 from src.negation import analyze_ma_plus_verb
+from src.noun_subject_case import analyze_noun_subject_case
 from src.object_agreement import analyze_object_agreement
 from src.predicate_sentence import scan_predicate_agreement
 from src.reviewed_sentence_agreement import analyze_reviewed_sentence_agreement
@@ -68,6 +69,10 @@ def main() -> None:
         reviewed_sentence_agreement.recognized
         and reviewed_sentence_agreement.agrees is False
     )
+    noun_subject_case = analyze_noun_subject_case(args.text)
+    noun_subject_case_conflict = (
+        noun_subject_case.recognized and noun_subject_case.agrees is False
+    )
 
     if (
         not findings
@@ -78,6 +83,7 @@ def main() -> None:
         and not negation_conflicts
         and not predicate_conflicts
         and not reviewed_sentence_conflict
+        and not noun_subject_case_conflict
     ):
         print("No supported orthography or grammar findings found.")
         return
@@ -99,6 +105,7 @@ def main() -> None:
         or negation_conflicts
         or predicate_conflicts
         or reviewed_sentence_conflict
+        or noun_subject_case_conflict
     ):
         if findings:
             print()
@@ -156,6 +163,15 @@ def main() -> None:
                 f"{reviewed_sentence_agreement.verb!r}: possible reviewed second-person-plural "
                 f"agreement conflict; current reviewed Idinku waad forms include: {expected}. "
                 "Review required; no automatic rewrite."
+            )
+
+        if noun_subject_case_conflict:
+            print(
+                f"- [REVIEW] {noun_subject_case.noun_form!r} before "
+                f"{noun_subject_case.marker!r}: possible definite-noun subject-case conflict; "
+                f"reviewed subject-form candidate is {noun_subject_case.expected_subject_form!r}. "
+                "Sentence role matters; no automatic rewrite. "
+                f"({noun_subject_case.rule_id})"
             )
 
     print("\nSafe corrected text:")
