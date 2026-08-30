@@ -108,3 +108,15 @@ Some lexical choices are co-natural in the reviewed Jigjiga usage rather than st
 `xabuub` has been reported in native review as a tomato term but remains a candidate pending independent verification of spelling and distribution. `dugan / duwan` is currently stored as a native-reviewed preference pair (`kala dugan` preferred in the profile, `kala duwan` recognized) pending broader source cross-checking.
 
 Regional sound correspondences must never become blind character-substitution rules. For example, the profile prefers `jidh` in the body sense but also uses ordinary `jir-` forms such as `jiro/jirto` in existential constructions; each lexical family must be analyzed independently.
+
+## 2026-08-30 — Reviewed `maydh` morphology
+
+Project native review confirms `maydhayaa` as a valid ongoing/current form, with reviewed examples including `Isagu dharka ayuu maydhayaa.` and `Anigu dharkaan maydhayaa.` The form `maydhanayaa` is also valid in the reviewed washing context. `maydhayaadee` is accepted in the reviewed example `Anigu dharkaan maydhayaadee.` with an explanatory or speaker-emphasis discourse function; its exact segmentation and pragmatic label remain provisional. These forms must not be treated as fabricated negative controls.
+
+## 2026-08-30 — Reviewed `jabsad-` derivational morphology
+
+Project native review confirms `jabsadeen` as a finite third-person-plural past form in a break-in/forced-entry context, including `Iyagu waxay jabsadeen tukaan.` It also confirms `jabsadayaal` as a plural agent/person noun in that semantic area. The singular corresponding to `jabsadayaal` is still unreviewed and must not be invented by the system.
+
+## 2026-08-30 — Finite-verb analysis labels are evidence-layer specific
+
+Agreement logic must use grammatical features rather than requiring every evidence source to use one identical `analysis_type` string. Source-paradigm records may use `finite_verb`, while native-review records may use a more specific label such as `native_reviewed_finite_verb_surface`. Both can participate in agreement checking when they explicitly identify a finite verb and provide reviewed person features. This does not authorize open-ended suffix guessing.
