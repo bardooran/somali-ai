@@ -18,6 +18,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 
+from src.morphology_candidates import analyze_surface_form
 from src.noun_gender_agreement import infer_subject_number
 from src.noun_subject_case import PERSONAL_PRONOUN_FORMS
 from src.reviewed_finite_verb import analyze_reviewed_finite_verb
@@ -45,6 +46,24 @@ class NounNumberVerbAgreementAnalysis:
     note: str = ""
 
 
+def _is_reviewed_conditional_auxiliary_context(tokens: list[str], verb_index: int) -> bool:
+    """Keep lexical leeyahay past readings out of reviewed conditional spans."""
+    if verb_index <= 0:
+        return False
+    auxiliary = any(
+        candidate.analysis_type == "conditional_auxiliary"
+        and candidate.features.get("construction") == "conditional"
+        for candidate in analyze_surface_form(tokens[verb_index])
+    )
+    if not auxiliary:
+        return False
+    return any(
+        candidate.analysis_type == "conditional_stem"
+        and candidate.features.get("possible_use") == "conditional_with_auxiliary"
+        for candidate in analyze_surface_form(tokens[verb_index - 1])
+    )
+
+
 def analyze_noun_number_verb_agreement(sentence: str) -> NounNumberVerbAgreementAnalysis:
     """Check reviewed plural noun subjects against reviewed finite verb person.
 
@@ -53,6 +72,10 @@ def analyze_noun_number_verb_agreement(sentence: str) -> NounNumberVerbAgreement
     analysis is accepted. A reviewed verb whose available persons exclude 3pl
     is a review-only conflict. Tense/aspect is reported independently. If the
     verb has no exact reviewed finite analysis, the sentence remains unjudged.
+
+    When a surface such as ``lahaayeen`` immediately follows a reviewed
+    conditional stem, this generic finite layer yields to the conditional
+    analyzer rather than reinterpreting the auxiliary as lexical possession.
     """
     tokens = TOKEN_RE.findall(sentence)
     if len(tokens) < 3:
@@ -71,7 +94,10 @@ def analyze_noun_number_verb_agreement(sentence: str) -> NounNumberVerbAgreement
             continue
 
         upper = min(len(tokens), index + 2 + MAX_VERB_GAP)
-        for verb in tokens[index + 2 : upper]:
+        for verb_index in range(index + 2, upper):
+            verb = tokens[verb_index]
+            if _is_reviewed_conditional_auxiliary_context(tokens, verb_index):
+                continue
             verb_analysis = analyze_reviewed_finite_verb(verb)
             if not verb_analysis.recognized or not verb_analysis.persons:
                 continue
@@ -106,8 +132,7 @@ def analyze_noun_number_verb_agreement(sentence: str) -> NounNumberVerbAgreement
             agrees=None,
             expected_person="3pl",
             note=(
-                "Plural subject recognized, but no exact reviewed finite verb was found "
-                "in the local window; verb agreement and tense/aspect remain unjudged."
+                "Plural subject recognized, but no exact reviewed finite lexical verb was found outside a more specific reviewed construction; verb agreement and tense/aspect remain unjudged here."
             ),
         )
 
