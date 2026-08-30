@@ -39,6 +39,7 @@ The project now also stores reviewed lexical evidence extracted from `Qaamuuska 
 8. Validate extracted records with tests before the checker uses them for grammatical decisions.
 9. Regional preference is not grammatical validity. A recognized nonpreferred regional form must not be labeled wrong solely because the Jigjiga-first profile would generate a different form.
 10. Sense-sensitive variant pairs must remain context-required. For example, body-sense `jir` may correspond to preferred `jidh`, but the existential verb `jir-` is a different analysis; similarly, `maydh` relates only to the washing sense of polysemous `dhaq`.
+11. Morphological lemmatization must be evidence-constrained. The first morphology layer recognizes stored reviewed surface forms; it does not strip a suffix from an unseen word and assume the remainder is a valid lemma.
 
 ## Initial grammatical code mapping
 
@@ -74,17 +75,26 @@ The reviewed Qaamuus lexicon is split by purpose instead of putting every word i
 
 - `data/lexical/qaamuus_2012_grammar_lexicon_seed.jsonl` — grammar terms, function words, and the first reviewed lexical bridge records.
 - `data/lexical/qaamuus_2012_everyday_lexicon_seed.jsonl` — ordinary vocabulary and lexical families mined from dictionary entries. Initial records include `inan`, `gaban`, `duwan`, `kor`, and the noun/verb homographs of `gabay`.
+- `data/morphology/qaamuus_2012_reviewed_noun_forms.jsonl` — reviewed inflected noun surface forms linked to candidate lemmas and grammatical features.
 
-`src/lexicon.py` searches both datasets by default. A caller may still pass one explicit JSONL path when testing or researching a single dataset.
+`src/lexicon.py` searches both lexical datasets by default and attaches reviewed morphology and regional evidence independently.
 
 ## Current reviewed lookup prototype
 
-`src/lexicon.py` performs exact lookup against the reviewed Qaamuus lexical datasets. It preserves multiple analyses for homographs rather than selecting one without sentence context. Current examples include three separate analyses for `ka`, two for `kee`, masculine/feminine analyses for `inan`, noun/verb analyses for `kor`, and noun/verb analyses for `gabay`.
+`src/lexicon.py` preserves multiple dictionary analyses for homographs rather than selecting one without sentence context. Current exact-headword examples include three analyses for `ka`, two for `kee`, masculine/feminine analyses for `inan`, noun/verb analyses for `kor`, and noun/verb analyses for `gabay`.
+
+`src/morphology_candidates.py` now provides the first safe surface-form-to-lemma bridge. It performs exact matching against reviewed morphology records only. Current source-backed examples include:
+
+- `buugga → buug` — masculine definite singular.
+- `marada → maro`, `badda → bad`, `qodaxda → qodax`, `bacda → bac`, `usha → ul`, `isha → il`, `bisha → bil` — feminine definite forms with source-described article allomorphy.
+- `buugag → buug`, `kabo → kab`, `gacmo → gacan`, `mindiyo → mindi` — plural patterns that must be stored rather than guessed from one universal plural suffix.
+- `buuggayga → buug`, `dalkeenna → dal`, `ushiinna → ul` — source-attested possessive surfaces.
+- `gabadha → gabadh` — currently stored as a documented derivation from the Qaamuus feminine-article rule plus the reviewed `gabadh` lemma; it is marked non-executable and must not be generalized mechanically to unseen words.
 
 `src/regional_variants.py` attaches reviewed regional metadata separately. It distinguishes `preferred`, `co_preferred`, `recognized_variant`, and `candidate_unverified` forms. It does not rewrite user text.
 
-The prototype intentionally does not lemmatize inflected surface forms. A query such as `gabadha` is therefore not silently converted to `gabadh` yet. That behavior must wait for a tested morphology/segmentation layer so that suffix stripping does not create false analyses.
+A morphology candidate does not by itself authorize a correction. All current reviewed noun morphology records remain `executable: false` while we expand coverage and validate ambiguity.
 
 ## Next implementation stage
 
-Expand the reviewed Qaamuus lexical datasets in coherent families, then connect exact lookup to tested Somali morphology. Morphology should propose one or more candidate lemmas while preserving ambiguity, after which dictionary, grammatical, regional, and source-provenance information can be combined into the future word-analyzer response.
+Expand reviewed noun morphology with more dictionary families and sentence-context tests, then add verb-surface morphology in the same conservative style. Only after enough reviewed coverage should the project generalize article/plural/possessive rules beyond explicitly stored forms.
