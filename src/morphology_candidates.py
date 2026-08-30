@@ -15,6 +15,9 @@ from pathlib import Path
 REVIEWED_NOUN_FORMS_PATH = Path(
     "data/morphology/qaamuus_2012_reviewed_noun_forms.jsonl"
 )
+REVIEWED_PLURAL_DEFINITE_FORMS_PATH = Path(
+    "data/morphology/qaamuus_2012_reviewed_plural_definite_forms.jsonl"
+)
 REVIEWED_VERB_FORMS_PATH = Path(
     "data/morphology/qaamuus_2012_reviewed_verb_forms.jsonl"
 )
@@ -29,6 +32,7 @@ NATIVE_REVIEW_DERIVATIONAL_FORMS_PATH = Path(
 )
 DEFAULT_MORPHOLOGY_PATHS = (
     REVIEWED_NOUN_FORMS_PATH,
+    REVIEWED_PLURAL_DEFINITE_FORMS_PATH,
     REVIEWED_VERB_FORMS_PATH,
     REVIEWED_VERB_CLASS_FORMS_PATH,
     NATIVE_REVIEW_MAYDH_FORMS_PATH,
