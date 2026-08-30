@@ -150,3 +150,30 @@ def test_cli_leaves_unknown_idinku_waad_verb_unjudged():
     output = run_cli("Idinku waad barateen.")
 
     assert "possible reviewed second-person-plural agreement conflict" not in output
+
+
+def test_cli_reports_na_object_gender_conflict_without_autofix():
+    text = "Libaaxu wuu na eryanaysaa."
+    output = run_cli(text)
+
+    assert "Grammar findings:" in output
+    assert "possible role-aware subject/verb agreement conflict" in output
+    assert "object 'na'" in output
+    assert "eryanayaa" in output
+    assert "The object clitic does not control agreement" in output
+    assert "Safe corrected text:" in output
+    assert text in output
+    assert "Libaaxu wuu na eryanayaa." not in output
+
+
+def test_cli_keeps_reviewed_na_object_agreement_silent():
+    for text in ["Libaaxu wuu na eryanayaa.", "Libaaxadu way na eryanaysaa."]:
+        output = run_cli(text)
+        assert "possible role-aware subject/verb agreement conflict" not in output
+
+
+def test_cli_does_not_duplicate_maydin_lion_conflict():
+    output = run_cli("Libaaxu maydin eryanaysaa?")
+
+    assert output.count("possible subject-gender/verb agreement conflict") == 1
+    assert "possible role-aware subject/verb agreement conflict" not in output
