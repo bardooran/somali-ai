@@ -2,9 +2,9 @@
 
 The scanner is intentionally narrow. It considers reviewed independent subject
 pronouns in a short local window, subject clitics only in anchored
-``baa/ayaa/waa + clitic`` contexts, and exact reviewed true subject-focus
-``SUBJECT + baa/ayaa + predicate`` frames. Unknown verbs are ignored or left
-unjudged rather than treated as errors.
+``baa/ayaa/waa + clitic`` contexts, and reviewed true subject-focus
+``SUBJECT + baa/ayaa + ... + predicate`` frames. Unknown verbs are ignored or
+left unjudged rather than treated as errors.
 """
 
 from __future__ import annotations
@@ -19,6 +19,7 @@ from src.subject_focus_agreement import analyze_subject_focus_agreement
 TOKEN_RE = re.compile(r"[A-Za-zÀ-ÖØ-öø-ÿʼ’'-]+", re.UNICODE)
 MAX_TOKEN_GAP = 4
 CLITIC_VERB_GAP = 2
+SUBJECT_FOCUS_WINDOW = 7
 CLITIC_ANCHORS = {"baa", "ayaa", "waa"}
 SUBJECT_FOCUS_PARTICLES = {"baa", "ayaa"}
 
@@ -85,16 +86,29 @@ def _append_subject_focus_mismatches(
     findings: list[SentenceAgreementFinding],
     tokens: list[re.Match[str]],
 ) -> None:
-    """Append exact reviewed true-subject-focus conflicts."""
+    """Append reviewed subject-focus conflicts from a short local clause window."""
     for index in range(len(tokens) - 2):
-        subject_match, particle_match, predicate_match = tokens[index : index + 3]
+        subject_match = tokens[index]
+        particle_match = tokens[index + 1]
         if particle_match.group(0).casefold() not in SUBJECT_FOCUS_PARTICLES:
             continue
-        candidate = " ".join(
-            (subject_match.group(0), particle_match.group(0), predicate_match.group(0))
-        )
+
+        upper = min(len(tokens), index + SUBJECT_FOCUS_WINDOW)
+        window = tokens[index:upper]
+        candidate = " ".join(match.group(0) for match in window)
         result = analyze_subject_focus_agreement(candidate)
-        if not result.recognized or result.agrees is not False:
+        if not result.recognized or result.agrees is not False or not result.predicate:
+            continue
+
+        predicate_match = next(
+            (
+                match
+                for match in tokens[index + 2 : upper]
+                if match.group(0).casefold() == result.predicate.casefold()
+            ),
+            None,
+        )
+        if predicate_match is None:
             continue
 
         expected = result.expected_person or "reviewed subject person"
@@ -126,11 +140,11 @@ def scan_sentence_agreement(text: str) -> list[SentenceAgreementFinding]:
     ``waa``. A clitic check is skipped when an independent subject pronoun is
     already present in the nearby left context, preventing duplicate reports.
 
-    Exact reviewed true subject-focus frames are also checked. Bare ``baa`` or
-    bare ``ayaa`` is licensed because the noun before it is the focused subject;
+    Reviewed true subject-focus frames are also checked. Bare ``baa`` or bare
+    ``ayaa`` is licensed because the noun before it is the focused subject;
     predicate agreement is delegated to the dedicated subject-focus analyzer,
-    including its restrictive simple-past mode. Unknown/unmodeled forms stay
-    silent. No corrections are generated.
+    including its restrictive simple-past mode and a short window for intervening
+    object/adverbial material. Unknown/unmodeled forms stay silent.
     """
     tokens = list(TOKEN_RE.finditer(text))
     pronouns = _known_subject_pronouns()
