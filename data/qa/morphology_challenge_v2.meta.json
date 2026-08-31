@@ -1,0 +1,25 @@
+{
+  "benchmark_version": "v2",
+  "candidate_pool_type_counts": {
+    "adjective": 22,
+    "noun": 33853,
+    "numeral": 78,
+    "verb": 11227
+  },
+  "case_count": 136,
+  "definitions_copied": false,
+  "manifest_sha256": "79b3534f7b51c1cf8c963ba6515e028f7cc93ae2b771297847508867a889851e",
+  "positive_case_count": 120,
+  "quotas": {
+    "adjective": 16,
+    "noun": 48,
+    "numeral": 8,
+    "verb": 48
+  },
+  "selected_pair_count": 120,
+  "selection_is_analyzer_blind": true,
+  "selection_seed": "somali-ai-morphology-challenge-v2-2026-08-31",
+  "source_commit": "737cf848bfa8291d5580f5c34db04daef858c955",
+  "source_repository": "bardooran/goobolabs",
+  "unknown_probe_count": 16
+}
