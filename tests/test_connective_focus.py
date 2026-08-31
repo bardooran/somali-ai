@@ -1,7 +1,10 @@
 import subprocess
 import sys
 
-from src.connective_focus import analyze_connective_subject_focus
+from src.connective_focus import (
+    analyze_connective_clitic_focus,
+    analyze_connective_subject_focus,
+)
 from src.noun_subject_case import analyze_noun_subject_case
 from src.sentence_agreement import scan_sentence_agreement
 
@@ -123,12 +126,79 @@ def test_connective_ayaana_does_not_turn_reduced_negative_surface_into_negative_
     assert "negative" not in (result.evidence or "")
 
 
-def test_clitic_bearing_connective_focus_forms_are_pending():
+def test_buuna_is_buu_plus_connective_na_and_checks_3sg_m_finite_agreement():
+    result = analyze_connective_clitic_focus("Cali baa yimid, Maryan buuna arkay.")
+    assert result.recognized is True
+    assert result.focused_phrase == ("Maryan",)
+    assert result.particle == "buuna"
+    assert result.base_focus_clitic == "buu"
+    assert result.subject_persons == ("3sg_m",)
+    assert result.verb == "arkay"
+    assert result.agreement_agrees is True
+    assert result.rule_id == "GRAM-CONNFOCUS-007"
+    assert analyze_connective_subject_focus("Cali baa yimid, Maryan buuna arkay.").recognized is False
+
+
+def test_beyna_is_bay_plus_connective_na_and_checks_feminine_or_plural_agreement():
+    result = analyze_connective_clitic_focus("Cali baa yimid, Maryan beyna aragtay.")
+    assert result.recognized is True
+    assert result.focused_phrase == ("Maryan",)
+    assert result.particle == "beyna"
+    assert result.base_focus_clitic == "bay"
+    assert result.subject_persons == ("3sg_f", "3pl")
+    assert result.verb == "aragtay"
+    assert result.agreement_agrees is True
+    assert result.rule_id == "GRAM-CONNFOCUS-007"
+    assert analyze_connective_subject_focus("Cali baa yimid, Maryan beyna aragtay.").recognized is False
+
+
+def test_connective_clitic_focus_reports_exact_finite_person_conflicts():
+    masculine = analyze_connective_clitic_focus("Cali baa yimid, Maryan buuna aragtay.")
+    assert masculine.recognized is True
+    assert masculine.agreement_agrees is False
+
+    feminine = analyze_connective_clitic_focus("Cali baa yimid, Maryan beyna arkay.")
+    assert feminine.recognized is True
+    assert feminine.agreement_agrees is False
+
+    findings = scan_sentence_agreement("Cali baa yimid, Maryan buuna aragtay.")
+    assert len(findings) == 1
+    assert findings[0].pronoun == "buuna"
+    assert findings[0].verb == "aragtay"
+    assert "encoded subject person" in findings[0].note
+
+
+def test_connective_clitic_focus_keeps_context_and_paradigm_safety_boundaries():
     for sentence in (
-        "Cali baa yimid, Maryan buuna arkay.",
-        "Cali baa yimid, Maryan beyna aragtay.",
+        "Maryan buuna arkay.",
+        "Maryan beyna aragtay.",
+        "Cali baa yimid, Maryan baadna aragtay.",
+        "Cali baa yimid, Maryan baanna aragnay.",
+        "Cali baa yimid, Maryan baydinna aragteen.",
     ):
-        assert analyze_connective_subject_focus(sentence).recognized is False
+        assert analyze_connective_clitic_focus(sentence).recognized is False
+
+    assert _run_checker("Maryan buuna arkay.") == NO_FINDINGS
+    assert _run_checker("Maryan beyna aragtay.") == NO_FINDINGS
+
+
+def test_connective_clitic_focus_does_not_guess_unknown_predicates():
+    result = analyze_connective_clitic_focus("Cali baa yimid, Maryan buuna arkXYZ.")
+    assert result.recognized is True
+    assert result.agreement_agrees is None
+    assert result.rule_id == "GRAM-CONNFOCUS-006"
+    assert _run_checker("Cali baa yimid, Maryan buuna arkXYZ.") == NO_FINDINGS
+
+
+def test_cli_accepts_valid_clitic_connective_focus_and_reports_mismatch_without_rewrite():
+    assert _run_checker("Cali baa yimid, Maryan buuna arkay.") == NO_FINDINGS
+    assert _run_checker("Cali baa yimid, Maryan beyna aragtay.") == NO_FINDINGS
+
+    output = _run_checker("Cali baa yimid, Maryan buuna aragtay.")
+    assert "possible subject-verb agreement conflict" in output
+    assert "buuna" in output
+    assert "aragtay" in output
+    assert "Safe corrected text:\nCali baa yimid, Maryan buuna aragtay." in output
 
 
 def test_cli_accepts_valid_connective_focus_and_reports_agreement_conflict():
