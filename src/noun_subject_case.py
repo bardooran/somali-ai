@@ -2,7 +2,8 @@
 
 Four reviewed contexts are distinguished:
 
-* ordinary explicit subjects before ``wuu/way`` use the ``-u`` subject surface;
+* ordinary explicit subjects before fused ``wuu/way`` or exact separated
+  ``waa uu/waa ay`` use the ``-u`` subject surface;
 * noun subjects focused by bare ``baa/ayaa`` use the paired absolute/non-subject
   surface instead;
 * negative true-subject focus with ``baan/ayaan`` uses that same absolute surface,
@@ -40,6 +41,7 @@ NON_SUBJECT_TO_SUBJECT = (
 SUBJECT_TO_NON_SUBJECT = tuple((subject, non_subject) for non_subject, subject in NON_SUBJECT_TO_SUBJECT)
 
 SUBJECT_CLITICS = {"wuu", "way"}
+SEPARATED_STATEMENT_CLITICS = {"uu": "wuu", "ay": "way"}
 FOCUS_MARKERS = {"ayaa", "baa"}
 CONNECTIVE_FOCUS_MARKERS = {"ayaana": "ayaa", "baana": "baa"}
 REVIEWED_NOUN_RULE_PATH = Path("rules/grammar/noun_subject_gender_agreement.jsonl")
@@ -190,14 +192,15 @@ def _connective_focus_case_conflict(sentence: str) -> NounSubjectCaseAnalysis | 
 def analyze_noun_subject_case(sentence: str) -> NounSubjectCaseAnalysis:
     """Analyze reviewed noun case in ordinary and true-subject-focus contexts.
 
-    Ordinary ``<noun> wuu/way`` keeps the established ``-u`` subject rule.
-    Adjacent ``<noun> baa/ayaa`` is treated as true noun subject focus only when
-    the noun belongs to an exact reviewed subject/absolute pair. Negative
-    ``baan/ayaan`` focus is delegated to the dedicated analyzer and activates
-    only after an exact negative predicate disambiguates the fused marker.
-    Overt second-clause ``baana/ayaana`` conflicts are checked as connective
-    versions of the same subject-focus case rule. Proper names and unknown noun
-    pairs remain outside ordinary noun-case rewrites.
+    Ordinary ``<noun> wuu/way`` and exact separated ``<noun> waa uu/waa ay``
+    keep the established ``-u`` subject rule. Adjacent ``<noun> baa/ayaa`` is
+    treated as true noun subject focus only when the noun belongs to an exact
+    reviewed subject/absolute pair. Negative ``baan/ayaan`` focus is delegated
+    to the dedicated analyzer and activates only after an exact negative
+    predicate disambiguates the fused marker. Overt second-clause
+    ``baana/ayaana`` conflicts are checked as connective versions of the same
+    subject-focus case rule. Proper names and unknown noun pairs remain outside
+    ordinary noun-case rewrites.
     """
     connective_conflict = _connective_focus_case_conflict(sentence)
     if connective_conflict is not None:
@@ -234,7 +237,17 @@ def analyze_noun_subject_case(sentence: str) -> NounSubjectCaseAnalysis:
                 return focus
             continue
 
-        if marker_folded not in SUBJECT_CLITICS:
+        statement_marker = marker
+        if marker_folded in SUBJECT_CLITICS:
+            pass
+        elif marker_folded == "waa" and index + 2 < len(tokens):
+            short_pronoun = tokens[index + 2]
+            normalized = SEPARATED_STATEMENT_CLITICS.get(short_pronoun.casefold())
+            if normalized is None:
+                continue
+            marker_folded = normalized
+            statement_marker = f"{marker} {short_pronoun}"
+        else:
             continue
 
         non_subject = expected_non_subject_form(noun)
@@ -242,7 +255,7 @@ def analyze_noun_subject_case(sentence: str) -> NounSubjectCaseAnalysis:
             return NounSubjectCaseAnalysis(
                 recognized=True,
                 noun_form=noun,
-                marker=marker,
+                marker=statement_marker,
                 expected_subject_form=noun,
                 agrees=True,
                 note=(
@@ -256,7 +269,7 @@ def analyze_noun_subject_case(sentence: str) -> NounSubjectCaseAnalysis:
             return NounSubjectCaseAnalysis(
                 recognized=True,
                 noun_form=noun,
-                marker=marker,
+                marker=statement_marker,
                 expected_subject_form=subject,
                 agrees=False,
                 note=(
