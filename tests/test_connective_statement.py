@@ -57,7 +57,7 @@ def test_waana_is_waa_plus_connective_na_without_subject_person():
     assert result.agreement_agrees is None
     assert result.conjunction == "-na"
     assert result.rule_id == "GRAM-CONNSTAT-005"
-    assert "person-neutral" in (result.evidence or "")
+    assert "person_neutral" in (result.evidence or "")
 
 
 def test_waana_does_not_invent_hidden_subject_agreement_even_before_reviewed_finite_verb():
