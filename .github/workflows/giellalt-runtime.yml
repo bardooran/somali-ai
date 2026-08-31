@@ -4,7 +4,10 @@ on:
   push:
     branches: [main]
     paths:
+      - "src/morphology_benchmark.py"
+      - "src/morphology_comparison.py"
       - "src/giellalt_runtime_benchmark.py"
+      - "tests/test_morphology_comparison.py"
       - "tests/test_giellalt_runtime_benchmark.py"
       - "data/qa/morphology_benchmark_v1.jsonl"
       - ".github/workflows/giellalt-runtime.yml"
@@ -30,6 +33,7 @@ jobs:
           wget https://apertium.projectjj.com/apt/install-nightly.sh -O - | sudo bash
           sudo apt-get install -y cg3 hfst
           pipx install git+https://github.com/divvun/GiellaLTGramTools/
+          pipx inject giellaltgramtools click
           pipx install git+https://github.com/divvun/GiellaLTLexTools/
           pipx install git+https://github.com/divvun/morph-test
 
@@ -44,11 +48,43 @@ jobs:
         id: analyzer
         shell: bash
         run: |
-          analyzer="$(find external/lang-som -type f \( -name 'analyser-gt-desc.hfstol' -o -name 'analyser-gt-desc.hfst' -o -name 'analyser-gt-norm.hfstol' -o -name 'analyser-gt-norm.hfst' \) | head -n 1)"
-          test -n "$analyzer"
-          echo "path=$analyzer" >> "$GITHUB_OUTPUT"
-          echo "Using $analyzer"
+          for candidate in \
+            external/lang-som/src/fst/analyser-gt-norm.hfstol \
+            external/lang-som/src/fst/analyser-gt-desc.hfstol \
+            external/lang-som/src/fst/analyser-gt-norm.hfst \
+            external/lang-som/src/fst/analyser-gt-desc.hfst; do
+            if test -f "$candidate"; then
+              echo "path=$candidate" >> "$GITHUB_OUTPUT"
+              echo "Using $candidate"
+              exit 0
+            fi
+          done
+          echo "No compiled GiellaLT analyzer found" >&2
+          exit 1
+
+      - name: Run Somali AI benchmark v1
+        run: python -m src.morphology_benchmark > somali-ai-benchmark-v1.json
 
       - name: Run frozen benchmark against compiled GiellaLT FST
         run: |
-          python -m src.giellalt_runtime_benchmark --analyzer "${{ steps.analyzer.outputs.path }}" --giellalt-commit 5278929712e9c0c67f254f1a1dc64c80ea7b2b8d
+          python -m src.giellalt_runtime_benchmark \
+            --analyzer "${{ steps.analyzer.outputs.path }}" \
+            --giellalt-commit 5278929712e9c0c67f254f1a1dc64c80ea7b2b8d \
+            > giellalt-runtime-benchmark-v1.json
+
+      - name: Build side-by-side comparison
+        run: |
+          python -m src.morphology_comparison \
+            --somali-ai somali-ai-benchmark-v1.json \
+            --giellalt giellalt-runtime-benchmark-v1.json \
+            > morphology-comparison-v1.json
+          cat morphology-comparison-v1.json
+
+      - name: Upload reproducible benchmark results
+        uses: actions/upload-artifact@v4
+        with:
+          name: morphology-benchmark-v1
+          path: |
+            somali-ai-benchmark-v1.json
+            giellalt-runtime-benchmark-v1.json
+            morphology-comparison-v1.json

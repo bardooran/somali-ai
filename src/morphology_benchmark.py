@@ -22,6 +22,7 @@ from .morphology_competition import GIELLALT_CANDIDATES_PATH, giellalt_candidate
 
 BENCHMARK_PATH = Path("data/qa/morphology_benchmark_v1.jsonl")
 VALID_SPLITS = {"development", "holdout", "unknown"}
+COARSE_PARTS_OF_SPEECH = {"noun", "verb", "adjective", "numeral"}
 
 
 @dataclass(frozen=True)
@@ -57,6 +58,24 @@ class MorphologyBenchmarkScore:
     giellalt_candidate_type_coverage: float
     giellalt_compiled_fst_evaluated: bool
     runtime_winner_declared: bool
+
+
+@dataclass(frozen=True)
+class RuntimeComparableScore:
+    case_count: int
+    positive_case_count: int
+    recognized_positive_case_count: int
+    positive_recognition_rate: float
+    holdout_case_count: int
+    recognized_holdout_case_count: int
+    holdout_recognition_rate: float
+    expected_type_count: int
+    matched_expected_type_count: int
+    expected_type_coverage: float
+    unknown_case_count: int
+    unknown_rejected_count: int
+    unknown_accepted_count: int
+    unknown_safety_rate: float
 
 
 def _read_jsonl(path: Path) -> Iterator[dict]:
@@ -185,6 +204,71 @@ def _score_split(results: tuple[dict, ...]) -> SplitScore:
     )
 
 
+def _expected_types(case: dict) -> set[str]:
+    result: set[str] = set()
+    for expected in case.get("expected_analyses", ()):
+        features = expected.get("features", {})
+        if not isinstance(features, dict):
+            continue
+        part_of_speech = str(features.get("part_of_speech", "")).casefold().strip()
+        if part_of_speech in COARSE_PARTS_OF_SPEECH:
+            result.add(part_of_speech)
+    return result
+
+
+def runtime_comparable_score(path: Path = BENCHMARK_PATH) -> RuntimeComparableScore:
+    """Return metrics aligned with the compiled-GiellaLT runtime comparator.
+
+    This intentionally measures recognition and coarse POS coverage, not the richer
+    exact project analyses used by ``build_score``. That makes the quantities
+    comparable while retaining the richer project-native benchmark separately.
+    """
+    cases = load_cases(path)
+    positives = tuple(case for case in cases if case["split"] != "unknown")
+    holdouts = tuple(case for case in cases if case["split"] == "holdout")
+    unknowns = tuple(case for case in cases if case["split"] == "unknown")
+
+    analyses_by_id = {
+        str(case["id"]): analyze_surface_form(str(case["surface"])) for case in cases
+    }
+
+    recognized_positive = sum(bool(analyses_by_id[str(case["id"])]) for case in positives)
+    recognized_holdout = sum(bool(analyses_by_id[str(case["id"])]) for case in holdouts)
+    unknown_accepted = sum(bool(analyses_by_id[str(case["id"])]) for case in unknowns)
+
+    expected_type_count = 0
+    matched_type_count = 0
+    for case in positives:
+        expected_types = _expected_types(case)
+        if not expected_types:
+            continue
+        actual_types = {
+            str(candidate.features.get("part_of_speech", "")).casefold().strip()
+            for candidate in analyses_by_id[str(case["id"])]
+            if str(candidate.features.get("part_of_speech", "")).casefold().strip()
+            in COARSE_PARTS_OF_SPEECH
+        }
+        expected_type_count += len(expected_types)
+        matched_type_count += len(expected_types & actual_types)
+
+    return RuntimeComparableScore(
+        case_count=len(cases),
+        positive_case_count=len(positives),
+        recognized_positive_case_count=recognized_positive,
+        positive_recognition_rate=_ratio(recognized_positive, len(positives)),
+        holdout_case_count=len(holdouts),
+        recognized_holdout_case_count=recognized_holdout,
+        holdout_recognition_rate=_ratio(recognized_holdout, len(holdouts)),
+        expected_type_count=expected_type_count,
+        matched_expected_type_count=matched_type_count,
+        expected_type_coverage=_ratio(matched_type_count, expected_type_count),
+        unknown_case_count=len(unknowns),
+        unknown_rejected_count=len(unknowns) - unknown_accepted,
+        unknown_accepted_count=unknown_accepted,
+        unknown_safety_rate=_ratio(len(unknowns) - unknown_accepted, len(unknowns)),
+    )
+
+
 def _giellalt_types_by_lemma(path: Path = GIELLALT_CANDIDATES_PATH) -> dict[str, set[str]]:
     result: dict[str, set[str]] = {}
     for record in giellalt_candidate_records(path):
@@ -206,7 +290,7 @@ def _expected_coarse_pairs(cases: tuple[dict, ...]) -> set[tuple[str, str]]:
             if not isinstance(features, dict):
                 continue
             part_of_speech = str(features.get("part_of_speech", "")).casefold().strip()
-            if lemma and part_of_speech in {"noun", "verb", "adjective", "numeral"}:
+            if lemma and part_of_speech in COARSE_PARTS_OF_SPEECH:
                 pairs.add((lemma, part_of_speech))
     return pairs
 
@@ -258,6 +342,7 @@ def report(path: Path = BENCHMARK_PATH) -> dict:
     score = build_score(path)
     return {
         "score": asdict(score),
+        "runtime_comparable": asdict(runtime_comparable_score(path)),
         "misses": [
             result
             for result in results
@@ -271,7 +356,12 @@ def report(path: Path = BENCHMARK_PATH) -> dict:
             "unknown_means_unjudged_not_ungrammatical": True,
             "giellalt_candidate_inventory_is_not_compiled_fst": True,
             "runtime_model_vs_model_claim_allowed": False,
-            "next_comparison": "run the compiled GiellaLT analyzer on the same frozen cases",
+            "v1_is_asymmetric": True,
+            "reason_v1_is_asymmetric": (
+                "development cases were already reviewed by Somali AI, while holdouts are "
+                "explicitly excluded from Somali AI runtime"
+            ),
+            "next_comparison": "freeze a source-independent v2 challenge before further promotion",
         },
     }
 
