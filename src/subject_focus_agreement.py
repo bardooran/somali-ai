@@ -110,6 +110,10 @@ def analyze_subject_focus_agreement(sentence: str) -> SubjectFocusAgreementAnaly
     paradigm. Up to four intervening lexical tokens are permitted so object or
     adverbial material can precede the predicate. Full ordinary finite agreement
     is never used as a fallback in subject focus.
+
+    ``predicate_persons`` deliberately continues to expose the surface's ordinary
+    reviewed morphology. Restrictive person reinterpretation is contextual and is
+    used only to decide ``agrees``; it never mutates the lexical analysis.
     """
     tokens = TOKEN_RE.findall(sentence)
     if len(tokens) < 3:
@@ -136,9 +140,6 @@ def analyze_subject_focus_agreement(sentence: str) -> SubjectFocusAgreementAnaly
     first_unmodeled_finite: tuple[str, object] | None = None
 
     for predicate in predicate_candidates:
-        # Exact native-reviewed subject-focus predicate surfaces outrank broader
-        # paradigm analysis. This preserves Maryan baa qososhay without deriving
-        # an unseen qos- paradigm.
         reviewed_persons = _reviewed_predicate_persons(predicate)
         if reviewed_persons:
             agrees = expected_person in reviewed_persons
@@ -167,14 +168,14 @@ def analyze_subject_focus_agreement(sentence: str) -> SubjectFocusAgreementAnaly
                 particle=particle,
                 predicate=predicate,
                 expected_person=expected_person,
-                predicate_persons=restrictive.contextual_persons,
+                predicate_persons=restrictive.full_surface_persons,
                 agrees=restrictive.agrees,
                 evidence=f"{subject_evidence}+restrictive_simple_past_exact_morphology",
                 rule_id=rule_id,
                 note=(
                     "Focused subjects use the reviewed restrictive/reduced simple-past paradigm. "
                     "The predicate surface itself comes from exact reviewed finite morphology, "
-                    "but its person interpretation is contextual: 2sg, 2pl and 3pl use the "
+                    "while its agreement interpretation is contextual: 2sg, 2pl and 3pl use the "
                     "ordinary 3sg-masculine-shaped past form; 3sg feminine remains distinct. "
                     "Intervening object/adverbial material does not control agreement. No "
                     "automatic rewrite."
@@ -185,13 +186,14 @@ def analyze_subject_focus_agreement(sentence: str) -> SubjectFocusAgreementAnaly
             first_unmodeled_finite = (predicate, restrictive)
 
     if first_unmodeled_finite is not None:
-        predicate, _ = first_unmodeled_finite
+        predicate, restrictive = first_unmodeled_finite
         return SubjectFocusAgreementAnalysis(
             recognized=True,
             subject=subject,
             particle=particle,
             predicate=predicate,
             expected_person=expected_person,
+            predicate_persons=restrictive.full_surface_persons,
             agrees=None,
             evidence=f"{subject_evidence}+restrictive_paradigm_not_yet_modeled_for_tense",
             rule_id=rule_id,
