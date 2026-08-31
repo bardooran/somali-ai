@@ -50,6 +50,12 @@ v4 changes the immediate morphology target. The prior v3 raw-recognition deficit
 
 Important limitation: v2, v3, and v4 are disjoint selections but come from the same pinned Qaamuus source family. They are strong leakage-controlled lexical tests, not fully source-independent morphology evidence. The next morphology benchmark should therefore use an independent published source and report pre-freeze runtime overlap explicitly.
 
+## Morphology: independent paradigm challenge v5 (freeze in progress)
+
+Source family: Morgan Nilsson, *Learner's Somali Grammar* (2025), University of Gothenburg course/reference literature. The source is independent of the Qaamuus family used for v2-v4. v5 is designed to test explicit inflected surface forms with grammatical features rather than headword recognition. Its freeze protocol must record pre-freeze overlap with the Somali AI reviewed runtime and master recognition index, and the unseen subset must be scored separately.
+
+No v5 winner is recorded until the manifest is frozen and both systems have been evaluated unchanged.
+
 ## Morphology: frozen analyzer-blind challenge v3
 
 Benchmark identity:
