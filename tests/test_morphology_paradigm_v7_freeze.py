@@ -54,9 +54,13 @@ def test_v7_unknowns_do_not_overlap_positive_surfaces() -> None:
 def test_v7_answers_are_locked_evaluation_only() -> None:
     metadata = json.loads(METADATA.read_text(encoding="utf-8"))
     policy = metadata["benchmark_policy"]
+    measured = metadata["measured_result"]
 
     assert policy["answers_are_evaluation_only"] is True
     assert policy["runtime_rule_learning_from_v7_allowed"] is False
     assert policy["explicit_source_forms_only"] is True
     assert policy["inferred_unattested_forms_included"] is False
-    assert metadata["pre_freeze_overlap_status"] == "pending_measurement"
+    assert metadata["pre_freeze_overlap_status"] == "measured"
+    assert measured["somali_ai_combined_positive_surface_recognition"] == "0/6"
+    assert measured["somali_ai_combined_comparable_feature_rows"] == "0/8"
+    assert measured["unknown_safety"] == "8/8 for combined runtime and master exact"
