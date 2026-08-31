@@ -2,8 +2,8 @@
   "benchmark_version": "v9",
   "benchmark_name": "Independent Conjugation-2 infinitive morphology challenge v9",
   "manifest_path": "data/qa/morphology_paradigm_benchmark_v9.jsonl",
-  "manifest_git_blob_sha": "pending_until_freeze_merge",
-  "freeze_commit": "pending_until_freeze_merge",
+  "manifest_git_blob_sha": "a3ed1aa4e9c44a42daee23c37ca585160cb6adda",
+  "freeze_commit": "f84bd99fab4162ded31d7469989b3200333df7da",
   "pre_freeze_runtime_commit": "7e705a87f96cf9a0768eb2bd868857b99b51d66a",
   "source_family": "Fayruus 2015 Isrogrogidda Falka Af-soomaaliga",
   "publisher": "Akadeemiye-Goboleedka Af-soomaaliga / Intergovernmental Academy of Somali Language",
@@ -15,8 +15,19 @@
   "positive_unique_surface_count": 7,
   "unknown_case_count": 8,
   "total_case_count": 15,
-  "pre_freeze_overlap_status": "not_measured",
-  "measured_result": null,
+  "pre_freeze_overlap_status": "measured",
+  "measured_result": {
+    "full_test_suite": "1047/1047 passed",
+    "somali_ai_combined_positive_surface_recognition": "0/7",
+    "somali_ai_master_positive_surface_recognition": "0/7",
+    "somali_ai_combined_comparable_feature_rows": "0/7",
+    "somali_ai_reviewed_exact_positive_surface_recognition": "0/7",
+    "somali_ai_reviewed_rule_derived_positive_surface_recognition": "0/7",
+    "unknown_safety": "8/8 for combined runtime and master exact",
+    "tested_head_commit": "299e8e9b0430913859a40aab75cfe88bc1781267",
+    "tested_pull_request_merge_commit": "342a983a3ba073694b0b8ea7e49912d69872cf20",
+    "workflow_run_id": 33448961752
+  },
   "benchmark_policy": {
     "answers_are_evaluation_only": true,
     "runtime_rule_learning_from_v9_allowed": false,
@@ -33,5 +44,5 @@
     "independent_of_green_morrison_development": true,
     "independent_of_saeed_development": true
   },
-  "notes": "Frozen after the first finite Conjugation-2A runtime slice (kari -> karisaa) merged and before any Fayruus-informed runtime development. The positive set contains only infinitive forms explicitly printed in Fayruus pp. 52-53. Positive lemmas cafi, layli, caddee, cashee, and malee are outside the existing finite Class-I and Conjugation-2 development profiles. Fayruus becomes evaluation-only for these answers after freeze and may not be used to authorize runtime rules targeting v9 answers."
+  "notes": "Frozen after the first finite Conjugation-2A runtime slice (kari -> karisaa) merged and before any Fayruus-informed runtime development. The positive set contains only infinitive forms explicitly printed in Fayruus pp. 52-53. The first post-freeze measurement found zero combined, master, exact-reviewed, or rule-derived positive-surface hits and 0/7 complete comparable feature rows while preserving 8/8 unknown safety. This establishes a clean pre-development Conjugation-2 infinitive baseline. Fayruus is evaluation-only for v9 answers and may not be used to authorize runtime rules targeting them."
 }
