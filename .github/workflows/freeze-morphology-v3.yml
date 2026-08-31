@@ -11,6 +11,9 @@ on:
       - ".github/workflows/freeze-morphology-v3.yml"
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   freeze:
     runs-on: ubuntu-latest
@@ -43,11 +46,18 @@ jobs:
             exit 1
           fi
 
-      - name: Verify v2 disjointness
+      - name: Verify v2 disjointness and frozen identity
         run: |
           python - <<'PY'
+          import hashlib
           import json
           from pathlib import Path
+
+          manifest = Path('benchmark_results/morphology_challenge_v3.jsonl')
+          expected_sha = '7222ef7a4e4f0c9b960b5feece50aaba11737dc7f3265040cfdac6a3e99ffd6c'
+          actual_sha = hashlib.sha256(manifest.read_bytes()).hexdigest()
+          assert actual_sha == expected_sha, (actual_sha, expected_sha)
+
           v2 = {
               json.loads(line)['surface'].casefold()
               for line in Path('data/qa/morphology_challenge_v2.jsonl').read_text(encoding='utf-8').splitlines()
@@ -55,7 +65,7 @@ jobs:
           }
           v3 = [
               json.loads(line)
-              for line in Path('benchmark_results/morphology_challenge_v3.jsonl').read_text(encoding='utf-8').splitlines()
+              for line in manifest.read_text(encoding='utf-8').splitlines()
               if line.strip()
           ]
           positive = {case['surface'].casefold() for case in v3 if case['split'] == 'challenge'}
@@ -64,6 +74,9 @@ jobs:
           assert meta['v2_positive_overlap_count'] == 0
           assert meta['selection_is_analyzer_blind'] is True
           assert meta['definitions_copied'] is False
+          assert meta['manifest_sha256'] == expected_sha
+          assert meta['positive_case_count'] == 110
+          assert meta['unknown_probe_count'] == 16
           PY
 
       - name: Upload frozen v3 candidate manifest
@@ -73,3 +86,21 @@ jobs:
           path: benchmark_results/
           if-no-files-found: error
           retention-days: 30
+
+      - name: Commit exact frozen v3 benchmark
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p data/qa
+          cp benchmark_results/morphology_challenge_v3.jsonl data/qa/morphology_challenge_v3.jsonl
+          cp benchmark_results/morphology_challenge_v3.meta.json data/qa/morphology_challenge_v3.meta.json
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/qa/morphology_challenge_v3.jsonl data/qa/morphology_challenge_v3.meta.json
+          if git diff --cached --quiet; then
+            echo "Frozen v3 benchmark already committed"
+            exit 0
+          fi
+          git commit -m "Freeze analyzer-blind morphology challenge v3"
+          git pull --rebase origin main
+          git push origin HEAD:main
