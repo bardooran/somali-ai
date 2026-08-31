@@ -106,6 +106,7 @@ def _reviewed_predicate_persons(surface: str) -> tuple[str, ...]:
 def _restrictive_evidence_suffix(paradigm: str | None) -> str:
     return {
         "simple_past_reuse": "restrictive_simple_past_exact_morphology",
+        "past_progressive_reuse": "restrictive_past_progressive_exact_morphology",
         "simple_present_short": "restrictive_simple_present_contextual_morphology",
         "simple_present_irregular_reuse": "restrictive_simple_present_contextual_morphology",
         "present_progressive_short": "restrictive_present_progressive_contextual_morphology",
