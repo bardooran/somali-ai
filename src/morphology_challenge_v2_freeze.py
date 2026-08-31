@@ -41,14 +41,17 @@ def normalize_surface(headword: str) -> str:
 
 def coarse_pos(code: str) -> str | None:
     token = code.casefold().strip()
+    segments = set(re.split(r"[./]", token))
+    # Qaamuus numerals are commonly encoded inside a nominal code, e.g. m.l.t.
+    # The explicit tiraale marker therefore takes precedence for this challenge.
+    if "t" in segments:
+        return "numeral"
     if token == "m" or token.startswith("m."):
         return "noun"
     if token == "f" or token.startswith("f."):
         return "verb"
     if token == "s" or token.startswith("s."):
         return "adjective"
-    if token == "t" or token.startswith("t."):
-        return "numeral"
     return None
 
 

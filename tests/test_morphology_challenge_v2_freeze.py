@@ -19,7 +19,7 @@ def _write_source(root: Path) -> None:
                 "- **ba'²** f.mg1 (-day) fake definition",
                 "- **baabuur** m.l (-rro) fake definition",
                 "- **bilan** s fake definition",
-                "- **boqol** t fake definition",
+                "- **boqol** m.l.t fake definition",
                 "- **bilan²** f.mg4 fake definition",
                 "- **laba eray** m.l fake definition",
             ]
@@ -34,7 +34,7 @@ def _write_source(root: Path) -> None:
                 "- **tijaab** f.g1 fake definition",
                 "- **tub** m.l fake definition",
                 "- **toos** s fake definition",
-                "- **toban** t fake definition",
+                "- **toban** m.l.t fake definition",
             ]
         )
         + "\n",
@@ -51,6 +51,9 @@ def test_coarse_pos_uses_qaamuus_codes_conservatively():
     assert coarse_pos("f.g/mg2") == "verb"
     assert coarse_pos("s") == "adjective"
     assert coarse_pos("t") == "numeral"
+    assert coarse_pos("m.l.t") == "numeral"
+    assert coarse_pos("m.l.t.j") == "numeral"
+    assert coarse_pos("m.f.dh") == "noun"
     assert coarse_pos("mu") is None
     assert coarse_pos("maan.") is None
 
@@ -61,6 +64,7 @@ def test_source_pool_excludes_multiword_entries(tmp_path):
     pool = source_pool(source_root)
     assert ("laba eray", "noun") not in pool
     assert ("baabuur", "noun") in pool
+    assert ("boqol", "numeral") in pool
     assert ("bilan", "verb") in pool
     assert ("bilan", "adjective") in pool
 

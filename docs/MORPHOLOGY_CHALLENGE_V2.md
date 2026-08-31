@@ -22,11 +22,11 @@ The dictionary metadata and rights review are still incomplete, so the frozen be
 The freeze generator reads all letter files `01-*.md` through `31-*.md`, then:
 
 1. Parses dictionary headwords and their grammatical code without consulting either analyzer.
-2. Keeps single-token entries whose first coarse category is unambiguous for this benchmark:
-   - `m` / `m.*` → noun
-   - `f` / `f.*` → verb
-   - `s` / `s.*` → adjective
-   - `t` / `t.*` → numeral
+2. Keeps single-token entries whose code supplies an unambiguous coarse category for this benchmark:
+   - an explicit `t` (tiraale / numeral) segment, including composite codes such as `m.l.t`, → numeral
+   - otherwise `m` / `m.*` → noun
+   - otherwise `f` / `f.*` → verb
+   - otherwise `s` / `s.*` → adjective
 3. Removes homograph superscript digits from the surface form and groups identical surface+POS pairs.
 4. Hashes each pair with SHA-256 using the fixed seed `somali-ai-morphology-challenge-v2-2026-08-31`.
 5. Takes the lowest hashes for fixed quotas: 48 nouns, 48 verbs, 16 adjectives, and 8 numerals.
