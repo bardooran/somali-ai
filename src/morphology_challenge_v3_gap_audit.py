@@ -65,6 +65,16 @@ def _usage_attestations(surface: str, rows: tuple[dict, ...]) -> tuple[int, list
     return count, sorted(sources)
 
 
+def _master_source_ids(master: tuple) -> list[str]:
+    result: set[str] = set()
+    for item in master:
+        for source in item.sources:
+            source_id = source.get("source_id")
+            if isinstance(source_id, str) and source_id.strip():
+                result.add(source_id.strip())
+    return sorted(result)
+
+
 def audit(path: Path = MANIFEST_PATH) -> dict:
     giellalt = _giellalt_index()
     usage = _usage_rows()
@@ -84,7 +94,7 @@ def audit(path: Path = MANIFEST_PATH) -> dict:
             if item.part_of_speech and str(item.part_of_speech).casefold().strip() in TARGET_TYPES
         }
         master_confidence = sorted({item.confidence_tier for item in master})
-        master_source_ids = sorted({source for item in master for source in item.source_ids})
+        master_source_ids = _master_source_ids(master)
         giellalt_types = sorted(giellalt.get(key, set()))
         usage_count, usage_sources = _usage_attestations(surface, usage)
 
