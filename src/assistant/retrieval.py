@@ -1,9 +1,9 @@
 """Lightweight retrieval over the Somali language foundation.
 
 The index deliberately excludes the large natural-text corpus. It searches
-reviewed project data and rule files, plus small imported candidate layers.
-Imported candidates are labelled lower-trust and are never treated as proof of
-correctness.
+reviewed project data and rule files, plus small/medium imported candidate
+layers. Imported candidates are labelled lower-trust and are never treated as
+proof of correctness.
 """
 
 from __future__ import annotations
@@ -25,7 +25,9 @@ DEFAULT_ROOTS = (
     Path("rules/variants"),
     Path("data/imported"),
 )
-MAX_INDEX_FILE_BYTES = 5_000_000
+# Large natural corpora remain excluded by root. This ceiling is high enough for
+# compact provenance-rich lexical candidate indexes such as GiellaLT.
+MAX_INDEX_FILE_BYTES = 25_000_000
 
 
 @dataclass(frozen=True)
@@ -41,6 +43,7 @@ class KnowledgeHit:
 class _IndexedRecord:
     path: str
     searchable: str
+    tokens: frozenset[str]
     trust: str
     status: str
     excerpt: str
@@ -110,6 +113,7 @@ def _excerpt(record: dict, maximum: int = 420) -> str:
         "input",
         "preferred_written",
         "rule",
+        "statement",
         "title",
         "somali_definition_summary",
         "note",
@@ -127,7 +131,7 @@ def _excerpt(record: dict, maximum: int = 420) -> str:
 
 
 class KnowledgeIndex:
-    """In-memory lexical overlap index over small project knowledge files."""
+    """In-memory lexical overlap index over project knowledge files."""
 
     def __init__(self, records: Iterable[_IndexedRecord] = ()) -> None:
         self._records = tuple(records)
@@ -148,10 +152,14 @@ class KnowledgeIndex:
                     if not strings:
                         continue
                     searchable = " ".join(strings)
+                    record_tokens = frozenset(_tokens(searchable))
+                    if not record_tokens:
+                        continue
                     indexed.append(
                         _IndexedRecord(
                             path=path.as_posix(),
                             searchable=searchable,
+                            tokens=record_tokens,
                             trust=_trust_for(path, record),
                             status=str(record.get("status", "unspecified")),
                             excerpt=_excerpt(record),
@@ -167,8 +175,7 @@ class KnowledgeIndex:
         folded_query = query.casefold().strip()
         hits: list[KnowledgeHit] = []
         for record in self._records:
-            record_tokens = _tokens(record.searchable)
-            overlap = query_tokens & record_tokens
+            overlap = query_tokens & record.tokens
             if not overlap:
                 continue
 

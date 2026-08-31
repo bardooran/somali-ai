@@ -1,0 +1,100 @@
+name: Refresh external candidates
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/refresh-external-candidates.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out Somali grammar project
+        uses: actions/checkout@v4
+        with:
+          path: somali-grammar
+          fetch-depth: 1
+
+      - name: Check out GiellaLT mirror
+        uses: actions/checkout@v4
+        with:
+          repository: bardooran/GiellaLT
+          path: GiellaLT
+          fetch-depth: 1
+
+      - name: Check out SLS mirror
+        uses: actions/checkout@v4
+        with:
+          repository: bardooran/goobolabs
+          path: SLS
+          fetch-depth: 1
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Extract provenance-rich candidates
+        working-directory: somali-grammar
+        shell: bash
+        run: |
+          set -euo pipefail
+          GIELLALT_SHA="$(git -C ../GiellaLT rev-parse HEAD)"
+          SLS_SHA="$(git -C ../SLS rev-parse HEAD)"
+
+          python tools/importers/giellalt_extract.py ../GiellaLT \
+            --source-commit "$GIELLALT_SHA" \
+            --output data/imported/giellalt/lexical_candidates.jsonl
+
+          python tools/importers/sls_extract.py ../SLS \
+            --source-commit "$SLS_SHA" \
+            --output data/imported/sls/rule_candidates.jsonl
+
+          test -s data/imported/giellalt/lexical_candidates.jsonl
+          test -s data/imported/sls/rule_candidates.jsonl
+
+          python - <<'PY'
+          import json
+          from collections import Counter
+          from pathlib import Path
+
+          giella = Path("data/imported/giellalt/lexical_candidates.jsonl")
+          sls = Path("data/imported/sls/rule_candidates.jsonl")
+          giella_rows = [json.loads(line) for line in giella.read_text(encoding="utf-8").splitlines() if line.strip()]
+          sls_rows = [json.loads(line) for line in sls.read_text(encoding="utf-8").splitlines() if line.strip()]
+          assert giella_rows and sls_rows
+          assert all(row["promotion_allowed"] is False for row in giella_rows + sls_rows)
+          print("GiellaLT candidates:", len(giella_rows), Counter(row["record_type"] for row in giella_rows))
+          print("SLS rule candidates:", len(sls_rows))
+          PY
+
+      - name: Run importer and assistant tests
+        working-directory: somali-grammar
+        run: |
+          python -m pip install pytest
+          python -m pytest -q \
+            tests/test_giellalt_importer.py \
+            tests/test_sls_importer.py \
+            tests/test_external_candidate_data.py \
+            tests/test_somali_assistant.py
+
+      - name: Commit refreshed candidate datasets
+        working-directory: somali-grammar
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/imported/giellalt/lexical_candidates.jsonl \
+                  data/imported/sls/rule_candidates.jsonl
+          if git diff --cached --quiet; then
+            echo "Candidate datasets are already current."
+            exit 0
+          fi
+          git commit -m "Refresh external Somali candidate datasets"
+          git pull --rebase origin main
+          git push origin HEAD:main
