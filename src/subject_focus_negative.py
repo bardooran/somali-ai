@@ -25,13 +25,13 @@ from functools import lru_cache
 from pathlib import Path
 
 from src.morphology_candidates import DEFAULT_MORPHOLOGY_PATHS
-from src.noun_gender_agreement import REVIEWED_PLURAL_FORMS, REVIEWED_SINGULAR_FORMS
 
 TOKEN_RE = re.compile(r"[^\W\d_]+(?:['’][^\W\d_]+)*", flags=re.UNICODE)
 NEGATIVE_FOCUS_MARKERS = {"baan", "ayaan"}
 COVERED_TENSE_ASPECTS = {"tagto", "tagto_socota"}
 MAX_PREDICATE_GAP = 4
 SUBJECT_FOCUS_RULE_PATH = Path("rules/grammar/subject_focus_agreement.jsonl")
+REVIEWED_NOUN_RULE_PATH = Path("rules/grammar/noun_subject_gender_agreement.jsonl")
 
 NON_SUBJECT_TO_SUBJECT = (
     ("sha", "shu"),
@@ -103,9 +103,27 @@ def _reviewed_proper_subjects() -> set[str]:
     return subjects
 
 
+@lru_cache(maxsize=1)
+def _reviewed_common_subjects() -> set[str]:
+    """Load exact reviewed ``-u`` noun subject surfaces without importing agreement code."""
+    if not REVIEWED_NOUN_RULE_PATH.exists():
+        return set()
+    reviewed: set[str] = set()
+    for line in REVIEWED_NOUN_RULE_PATH.read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        record = json.loads(line)
+        if record.get("id") not in {"GRAM-NGENDER-002", "GRAM-NGENDER-006"}:
+            continue
+        for item in record.get("forms", []):
+            form = item.get("form")
+            if isinstance(form, str):
+                reviewed.add(form.casefold())
+    return reviewed
+
+
 def _is_reviewed_common_subject(surface: str) -> bool:
-    folded = surface.casefold()
-    return folded in REVIEWED_SINGULAR_FORMS or folded in REVIEWED_PLURAL_FORMS
+    return surface.casefold() in _reviewed_common_subjects()
 
 
 def _subject_case_profile(surface: str) -> tuple[bool, str, str] | None:
