@@ -7,47 +7,42 @@ Use this folder for dictionary-style facts such as:
 - the word itself (`lemma`);
 - noun/verb/other word type;
 - grammatical gender when a source gives it;
-- source part-of-speech codes;
 - concise Somali meaning notes;
 - documented related words or variants;
 - provenance showing where the information came from.
 
 ## Current files
 
-- `qaamuus_2012_grammar_words.jsonl` — words especially useful for grammar analysis, function words, and grammar-related entries.
+- `qaamuus_2012_grammar_words.jsonl` — grammar-related reviewed vocabulary.
 - `qaamuus_2012_everyday_words.jsonl` — ordinary reviewed vocabulary.
-- `qaamuus_2012_everyday_verbs.jsonl` — reviewed everyday verb entries.
-- `qaamuus_2012_sample_entries.jsonl` — early Qaamuus/SLS sample records preserved from the old root `lexicon/` folder.
-- `somali_numbers.json` — reviewed Somali cardinal-number vocabulary, 11–99 composition rules, exact reviewed large-number expressions, source notes, and submitted candidates that are deliberately not promoted without enough evidence.
-- `somali_calendar_terms.jsonl` — reviewed Gregorian month names, documented spelling variants, Somali traditional season names, and conservative region-sensitive month alignment.
+- `qaamuus_2012_everyday_verbs.jsonl` — reviewed everyday verbs.
+- `qaamuus_2012_sample_entries.jsonl` — preserved early Qaamuus/SLS sample records.
+- `somali_numbers.json` — reviewed cardinal numbers and constrained composition evidence.
+- `somali_calendar_terms.jsonl` — Gregorian month names and Somali traditional seasons.
+- `somali_datetime_terms.jsonl` — weekdays, relative days, time units, time-of-day words, and reviewed relative-time vocabulary.
+- `somali_age_terms.jsonl` — age-related vocabulary used alongside the reviewed `N jir` construction.
+- `somali_direction_terms.jsonl` — cardinal/intermediate directions and location/direction terms with context-sensitive senses marked explicitly.
 
-The executable general word lookup is in `src/vocabulary.py`.
-The conservative numeral analyzer is in `src/numbers.py`.
-The calendar-term analyzer is in `src/calendar_terms.py`.
+Executable helpers live in `src/vocabulary.py`, `src/numbers.py`, `src/calendar_terms.py`, `src/datetime_terms.py`, `src/age.py`, and `src/directions.py`.
 
-## Calendar safety
+## Calendar and clock safety
 
-Somali traditional seasons are **not mechanically identical** to Western spring/summer/autumn/winter.
+Somali traditional seasons are **not mechanically identical** to Western spring/summer/autumn/winter. Their month alignment is approximate and region-sensitive.
 
-The project currently stores the common approximate cycle:
+Clock expressions are also kept conservative. Sources attest ordinary forms such as `afar saac` / `labadii iyo barka`, while other standard-Somali teaching material documents a traditional six-hour clock relationship. The project therefore does **not** automatically convert every 24-hour timestamp into a Somali clock phrase until the convention/context is specified.
 
-- `Jiilaal` — typically around January–March;
-- `Gu'` — typically around April–June;
-- `Xagaa` — typically around July–September;
-- `Dayr` — typically around October–December.
+## Relative-time safety
 
-These are descriptive alignments, not fixed date boundaries. Rainfall timing varies by year and region, and Northwestern/Ethiopian Somali systems can include additional distinctions such as Karan. Supported variants such as `Jilaal`, `Deyr`, `Hagaa`, `Janaayo`, and `Luuliyo` are preserved rather than automatically marked wrong.
+Reviewed executable forms include `shalay`, `maanta`, `berri`, `dorraad`, `saadambe`, and provisionally reviewed `saakuun`, plus constrained phrases such as `3 saacadood ka hor` and `6 bilood ka dib`.
+
+Submitted forms such as `shalay-dambe` and `saakuunta` are stored as candidates but are not automatic generation/correction targets until stronger independent evidence establishes their exact role.
 
 ## Important separation
 
-Vocabulary data is **not automatically a grammar correction rule**.
+Vocabulary data is **not automatically a grammar correction rule**. A dictionary or submitted batch may establish that a form exists without proving every sentence-level use or translation.
 
-A dictionary may tell us that a word exists, its gender, or its grammatical category. Sentence grammar still needs construction-level evidence under `rules/` and executable logic under `src/`.
-
-The number dataset follows the same rule: a submitted or source-attested form can be stored without becoming an automatic correction target. Unreviewed large-number compositions remain unknown rather than being generated freely.
-
-Regional preferences stay separate under `rules/variants/` so a supported regional form is not incorrectly treated as a grammar error.
+Context-sensitive terms such as `kor`, `hore`, `bari`, `dhexe`, `horta`, and `dhallinyaro` must not be flattened into one English gloss when Somali context can change their function.
 
 ## Safety
 
-Do not guess missing gender, word class, conjugation, meaning, spelling status, number composition, or regional season meaning from surface form alone. Preserve source evidence and leave unsupported information unknown.
+Do not guess missing gender, word class, conjugation, meaning, spelling status, number composition, clock convention, or regional meaning from surface form alone. Preserve source evidence and leave unsupported information unknown.
