@@ -20,59 +20,53 @@ The project has an executable, evidence-backed grammar engine. The main remainin
 | Noun subject case/forms | Growing | Broader focus/case validation |
 | `baa` / `ayaa` focus | Active / Growing | More complex focus constructions |
 | Object clitics | Active / Growing | More clitics and combinations |
-| Statement clitics (`wuu`, `way`, etc.) | Active | Broader clause structures |
-| Connectives (`wuuna`, `wayna`, `wuxuuna`) | Growing | More subject-switch and discourse QA |
-| Negation | Active / Growing | Broader paradigms and clitic combinations |
-| Negative subject focus | Active / Growing | More independently attested stems |
-| Future / negative future | Active / Growing | More verbs and holdout QA |
-| Past / aspect | Growing | Broader tense/aspect coverage |
-| Past habitual | Active / Growing | More independently supported habitual stems |
-| Imperative / jussive / dependent / conditional | Growing | More reviewed verb families and contexts |
-| Possession (`leeyahay`) | Active / Growing | More constructions and nouns |
-| Predicate/copula agreement | Growing | Broader predicates and clause types |
-| Verb Classes I–IV | Reviewed / Growing | More lemmas and independent paradigms |
-| Irregular verbs (`dheh`, `aqaan`, `aal/yaal`, `ahaw`) | Reviewed / Growing | More tense/mood and sentence validation |
-| `arag` aspect contrasts | Reviewed | Broader cross-source validation |
-| `maydh` Jigjiga forms | Reviewed / Conservative | Independent evidence and more forms |
-| Somali cardinal numbers | Active / Reviewed | Extend carefully beyond 0–100 and exact reviewed large-number expressions |
-| Gregorian month names | Active / Reviewed | Add date phrases, ordinals, and sentence-level time constructions |
-| Somali traditional seasons | Active / Region-sensitive | More Jigjiga/Northwestern evidence and seasonal sentence QA |
+| Statement/connective clitics | Active / Growing | Broader clause structures |
+| Negation / future / aspect / mood | Active / Growing | More reviewed paradigms and contexts |
+| Past habitual | Active / Growing | More independently supported stems |
+| Predicate/copula and possession | Growing | Broader sentence coverage |
+| Verb Classes I–IV and irregular verbs | Reviewed / Growing | More lemmas and paradigms |
+| `arag` / `maydh` reviewed forms | Conservative | More independent evidence |
+| Somali cardinal numbers | Active / Reviewed | Carefully extend large and approximate quantities |
+| Gregorian month names | Active / Reviewed | More date constructions and ordinals |
+| Somali traditional seasons | Active / Region-sensitive | More Jigjiga/Northwestern evidence |
+| Weekdays and full Gregorian dates | Active / Reviewed | Broader natural date-sentence QA |
+| Relative days/time | Active / Conservative | More independent evidence for rare forms and richer constructions |
+| Clock expressions | Evidence collected / Non-generative | Resolve direct vs traditional clock conventions before automatic conversion |
+| Age expressions | Active / Conservative | More sentence grammar around age questions/statements |
+| Directions/location vocabulary | Active / Conservative | More construction-level route/location grammar |
 | Regional variants | Active / Growing | Larger pair-by-pair inventory |
 | Vocabulary data | Active / Growing | Expand reviewed everyday words and verbs |
 | Word lookup (`src/vocabulary.py`) | Active / Conservative | More reviewed word coverage without guessing |
-| Somali corpus | Started | Review and use `data/corpus/maahmaahyo.json` for research/QA |
+| Somali corpus | Started | Use `data/corpus/maahmaahyo.json` for research/QA |
 | Independent QA / holdouts | Growing | Much larger unseen-example dataset |
 | LLM training | Not started | Later, after stronger language foundation |
 
-## Number-system coverage
+## High-frequency date/time coverage
 
-`data/vocabulary/somali_numbers.json` and `src/numbers.py` currently provide:
+The repo now includes `data/vocabulary/somali_datetime_terms.jsonl` and `src/datetime_terms.py` with:
 
-- reviewed cardinal bases from `eber` through `toban`;
-- reviewed tens through `sagaashan` and `boqol`;
-- evidence-constrained generation/recognition of the finite 11–99 composition system;
-- both documented 11–99 orders, while keeping order variants separate from automatic correction;
-- usage-sensitive handling of `kow` and `hal`;
-- exact reviewed expressions including `kun`, `laba kun`, `afar kun`, `toban kun`, `boqol kun`, and million forms;
-- conservative weaker-evidence recognition of `bilyan` without promoting it to correction authority;
-- unknown/unjudged treatment for submitted spellings or large compositions that have not yet been independently supported.
+- weekdays `Isniin`, `Talaado`, `Arbaco`, `Khamiis`, `Jimco/Jimce`, `Sabti`, `Axad`;
+- full Gregorian date display such as `Arbaco, 5 Agoosto 2026`;
+- reviewed relative days `dorraad/daraad`, `shalay`, `maanta`, `berri/berrito`, `saadambe/berri dambe`, and provisionally reviewed `saakuun`;
+- submitted `shalay-dambe` and `saakuunta` stored as non-executable candidates;
+- reviewed time units and quantity forms such as `daqiiqo`, `saac/saacadood`, `maalin/maalmood`, `bil/bilood`, `sannad/sano`;
+- constrained phrases such as `3 saacadood ka hor`, `6 bilood ka dib`, and duration phrases;
+- no blind 24-hour-to-Somali clock conversion because sources document more than one clock convention.
+
+## Age and direction coverage
+
+`data/vocabulary/somali_age_terms.jsonl` + `src/age.py` support the productive numeric age construction `N jir`, including independently attested questions/statements such as `Immisa jir baad tahay?` and numeric age answers. Social age labels remain context-sensitive rather than fixed to hard numerical ranges.
+
+`data/vocabulary/somali_direction_terms.jsonl` + `src/directions.py` cover cardinal/intermediate directions and common location terms. Ambiguous forms such as `bari`, `hore`, `kor`, `dhexe`, and `horta` retain context-sensitive status.
 
 ## Calendar coverage
 
-`data/vocabulary/somali_calendar_terms.jsonl` and `src/calendar_terms.py` currently provide:
-
-- the 12 Gregorian month names;
-- documented month-name variation, including `Jannaayo` / `Janaayo` and `Luulyo` / `Luuliyo`;
-- reviewed Somali season terms `Gu'`, `Xagaa`, `Dayr`, and `Jiilaal`;
-- recognized variants including `Gu`, `Hagaa`, `Deyr`, and `Jilaal`;
-- approximate common month alignment: `Jiilaal` Jan–Mar, `Gu'` Apr–Jun, `Xagaa` Jul–Sep, `Dayr` Oct–Dec;
-- explicit region-sensitivity: boundaries vary by year/region, and Northwestern/Ethiopian Somali systems may include additional seasonal distinctions such as Karan;
-- no automatic equation of Somali seasons with Western spring/summer/autumn/winter.
+`data/vocabulary/somali_calendar_terms.jsonl` and `src/calendar_terms.py` provide the 12 Gregorian month names, documented variants, and reviewed Somali traditional seasons. Seasonal Gregorian alignment is approximate and region-sensitive; Somali seasons are not automatically equated with Western spring/summer/autumn/winter.
 
 ## Current data organization
 
 ```text
-data/vocabulary/  = information about words, reviewed numerals, months, and season terms
+data/vocabulary/  = words, numerals, calendar/date/time, age, and direction terms
 data/morphology/  = reviewed word forms/paradigms
 data/corpus/      = real Somali text collections
 data/qa/          = independent test material
@@ -86,16 +80,16 @@ data/sources/     = structured source evidence
 - Prefer unknown/context-required over unsafe correction.
 - Test with examples not used to create the rule.
 - Keep regional variation separate from grammatical correctness.
-- Treat Somali traditional seasons as region-sensitive language/cultural categories, not fixed Western-season translations.
+- Do not flatten region-sensitive seasons, clock conventions, age categories, or ambiguous location words into one universal interpretation.
 - Preserve provenance.
-- Keep repository names understandable and documentation synchronized with the implementation.
+- Keep repository names understandable and documentation synchronized with implementation.
 
 ## Immediate priorities
 
 1. Expand high-frequency Somali grammar in larger evidence-backed batches.
-2. Use the maahmaahyo corpus as a source of new research and stress-test candidates, not as automatic grammar authority.
+2. Use the maahmaahyo corpus for research and unseen stress tests, not automatic grammar authority.
 3. Increase independent QA and holdout examples.
-4. Expand reviewed vocabulary, verbs, nouns, numbers, dates, time words, and other high-frequency language areas without open-ended guessing.
+4. Expand reviewed vocabulary, verbs, nouns, quantities, dates/time, directions, and other high-frequency language areas without open-ended guessing.
 5. Improve ambiguity and rule-conflict handling.
 
 Update this dashboard whenever a meaningful language area or major data layer changes.
