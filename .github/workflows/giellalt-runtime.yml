@@ -25,10 +25,11 @@ jobs:
           ref: 5278929712e9c0c67f254f1a1dc64c80ea7b2b8d
           path: external/lang-som
 
-      - name: Install HFST and Constraint Grammar
+      - name: Install GiellaLT build dependencies
         run: |
           wget https://apertium.projectjj.com/apt/install-nightly.sh -O - | sudo bash
           sudo apt-get install -y cg3 hfst
+          pipx install git+https://github.com/divvun/GiellaLTGramTools/
 
       - name: Build GiellaLT analyzer
         working-directory: external/lang-som
