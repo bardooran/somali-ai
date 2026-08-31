@@ -1,33 +1,87 @@
-# Somali Grammar
+# Somali Grammar + Somali AI
 
-An evidence-based Somali language foundation for grammar checking, linguistic analysis, and future Somali-first AI evaluation.
+An evidence-based Somali language foundation and a working Somali-first AI assistant layer.
 
-The project is building a conservative grammar engine: rules come from reviewed evidence, are tested against real Somali, and remain unknown or context-dependent when the evidence does not support a safe judgment.
+The project has two connected goals:
 
-## Project goals
+1. build reliable Somali grammar, morphology, vocabulary, regional-variant, corpus, and QA knowledge;
+2. use that knowledge around a strong reasoning model so people can converse, ask questions, get explanations, compare choices, make plans, and improve Somali writing now.
 
-1. Help Somali speakers improve written Somali.
-2. Help learners understand Somali grammar through clear explanations and examples.
-3. Build reviewed Somali grammar, morphology, vocabulary, real-text corpora, and QA datasets.
-4. Create a strong Somali language foundation that can later help train and evaluate Somali-first AI systems.
+The language engine remains conservative: unsupported forms stay unknown or context-dependent rather than being guessed.
 
-This repository does **not** train a large language model yet. It builds the language knowledge and evaluation foundation first.
+## Somali AI v0.1
 
-## Current status
+The repository now includes a conversational assistant under `src/assistant/`.
 
-The repository contains:
+```text
+Somali user message
+       ↓
+reviewed + candidate Somali knowledge retrieval
+       ↓
+general reasoning language model
+       ↓
+Somali-first generation instructions
+       ↓
+conservative Somali response checker
+       ↓
+final answer
+```
 
-- an executable checker in `check.py`;
-- grammar and analysis code under `src/`;
-- machine-readable rules under `rules/`;
-- reviewed evidence under `data/`;
-- vocabulary data under `data/vocabulary/`;
-- real Somali text collections under `data/corpus/`;
-- automated tests under `tests/`;
-- project decisions and status documentation under `docs/`;
-- human-readable source notes under `sources/`.
+The assistant prefers the reviewed **Jigjiga / Northwestern-Hargeisa** output profile while recognizing other supported Somali varieties.
 
-See [`docs/STATUS.md`](docs/STATUS.md) for **where the project is now** and [`docs/REPO_MAP.md`](docs/REPO_MAP.md) for **what every folder means**.
+This is not yet a standalone LLM trained from scratch. A general reasoning model supplies broad reasoning and conversation; this repository supplies Somali-specific evidence, preferences, checking, and evaluation. That lets the project be useful now while the Somali foundation keeps improving.
+
+### Run in the terminal
+
+```bash
+export OPENAI_API_KEY="..."
+python somali_ai.py
+```
+
+### Run as a local browser chat
+
+```bash
+export OPENAI_API_KEY="..."
+python somali_ai_web.py
+```
+
+Then open `http://127.0.0.1:8080`.
+
+Optional model override:
+
+```bash
+export SOMALI_AI_MODEL="gpt-5.6-terra"
+```
+
+See [`docs/SOMALI_AI_V0_1.md`](docs/SOMALI_AI_V0_1.md).
+
+## Assistant evaluation
+
+The repository includes a broad capability suite in:
+
+`data/qa/somali_assistant_capabilities.jsonl`
+
+It tests conversation, multi-turn memory, planning, explanations, comparisons, writing, Somali language help, reasoning, uncertainty, and regional behavior.
+
+With a configured model:
+
+```bash
+python -m src.assistant.eval
+```
+
+The runner saves model outputs for review. Automated structural checks are deliberately **not** presented as a Somali correctness score; semantic/native-quality review remains explicit.
+
+## External language evidence
+
+Audited external projects are kept as candidate/evidence layers rather than silently becoming grammar truth:
+
+- **GiellaLT Somali** — lexical and morphology discovery/cross-validation;
+- **Somali Language Standard (SLS)** — structured grammar and orthography cross-validation;
+- **SomNLP-Corpus** — natural-language corpus/QA/frequency workflows.
+
+Candidate extraction is reproducible through `.github/workflows/refresh-external-candidates.yml`. Every generated external candidate preserves provenance and has `promotion_allowed: false` until reviewed.
+
+The large SomNLP corpus is not dumped into this repository. It remains a corpus/QA source with per-source licensing.
 
 ## Core safety principle
 
@@ -37,56 +91,12 @@ The project prefers:
 
 - source-backed forms over guessed forms;
 - exact reviewed morphology over blind suffix generation;
-- `context_required` or unknown results over unsafe corrections;
-- supported regional variants over falsely marking a valid form wrong.
+- `context_required` or unknown over unsafe correction;
+- supported regional variation over falsely marking a valid form wrong;
+- provenance-aware external candidates over untraceable bulk copying;
+- unseen QA examples over testing only the sentences that created a rule.
 
-## How knowledge moves through the project
-
-```text
-source / native review / real Somali text
-                 ↓
-          reviewed evidence
-                 ↓
-        grammar or morphology rule
-                 ↓
-           analyzer code
-                 ↓
-              checker
-                 ↓
-       tests + independent QA
-```
-
-Evidence does not automatically become a correction rule.
-
-## Repository layout
-
-```text
-somali-grammar/
-├── README.md
-├── check.py                 # main checker
-│
-├── src/                     # executable Python analysis code
-│   └── vocabulary.py        # reviewed word lookup
-│
-├── rules/
-│   ├── grammar/             # sentence grammar rules
-│   ├── morphology/          # word-form patterns
-│   ├── orthography/         # spelling/writing rules
-│   └── variants/            # supported regional variants
-│
-├── data/
-│   ├── vocabulary/          # reviewed word information
-│   ├── morphology/          # reviewed word forms/paradigms
-│   ├── corpus/              # real Somali text collections
-│   ├── qa/                  # independent/holdout test data
-│   └── sources/             # structured source evidence
-│
-├── tests/                   # automated tests
-├── sources/                 # human-readable source notes
-└── docs/                    # status, decisions, repo map, schemas
-```
-
-## Current linguistic coverage
+## Current language foundation
 
 Implemented or reviewed areas include:
 
@@ -99,22 +109,47 @@ Implemented or reviewed areas include:
 - statement clitics such as `wuu`, `way`, `waan`, and `waad`;
 - connective forms such as `wuuna`, `wayna`, and reviewed `wuxuuna` constructions;
 - negation and negative agreement;
-- future and negative-future auxiliaries;
-- past, habitual, imperative, jussive, dependent, and conditional patterns;
-- possession with `leeyahay`-type constructions;
-- predicate/copula agreement;
+- future, habitual, imperative, jussive, dependent, and conditional patterns;
+- possession and predicate/copula agreement;
 - reviewed regular and irregular verb families;
+- noun morphology and gender polarity;
 - Jigjiga-first regional preference handling;
-- source-backed vocabulary lookup;
-- a Somali proverb corpus for research and stress-testing.
+- vocabulary lookup;
+- numbers and ordinals;
+- dates, weekdays, months, seasons, relative time, and age;
+- directions and measurements;
+- grammar-bearing high-frequency/function words;
+- real Somali corpus material and independent QA layers.
 
-Coverage is still incomplete. Unsupported forms should remain unjudged rather than being guessed.
+Coverage is intentionally open-ended. Unsupported forms remain unjudged until evidence improves.
 
-## Preferred Somali output profile
+## Repository layout
 
-The preferred generation/teaching profile is **Jigjiga Somali**, with strong compatibility with Northwestern/Hargeisa usage. Other supported Somali regional forms remain valid and should not be marked wrong solely because they differ regionally.
-
-See [`docs/DECISIONS.md`](docs/DECISIONS.md) for the decision history.
+```text
+somali-grammar/
+├── somali_ai.py             # terminal Somali AI
+├── somali_ai_web.py         # local browser chat
+├── check.py                 # grammar/orthography checker
+├── src/
+│   ├── assistant/           # conversation, retrieval, model, evaluation, web
+│   └── ...                  # Somali analysis modules
+├── rules/
+│   ├── grammar/
+│   ├── morphology/
+│   ├── orthography/
+│   └── variants/
+├── data/
+│   ├── vocabulary/
+│   ├── morphology/
+│   ├── corpus/
+│   ├── qa/
+│   ├── imported/            # non-promoting external candidates
+│   └── sources/
+├── tools/importers/
+├── tests/
+├── sources/
+└── docs/
+```
 
 ## Running the checker
 
@@ -122,23 +157,31 @@ See [`docs/DECISIONS.md`](docs/DECISIONS.md) for the decision history.
 python check.py "Somali text here"
 ```
 
-## Development rule
+## How knowledge becomes trusted behavior
 
-Before promoting new grammar behavior:
+```text
+source / native review / real Somali text
+                 ↓
+        candidate / reviewed evidence
+                 ↓
+      conflict + lineage checking
+                 ↓
+        grammar/morphology rule
+                 ↓
+           analyzer/checker
+                 ↓
+       unseen tests + independent QA
+                 ↓
+      assistant retrieval/generation
+```
 
-1. collect trustworthy evidence;
-2. record provenance;
-3. keep word-form facts separate from sentence-context claims;
-4. implement only what the evidence supports;
-5. add positive, negative, ambiguous, and unknown tests;
-6. test examples that were not used to create the rule;
-7. keep unsupported cases unjudged.
+Evidence does not automatically become a correction rule.
 
 ## Documentation
 
-- [`docs/STATUS.md`](docs/STATUS.md) — current project dashboard
-- [`docs/REPO_MAP.md`](docs/REPO_MAP.md) — what every major folder/file is for
-- [`docs/DECISIONS.md`](docs/DECISIONS.md) — project decisions and reviewed language judgments
-- [`docs/GRAMMAR_ANALYSIS.md`](docs/GRAMMAR_ANALYSIS.md) — grammar analysis notes
-- [`docs/VOCABULARY_SCHEMA.md`](docs/VOCABULARY_SCHEMA.md) — vocabulary-data structure
-- [`docs/CLEANUP_AUDIT.md`](docs/CLEANUP_AUDIT.md) — structural cleanup history
+- [`docs/SOMALI_AI_V0_1.md`](docs/SOMALI_AI_V0_1.md) — conversational assistant
+- [`docs/STATUS.md`](docs/STATUS.md) — project dashboard
+- [`docs/REPO_MAP.md`](docs/REPO_MAP.md) — repository map
+- [`docs/DECISIONS.md`](docs/DECISIONS.md) — reviewed decisions
+- [`docs/GRAMMAR_ANALYSIS.md`](docs/GRAMMAR_ANALYSIS.md) — grammar analysis
+- [`docs/VOCABULARY_SCHEMA.md`](docs/VOCABULARY_SCHEMA.md) — vocabulary schema
