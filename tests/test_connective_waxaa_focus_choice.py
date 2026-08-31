@@ -49,7 +49,8 @@ def test_waxa_connective_without_postverbal_focus_tail_requires_review():
         assert result.focus_material == ()
         assert result.focus_structure_agrees is False
         assert result.focus_rule_id == "GRAM-CONNWAXAA-009"
-        assert "final-focus" in result.note
+        assert "none follows" in result.note
+        assert "REVIEW" in result.note
 
 
 def test_same_subject_focus_continuation_is_compatible_for_feminine_and_second_person():
