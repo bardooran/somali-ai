@@ -12,7 +12,7 @@
 {"lemma":"toos","source_pos":"direction_manner","domain":"location","status":"reviewed","source":"Project submission 2026-08-31; Somali instructional usage","meaning":"straight"}
 {"lemma":"hore","source_pos":"relative_direction","domain":"location","status":"reviewed_context_sensitive","source":"Project submission 2026-08-31; common Somali usage","meaning":"front_or_forward_or_earlier_context_dependent"}
 {"lemma":"gadaal","source_pos":"relative_direction","domain":"location","status":"reviewed","source":"Project submission 2026-08-31; common Somali usage","meaning":"back_or_backward_context_dependent"}
-{"lemma":"kor","source_pos":"relative_direction","domain":"location","status":"reviewed_context_sensitive","source":"Project submission 2026-08-31; existing Qaamuus homograph evidence","meaning":"up_or_above_context_dependent"}
+{"lemma":"kor","source_pos":"relative_direction","domain":"location","status":"reviewed_context_sensitive","source":"Project submission 2026-08-31; existing Qaamuus homograph evidence","meaning":"up_or_above_context_dependent","include_in_general_vocabulary":false}
 {"lemma":"hoos","source_pos":"relative_direction","domain":"location","status":"reviewed","source":"Project submission 2026-08-31; common Somali usage","meaning":"down_or_below_context_dependent"}
 {"lemma":"gudaha","source_pos":"location_term","domain":"location","status":"reviewed","source":"Project submission 2026-08-31; common Somali usage","meaning":"inside"}
 {"lemma":"dibadda","source_pos":"location_term","domain":"location","status":"reviewed","source":"Project submission 2026-08-31; common Somali usage","meaning":"outside"}
