@@ -14,7 +14,17 @@
   "positive_unique_surface_count": 6,
   "unknown_case_count": 8,
   "total_case_count": 16,
-  "pre_freeze_overlap_status": "pending_measurement",
+  "pre_freeze_overlap_status": "measured",
+  "measured_result": {
+    "workflow_run_id": 33444884294,
+    "tested_head_commit": "29ceccfc14251d0c7816829154834b490820a9df",
+    "somali_ai_combined_positive_surface_recognition": "0/6",
+    "somali_ai_combined_comparable_feature_rows": "0/8",
+    "somali_ai_master_positive_surface_recognition": "0/6",
+    "somali_ai_reviewed_rule_derived_positive_surface_recognition": "0/6",
+    "unknown_safety": "8/8 for combined runtime and master exact",
+    "full_test_suite": "1021/1021 passed"
+  },
   "benchmark_policy": {
     "answers_are_evaluation_only": true,
     "runtime_rule_learning_from_v7_allowed": false,
@@ -26,5 +36,5 @@
     "independent_of_nilsson_v5": true,
     "independent_of_orwin_v6": true
   },
-  "notes": "Frozen before any v6-driven morphophonology expansion. The positive set is deliberately narrow: the explicit joogso Pattern-1 third-conjugation past paradigm plus the explicitly derived plural imperative on printed page 113. The source describes intervocalic t voicing, tt reduction, and t+n > nn. Synthetic unknown probes are safety checks and are not claimed Somali forms."
+  "notes": "Frozen before any v6-driven morphophonology expansion. The positive set is deliberately narrow: the explicit joogso Pattern-1 third-conjugation past paradigm plus the explicitly derived plural imperative on printed page 113. Synthetic unknown probes are safety checks and are not claimed Somali forms. The first post-freeze measurement found zero combined, master, or reviewed-rule-derived positive-surface hits while preserving 8/8 unknown safety, establishing a clean pre-development baseline without using v7 answers for runtime rule authoring."
 }
