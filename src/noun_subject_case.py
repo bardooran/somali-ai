@@ -1,13 +1,15 @@
 """Context-limited Somali definite-noun subject-case analysis.
 
-Three reviewed contexts are distinguished:
+Four reviewed contexts are distinguished:
 
 * ordinary explicit subjects before ``wuu/way`` use the ``-u`` subject surface;
 * noun subjects focused by bare ``baa/ayaa`` use the paired absolute/non-subject
   surface instead;
 * negative true-subject focus with ``baan/ayaan`` uses that same absolute surface,
   but only when an exact reviewed negative predicate independently disambiguates
-  the otherwise ambiguous fused marker.
+  the otherwise ambiguous fused marker;
+* second-clause connective subject focus with ``baana/ayaana`` inherits the same
+  absolute surface after removing only conjunction ``-na`` for analysis.
 
 The focus branches are deliberately stricter than the ordinary suffix mapping:
 they run only for noun surfaces whose paired ``-u`` form already occurs in the
@@ -25,6 +27,7 @@ from pathlib import Path
 from src.subject_focus_negative import analyze_subject_focus_negative
 
 TOKEN_RE = re.compile(r"[^\W\d_]+(?:['’][^\W\d_]+)*['’]?", flags=re.UNICODE)
+CLAUSE_BOUNDARY_RE = re.compile(r"[,;]")
 
 NON_SUBJECT_TO_SUBJECT = (
     ("sha", "shu"),
@@ -38,6 +41,7 @@ SUBJECT_TO_NON_SUBJECT = tuple((subject, non_subject) for non_subject, subject i
 
 SUBJECT_CLITICS = {"wuu", "way"}
 FOCUS_MARKERS = {"ayaa", "baa"}
+CONNECTIVE_FOCUS_MARKERS = {"ayaana": "ayaa", "baana": "baa"}
 REVIEWED_NOUN_RULE_PATH = Path("rules/grammar/noun_subject_gender_agreement.jsonl")
 
 PERSONAL_PRONOUN_FORMS = {
@@ -149,6 +153,40 @@ def _analyze_focus_case(noun: str, marker: str) -> NounSubjectCaseAnalysis | Non
     )
 
 
+def _connective_focus_case_conflict(sentence: str) -> NounSubjectCaseAnalysis | None:
+    """Return only a safe second-clause baana/ayaana noun-case conflict.
+
+    Correct connective focus is not returned here because this single-analysis
+    API should not let a valid second clause hide a conflict in an earlier
+    ordinary clause. A connective conflict, however, is prioritized so it is
+    visible even when the first clause contains a valid reviewed subject.
+    """
+    for boundary in CLAUSE_BOUNDARY_RE.finditer(sentence):
+        tokens = TOKEN_RE.findall(sentence[boundary.end() :])
+        if len(tokens) < 2:
+            continue
+        noun, marker = tokens[0], tokens[1]
+        if marker.casefold() not in CONNECTIVE_FOCUS_MARKERS:
+            continue
+        focus = _analyze_focus_case(noun, marker)
+        if focus is None or focus.agrees is not False:
+            continue
+        return NounSubjectCaseAnalysis(
+            recognized=True,
+            noun_form=focus.noun_form,
+            marker=marker,
+            expected_subject_form=focus.expected_subject_form,
+            agrees=False,
+            rule_id="GRAM-CONNFOCUS-003",
+            note=(
+                f"{marker} is analyzed as {CONNECTIVE_FOCUS_MARKERS[marker.casefold()]} + "
+                "connective -na in an overt second clause. True subject focus keeps the "
+                "reviewed absolute/non-subject noun surface; no automatic rewrite."
+            ),
+        )
+    return None
+
+
 def analyze_noun_subject_case(sentence: str) -> NounSubjectCaseAnalysis:
     """Analyze reviewed noun case in ordinary and true-subject-focus contexts.
 
@@ -157,8 +195,14 @@ def analyze_noun_subject_case(sentence: str) -> NounSubjectCaseAnalysis:
     the noun belongs to an exact reviewed subject/absolute pair. Negative
     ``baan/ayaan`` focus is delegated to the dedicated analyzer and activates
     only after an exact negative predicate disambiguates the fused marker.
-    Proper names and unknown noun pairs remain outside ordinary noun-case rewrites.
+    Overt second-clause ``baana/ayaana`` conflicts are checked as connective
+    versions of the same subject-focus case rule. Proper names and unknown noun
+    pairs remain outside ordinary noun-case rewrites.
     """
+    connective_conflict = _connective_focus_case_conflict(sentence)
+    if connective_conflict is not None:
+        return connective_conflict
+
     negative_focus = analyze_subject_focus_negative(sentence)
     if negative_focus.recognized and negative_focus.subject and negative_focus.marker:
         return NounSubjectCaseAnalysis(
