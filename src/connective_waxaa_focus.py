@@ -8,11 +8,12 @@ Three exact connective surfaces currently have independent source support:
 - ``waxaadna = waxaad + -na``: cleft focus carrying reviewed ``aad`` subject
   compatibility (2sg / 2pl) plus connective.
 
-These forms are not generated from one another. The executable layer requires
-an overt comma or semicolon and clause-initial placement in the second clause.
-For clitic-bearing forms, agreement is checked only against an exact reviewed
-finite verb. Unknown predicates remain unjudged, antecedents are not inferred,
-and no automatic rewrite is performed.
+These forms are not generated from one another. Source evidence also supports
+sentence-initial/discourse-linking use, so the executable layer recognizes an
+exact reviewed form either at the left edge of the analyzed input or immediately
+after overt clause/sentence punctuation. For clitic-bearing forms, agreement is
+checked only against an exact reviewed finite verb. Unknown predicates remain
+unjudged, antecedents are not inferred, and no automatic rewrite is performed.
 """
 
 from __future__ import annotations
@@ -23,12 +24,13 @@ from dataclasses import dataclass
 from src.reviewed_finite_verb import analyze_reviewed_finite_verb
 
 TOKEN_RE = re.compile(r"[^\W\d_]+(?:['’][^\W\d_]+)*", flags=re.UNICODE)
-CLAUSE_BOUNDARY_RE = re.compile(r"[,;]")
+CLAUSE_BOUNDARY_RE = re.compile(r"[,;.!?]")
 CONNECTIVE_WAXAA_CLITICS = {
     "waxayna": ("waxay", "ay", ("3sg_f", "3pl")),
     "waxaadna": ("waxaad", "aad", ("2sg", "2pl")),
 }
 MAX_FINITE_GAP = 4
+INPUT_START_BOUNDARY = "input_start"
 
 
 @dataclass(frozen=True)
@@ -85,16 +87,17 @@ def _analyze_clitic_connective(
             agreement_agrees=agrees,
             evidence=(
                 "source_backed_waxaa_focus_subject_clitic_plus_conjunction_na"
+                "+sentence_or_clause_initial_distribution"
                 "+exact_reviewed_finite_morphology"
             ),
             rule_id="GRAM-CONNWAXAA-006",
             note=(
                 f"{particle} is an independently reviewed waxaa-family connective focus "
                 f"form based on {base_focus_subject_form}, carrying subject clitic "
-                f"{subject_clitic}, plus connective -na ('and'). Agreement is checked only "
-                "between its encoded reviewed subject person(s) and an exact reviewed "
-                "finite verb. No antecedent, unseen verb form, or automatic rewrite is "
-                "inferred."
+                f"{subject_clitic}, plus connective -na ('and'). Its sentence/clause-initial "
+                "position is source-backed. Agreement is checked only between its encoded "
+                "reviewed subject person(s) and an exact reviewed finite verb. No prior "
+                "discourse antecedent, unseen verb form, or automatic rewrite is inferred."
             ),
         )
 
@@ -112,68 +115,89 @@ def _analyze_clitic_connective(
         agreement_agrees=None,
         evidence=(
             "source_backed_waxaa_focus_subject_clitic_plus_conjunction_na"
+            "+sentence_or_clause_initial_distribution"
             "+unreviewed_predicate"
         ),
         rule_id="GRAM-CONNWAXAA-005",
         note=(
-            f"{particle} is an independently reviewed waxaa-family connective focus form, "
-            "but no exact reviewed finite verb was found in the local predicate window. "
-            "Agreement remains unjudged; no verb form or antecedent is guessed."
+            f"{particle} is an independently reviewed waxaa-family connective focus form "
+            "in a licensed sentence/clause-initial position, but no exact reviewed finite "
+            "verb was found in the local predicate window. Agreement remains unjudged; "
+            "no prior discourse antecedent or verb form is guessed."
         ),
     )
 
 
+def _analyze_boundary_tokens(
+    tokens: list[str],
+    boundary: str,
+) -> ConnectiveWaxaaFocusAnalysis | None:
+    if not tokens:
+        return None
+
+    particle = tokens[0]
+    if particle.casefold() == "waxaana":
+        return ConnectiveWaxaaFocusAnalysis(
+            recognized=True,
+            particle=particle,
+            base_focus_particle="waxaa",
+            conjunction="-na",
+            following_material=tuple(tokens[1:]),
+            boundary=boundary,
+            subject_persons=(),
+            agreement_agrees=None,
+            evidence=(
+                "source_backed_waxaa_focus_particle_plus_conjunction_na"
+                "+sentence_or_clause_initial_distribution"
+                "+person_neutral_particle"
+            ),
+            rule_id="GRAM-CONNWAXAA-001",
+            note=(
+                "waxaana is analyzed only as the reviewed focus particle waxaa plus "
+                "connective -na ('and'). Its sentence/clause-initial position is "
+                "source-backed, but the particle itself does not encode a subject person. "
+                "No hidden uu/ay/aad, prior discourse antecedent, verb agreement, or "
+                "automatic rewrite is inferred."
+            ),
+        )
+
+    return _analyze_clitic_connective(particle, tokens, boundary)
+
+
 def analyze_connective_waxaa_focus(sentence: str) -> ConnectiveWaxaaFocusAnalysis:
-    """Analyze exact reviewed second-clause waxaa-family connective forms.
+    """Analyze exact reviewed sentence/clause-initial waxaa-family connectives.
 
     ``waxaana`` is person-neutral. ``waxayna`` and ``waxaadna`` carry exact
     reviewed subject-clitic person sets and may therefore be checked against
-    exact reviewed finite morphology. This function is an exact-form recognizer,
-    not a productive morphology generator.
+    exact reviewed finite morphology. Exact reviewed forms may occur at input
+    start or immediately after explicit comma, semicolon, period, question mark,
+    or exclamation mark. This function does not reconstruct preceding discourse
+    and is not a productive morphology generator.
     """
+    stripped = sentence.lstrip()
+    if stripped:
+        first_match = TOKEN_RE.match(stripped)
+        if first_match is not None:
+            start_tokens = TOKEN_RE.findall(stripped)
+            start_result = _analyze_boundary_tokens(
+                start_tokens,
+                INPUT_START_BOUNDARY,
+            )
+            if start_result is not None:
+                return start_result
+
     for boundary_match in CLAUSE_BOUNDARY_RE.finditer(sentence):
         tail = sentence[boundary_match.end() :].strip()
         tokens = TOKEN_RE.findall(tail)
-        if not tokens:
-            continue
-
-        particle = tokens[0]
-        if particle.casefold() == "waxaana":
-            return ConnectiveWaxaaFocusAnalysis(
-                recognized=True,
-                particle=particle,
-                base_focus_particle="waxaa",
-                conjunction="-na",
-                following_material=tuple(tokens[1:]),
-                boundary=boundary_match.group(0),
-                subject_persons=(),
-                agreement_agrees=None,
-                evidence=(
-                    "source_backed_waxaa_focus_particle_plus_conjunction_na"
-                    "+person_neutral_particle"
-                ),
-                rule_id="GRAM-CONNWAXAA-001",
-                note=(
-                    "waxaana is analyzed only as the reviewed focus particle waxaa plus "
-                    "connective -na ('and'). The particle itself does not encode a subject "
-                    "person, so no hidden uu/ay/aad, antecedent, or verb agreement is "
-                    "inferred. No automatic rewrite."
-                ),
-            )
-
-        clitic_result = _analyze_clitic_connective(
-            particle,
-            tokens,
-            boundary_match.group(0),
-        )
-        if clitic_result is not None:
-            return clitic_result
+        result = _analyze_boundary_tokens(tokens, boundary_match.group(0))
+        if result is not None:
+            return result
 
     return ConnectiveWaxaaFocusAnalysis(
         recognized=False,
         note=(
-            "No overt second-clause clause-initial exact reviewed waxaa-family connective "
-            "was found. Sentence-initial/discourse-linking forms and predicted related "
-            "surfaces remain context-dependent."
+            "No sentence/clause-initial exact reviewed waxaa-family connective was found. "
+            "Only independently reviewed surfaces are executable; predicted related forms "
+            "remain unjudged."
         ),
     )
