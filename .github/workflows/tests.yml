@@ -31,3 +31,6 @@ jobs:
 
       - name: Print analyzer-blind morphology challenge v2
         run: python -m src.morphology_challenge_v2
+
+      - name: Print independent morphology paradigm v5 baseline
+        run: python -m src.morphology_paradigm_v5
