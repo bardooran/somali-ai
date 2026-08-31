@@ -2,8 +2,8 @@
 
 The scanner is intentionally narrow. It considers reviewed independent subject
 pronouns in a short local window, subject clitics only in anchored
-``baa/ayaa/waa + clitic`` contexts, and exact native-reviewed true subject-focus
-``SUBJECT + baa + predicate`` frames. Unknown verbs are ignored or left
+``baa/ayaa/waa + clitic`` contexts, and exact reviewed true subject-focus
+``SUBJECT + baa/ayaa + predicate`` frames. Unknown verbs are ignored or left
 unjudged rather than treated as errors.
 """
 
@@ -20,6 +20,7 @@ TOKEN_RE = re.compile(r"[A-Za-zÀ-ÖØ-öø-ÿʼ’'-]+", re.UNICODE)
 MAX_TOKEN_GAP = 4
 CLITIC_VERB_GAP = 2
 CLITIC_ANCHORS = {"baa", "ayaa", "waa"}
+SUBJECT_FOCUS_PARTICLES = {"baa", "ayaa"}
 
 
 @dataclass(frozen=True)
@@ -87,12 +88,13 @@ def _append_subject_focus_mismatches(
     """Append exact reviewed true-subject-focus conflicts.
 
     The first noun in these frames is the focused subject itself, so bare ``baa``
-    is valid. This path only reports predicate-person conflicts from the dedicated
-    exact-evidence analyzer; matching and unknown predicates stay silent.
+    or bare ``ayaa`` is valid. This path only reports predicate-person conflicts
+    from the dedicated exact-evidence analyzer; matching and unknown predicates
+    stay silent.
     """
     for index in range(len(tokens) - 2):
         subject_match, particle_match, predicate_match = tokens[index : index + 3]
-        if particle_match.group(0).casefold() != "baa":
+        if particle_match.group(0).casefold() not in SUBJECT_FOCUS_PARTICLES:
             continue
         candidate = " ".join(
             (subject_match.group(0), particle_match.group(0), predicate_match.group(0))
@@ -122,10 +124,10 @@ def scan_sentence_agreement(text: str) -> list[SentenceAgreementFinding]:
     ``waa``. A clitic check is skipped when an independent subject pronoun is
     already present in the nearby left context, preventing duplicate reports.
 
-    Exact native-reviewed true subject-focus frames are also checked. In those
-    frames bare ``baa`` is licensed because the noun before it is the focused
-    subject; only predicate-person conflict is reportable. Matching pairs and
-    unknown forms stay silent. No corrections are generated.
+    Exact reviewed true subject-focus frames are also checked. In those frames
+    bare ``baa`` or bare ``ayaa`` is licensed because the noun before it is the
+    focused subject; only predicate-person conflict is reportable. Matching pairs
+    and unknown forms stay silent. No corrections are generated.
     """
     tokens = list(TOKEN_RE.finditer(text))
     pronouns = _known_subject_pronouns()
