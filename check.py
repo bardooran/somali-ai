@@ -9,6 +9,7 @@ from pathlib import Path
 
 from src.checker import check_file
 from src.conditional_agreement import analyze_conditional_agreement
+from src.connective_statement import analyze_connective_statement
 from src.connective_waxaa_focus import analyze_connective_waxaa_focus
 from src.dependent_mood import analyze_dependent_mood
 from src.focus_particle import scan_focus_particle_clitics
@@ -70,6 +71,11 @@ def main() -> None:
     findings, corrected = check_file(args.text, args.rules)
     agreement_findings = scan_sentence_agreement(args.text)
     focus_findings = scan_focus_particle_clitics(args.text)
+    connective_statement = analyze_connective_statement(args.text)
+    connective_statement_subject_switch_review = (
+        connective_statement.recognized
+        and connective_statement.same_subject_continuity_agrees is False
+    )
     connective_waxaa_focus = analyze_connective_waxaa_focus(args.text)
     connective_waxaa_focus_structure_review = (
         connective_waxaa_focus.recognized
@@ -216,6 +222,7 @@ def main() -> None:
         not findings
         and not agreement_findings
         and not focus_findings
+        and not connective_statement_subject_switch_review
         and not connective_waxaa_focus_structure_review
         and not connective_waxaa_subject_switch_review
         and not object_agreement_conflict
@@ -255,6 +262,7 @@ def main() -> None:
     if (
         agreement_findings
         or focus_findings
+        or connective_statement_subject_switch_review
         or connective_waxaa_focus_structure_review
         or connective_waxaa_subject_switch_review
         or object_agreement_conflict
@@ -295,6 +303,20 @@ def main() -> None:
                 f"- [REVIEW] {finding.subject!r} ... {finding.particle!r}: "
                 f"possible missing subject clitic in a baa/ayaa focus construction "
                 f"({finding.rule_id})"
+            )
+
+        if connective_statement_subject_switch_review:
+            left_persons = "/".join(connective_statement.left_subject_persons)
+            right_persons = "/".join(connective_statement.subject_persons)
+            print(
+                f"- [REVIEW] {connective_statement.left_subject_clitic!r} ... "
+                f"{connective_statement.particle!r}: possible subject switch; the preceding "
+                f"reviewed statement clitic supports {left_persons or 'unknown'} while the "
+                f"statement-connective subject clitic supports {right_persons or 'unknown'}. "
+                "This can be grammatical when the subject change is intentional, but context "
+                "is required; do not treat it as a plain same-subject continuation. "
+                "No automatic rewrite. "
+                f"({connective_statement.continuity_rule_id})"
             )
 
         if connective_waxaa_focus_structure_review:
