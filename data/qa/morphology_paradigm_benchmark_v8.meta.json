@@ -1,0 +1,34 @@
+{
+  "benchmark_version": "v8",
+  "benchmark_name": "Independent Class-I morphophonology challenge v8",
+  "manifest_path": "data/qa/morphology_paradigm_benchmark_v8.jsonl",
+  "manifest_git_blob_sha": "6c292ccbd714f244001904bdadfd402f5ac5a638",
+  "freeze_commit": null,
+  "pre_freeze_runtime_commit": "a48bb5d6e131b07e192f3effaea0d347d83dd46b",
+  "source_family": "Warner 1985 Somali Grammar Vol. 1",
+  "publisher": "Mennonite Board in East Africa",
+  "source_url": "https://arcadia.sba.uniroma3.it/bitstream/2307/5859/3/Somali%20Grammar_Vol.1_Warner.pdf",
+  "source_lesson": "Lesson 5 - Present and Past Indicative of Class I Verbs",
+  "source_page": "1.10",
+  "positive_case_count": 7,
+  "positive_unique_surface_count": 7,
+  "unknown_case_count": 8,
+  "total_case_count": 15,
+  "pre_freeze_overlap_status": "pending_measurement",
+  "benchmark_policy": {
+    "answers_are_evaluation_only": true,
+    "runtime_rule_learning_from_v8_allowed": false,
+    "explicit_source_forms_only": true,
+    "inferred_unattested_forms_included": false,
+    "synthetic_unknowns_are_claimed_somali_forms": false
+  },
+  "independence": {
+    "independent_of_qaamuus_v2_v4": true,
+    "independent_of_nilsson_v5": true,
+    "independent_of_orwin_v6": true,
+    "independent_of_zorc_issa_v7": true,
+    "independent_of_green_morrison_stage1c": true,
+    "independent_of_giellalt_as_runtime_evidence": true
+  },
+  "notes": "Frozen after Stage 1C merged and before any Warner-informed runtime development. Positive rows are only Class-I forms explicitly printed in Warner Lesson 5. The selected positive lemmas are intentionally disjoint from the Stage 1C development profiles and from v6/v7 positive lemmas. Synthetic unknown probes are safety checks only. Warner is evaluation-only and may not be cited to authorize runtime rules after this freeze."
+}
