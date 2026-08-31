@@ -4,9 +4,10 @@ The scanner is intentionally narrow. It considers reviewed independent subject
 pronouns in a short local window, subject clitics only in anchored
 ``baa/ayaa/waa + clitic`` contexts, reviewed true subject-focus
 ``SUBJECT + baa/ayaa + ... + predicate`` frames, overt second-clause connective
-subject focus ``SUBJECT + baana/ayaana + ... + predicate`` frames, and reviewed
-clitic-bearing connective focus ``... + buuna/beyna + ... + predicate`` frames.
-Unknown verbs are ignored or left unjudged rather than treated as errors.
+subject focus ``SUBJECT + baana/ayaana + ... + predicate`` frames, reviewed
+clitic-bearing connective focus ``... + buuna/beyna + ... + predicate`` frames,
+and clause-initial connective statement ``wuuna/wayna + ... + predicate``
+frames. Unknown verbs are ignored or left unjudged rather than treated as errors.
 """
 
 from __future__ import annotations
@@ -16,6 +17,7 @@ from dataclasses import dataclass
 
 from src.agreement import analyze_pronoun_verb, _load_jsonl, PRONOUN_PATH, AGREEMENT_PATH
 from src.connective_focus import analyze_connective_clitic_focus
+from src.connective_statement import analyze_connective_statement
 from src.subject_focus_agreement import analyze_subject_focus_agreement
 
 
@@ -258,6 +260,59 @@ def _append_connective_clitic_focus_mismatch(
     )
 
 
+def _append_connective_statement_mismatch(
+    findings: list[SentenceAgreementFinding],
+    text: str,
+    tokens: list[re.Match[str]],
+) -> None:
+    """Append reviewed wuuna/wayna statement-clitic/finite-verb conflicts."""
+    result = analyze_connective_statement(text)
+    if (
+        not result.recognized
+        or result.agreement_agrees is not False
+        or not result.particle
+        or not result.verb
+    ):
+        return
+
+    particle_match = next(
+        (
+            match
+            for match in tokens
+            if match.group(0).casefold() == result.particle.casefold()
+        ),
+        None,
+    )
+    if particle_match is None:
+        return
+    verb_match = next(
+        (
+            match
+            for match in tokens
+            if match.start() > particle_match.end()
+            and match.group(0).casefold() == result.verb.casefold()
+        ),
+        None,
+    )
+    if verb_match is None:
+        return
+
+    encoded = "/".join(result.subject_persons) or "reviewed subject person"
+    findings.append(
+        SentenceAgreementFinding(
+            pronoun=particle_match.group(0),
+            verb=verb_match.group(0),
+            pronoun_start=particle_match.start(),
+            verb_start=verb_match.start(),
+            agrees=False,
+            expected_forms=(
+                f"a reviewed finite predicate compatible with connective statement clitic person(s) {encoded}",
+            ),
+            note=result.note,
+        )
+    )
+
+
 def scan_sentence_agreement(text: str) -> list[SentenceAgreementFinding]:
     """Find reviewed subject/verb agreement conflicts in conservative contexts.
 
@@ -272,7 +327,9 @@ def scan_sentence_agreement(text: str) -> list[SentenceAgreementFinding]:
     particle for the same restrictive agreement check. Reviewed ``buuna`` and
     ``beyna`` are instead treated as focus+subject-clitic+connective forms: only
     their encoded subject person is checked against exact finite morphology.
-    Unknown/unmodeled forms stay silent, and standalone connective forms remain
+    Reviewed clause-initial ``wuuna``/``wayna`` are statement/declarative
+    clitic+connective forms and are checked separately from focus. Unknown or
+    unmodeled forms stay silent, and standalone connective forms remain
     context-dependent.
     """
     tokens = list(TOKEN_RE.finditer(text))
@@ -315,4 +372,5 @@ def scan_sentence_agreement(text: str) -> list[SentenceAgreementFinding]:
     _append_subject_focus_mismatches(findings, tokens)
     _append_connective_subject_focus_mismatches(findings, text, tokens)
     _append_connective_clitic_focus_mismatch(findings, text, tokens)
+    _append_connective_statement_mismatch(findings, text, tokens)
     return findings
