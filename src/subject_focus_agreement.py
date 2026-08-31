@@ -3,9 +3,10 @@
 True subject focus is kept separate from non-subject/object focus. Proper names
 are licensed only from exact reviewed profiles. Common nouns are licensed only
 when their absolute focus form can be paired with an already reviewed ``-u``
-subject form. Affirmative simple-past predicates are interpreted through the
-source-backed restrictive/reduced focus paradigm; other tenses remain unjudged
-unless an exact subject-focus sentence surface has been reviewed directly.
+subject form. Affirmative past and reviewed present/realis predicates are
+interpreted through the source-backed restrictive/reduced focus paradigm; other
+tenses remain unjudged unless an exact subject-focus sentence surface has been
+reviewed directly.
 """
 
 from __future__ import annotations
@@ -102,18 +103,30 @@ def _reviewed_predicate_persons(surface: str) -> tuple[str, ...]:
     return tuple(persons)
 
 
+def _restrictive_evidence_suffix(paradigm: str | None) -> str:
+    return {
+        "simple_past_reuse": "restrictive_simple_past_exact_morphology",
+        "simple_present_short": "restrictive_simple_present_contextual_morphology",
+        "simple_present_irregular_reuse": "restrictive_simple_present_contextual_morphology",
+        "present_progressive_short": "restrictive_present_progressive_contextual_morphology",
+        "copular_present_invariant": "restrictive_copular_present_contextual_morphology",
+    }.get(paradigm, "restrictive_contextual_morphology")
+
+
 def analyze_subject_focus_agreement(sentence: str) -> SubjectFocusAgreementAnalysis:
     """Analyze reviewed ``FOCUSED_SUBJECT + baa/ayaa + ... + predicate`` agreement.
 
     Exact sentence-level subject-focus evidence has first priority. Otherwise,
-    known simple-past finite surfaces are interpreted through the restrictive
+    reviewed predicates are interpreted through the currently modeled restrictive
     paradigm. Up to four intervening lexical tokens are permitted so object or
     adverbial material can precede the predicate. Full ordinary finite agreement
     is never used as a fallback in subject focus.
 
-    ``predicate_persons`` deliberately continues to expose the surface's ordinary
-    reviewed morphology. Restrictive person reinterpretation is contextual and is
-    used only to decide ``agrees``; it never mutates the lexical analysis.
+    ``predicate_persons`` exposes the ordinary full-paradigm person values used
+    as lexical evidence when available. Reduced present surfaces can be contextual
+    forms that are intentionally absent from global finite morphology; in those
+    cases the field records the source full-form person class rather than promoting
+    the reduced surface globally.
     """
     tokens = TOKEN_RE.findall(sentence)
     if len(tokens) < 3:
@@ -162,6 +175,7 @@ def analyze_subject_focus_agreement(sentence: str) -> SubjectFocusAgreementAnaly
 
         restrictive = analyze_subject_focus_restrictive(predicate, expected_person)
         if restrictive.covered:
+            evidence_suffix = _restrictive_evidence_suffix(restrictive.paradigm)
             return SubjectFocusAgreementAnalysis(
                 recognized=True,
                 subject=subject,
@@ -170,15 +184,11 @@ def analyze_subject_focus_agreement(sentence: str) -> SubjectFocusAgreementAnaly
                 expected_person=expected_person,
                 predicate_persons=restrictive.full_surface_persons,
                 agrees=restrictive.agrees,
-                evidence=f"{subject_evidence}+restrictive_simple_past_exact_morphology",
+                evidence=f"{subject_evidence}+{evidence_suffix}",
                 rule_id=rule_id,
                 note=(
-                    "Focused subjects use the reviewed restrictive/reduced simple-past paradigm. "
-                    "The predicate surface itself comes from exact reviewed finite morphology, "
-                    "while its agreement interpretation is contextual: 2sg, 2pl and 3pl use the "
-                    "ordinary 3sg-masculine-shaped past form; 3sg feminine remains distinct. "
-                    "Intervening object/adverbial material does not control agreement. No "
-                    "automatic rewrite."
+                    f"{restrictive.note} Intervening object/adverbial material does not "
+                    "control agreement. No automatic rewrite."
                 ),
             )
 
@@ -199,8 +209,9 @@ def analyze_subject_focus_agreement(sentence: str) -> SubjectFocusAgreementAnaly
             rule_id=rule_id,
             note=(
                 "The subject-focus frame and finite predicate are recognized, but this "
-                "tense/aspect is outside the currently modeled restrictive paradigm. It is "
-                "left unjudged instead of reusing ordinary full agreement."
+                "tense/aspect or irregular paradigm is outside the currently modeled "
+                "restrictive coverage. It is left unjudged instead of reusing ordinary full "
+                "agreement."
             ),
         )
 
@@ -216,6 +227,7 @@ def analyze_subject_focus_agreement(sentence: str) -> SubjectFocusAgreementAnaly
         rule_id=rule_id,
         note=(
             "The reviewed subject-focus frame is recognized, but no nearby predicate has exact "
-            "reviewed finite or sentence-level evidence. It is left unjudged rather than guessed."
+            "reviewed finite or source-backed contextual reduced evidence. It is left unjudged "
+            "rather than guessed."
         ),
     )
