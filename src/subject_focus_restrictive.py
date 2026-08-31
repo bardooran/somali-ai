@@ -28,10 +28,6 @@ from functools import lru_cache
 from src.morphology_candidates import DEFAULT_MORPHOLOGY_PATHS
 from src.reviewed_finite_verb import FINITE_ANALYSIS_TYPES, analyze_reviewed_finite_verb
 
-# Restrictive agreement maps the clause subject person to the person-class whose
-# full-paradigm form supplies the reduced agreement shape. The default group
-# collapses 2sg/2pl/3pl with the 3sg-masculine class; 3sg feminine and 1pl stay
-# distinct.
 RESTRICTIVE_SOURCE_PERSON = {
     "1sg": "1sg",
     "2sg": "3sg_m",
@@ -59,15 +55,15 @@ SIMPLE_PRESENT_TENSE = "joogto_caadaley"
 PRESENT_PROGRESSIVE_TENSE = "joogto_socota"
 COPULAR_PRESENT_TENSE = "joogto"
 
-# These present paradigms are explicitly source-backed as reusing their listed
-# short surfaces under reduced agreement instead of undergoing the regular
-# final-vowel shortening rule.
-PRESENT_REUSE_LEMMAS = {"aqaan", "aal/yaal"}
+# These source-backed irregular present paradigms reuse exact listed surfaces
+# under reduced agreement. Their source datasets use different tense labels, so
+# the pairing is explicit rather than normalized globally.
+PRESENT_REUSE_TENSES = {
+    "aqaan": {SIMPLE_PRESENT_TENSE},
+    "aal/yaal": {COPULAR_PRESENT_TENSE},
+}
+PRESENT_REUSE_LEMMAS = set(PRESENT_REUSE_TENSES)
 COPULAR_LEMMAS = {"ahaw/ah"}
-
-# The source gives 1pl simple-present forms for some prefix/suppletive verbs that
-# cannot be recovered safely from the project's current full-form records. We
-# therefore derive only the default and feminine classes for those lemmas here.
 SHORT_PRESENT_SKIP_DERIVED_1PL = {"imow", "dheh"}
 
 
@@ -146,14 +142,7 @@ def _derived_group(persons: tuple[str, ...], lemma: str, tense: str) -> tuple[st
 
 @lru_cache(maxsize=1)
 def _short_present_index() -> dict[str, tuple[dict, ...]]:
-    """Build focus-only short-``a`` present/progressive forms from exact evidence.
-
-    A reduced surface is created only when an affirmative reviewed full finite
-    record already exists, ends in ``-aa``, and belongs to simple present or
-    present progressive. This is a contextual grammatical transformation, not a
-    lexical morphology generator: the produced surface is kept in this private
-    index and never registered globally.
-    """
+    """Build focus-only short-``a`` present/progressive forms from exact evidence."""
     index: dict[str, list[dict]] = {}
     for record in _all_reviewed_records():
         if not _is_affirmative_finite(record):
@@ -246,13 +235,20 @@ def _analyze_short_present_surface(
     )
 
 
+def _finite_has_reuse_present(finite) -> bool:
+    for lemma in finite.lemmas:
+        allowed_tenses = PRESENT_REUSE_TENSES.get(lemma)
+        if allowed_tenses and any(tense in allowed_tenses for tense in finite.tense_aspects):
+            return True
+    return False
+
+
 def _analyze_special_present_surface(
     surface: str,
     expected_person: str,
 ) -> SubjectFocusRestrictiveAnalysis | None:
     key = surface.casefold()
 
-    # Copular AHAW/AH has an invariant absolutive reduced present form.
     if key == "ah":
         return SubjectFocusRestrictiveAnalysis(
             recognized=True,
@@ -272,13 +268,7 @@ def _analyze_special_present_surface(
         )
 
     finite = analyze_reviewed_finite_verb(surface)
-    if not finite.recognized:
-        return None
-
-    if not (
-        SIMPLE_PRESENT_TENSE in finite.tense_aspects
-        and any(lemma in PRESENT_REUSE_LEMMAS for lemma in finite.lemmas)
-    ):
+    if not finite.recognized or not _finite_has_reuse_present(finite):
         return None
 
     contextual = _contextual_persons(finite.persons)
@@ -319,14 +309,7 @@ def analyze_subject_focus_restrictive(
     surface: str,
     expected_person: str,
 ) -> SubjectFocusRestrictiveAnalysis:
-    """Judge a predicate surface in a reviewed focused-subject context.
-
-    Exact simple-past finite surfaces use the established contextual person
-    reinterpretation. Simple-present and present-progressive reduced surfaces may
-    be recognized from the private source-backed short-form index. Full present
-    forms are reportable as conflicts only when a corresponding reviewed reduced
-    form is known for the same lemma/person. Unsupported cases remain unjudged.
-    """
+    """Judge a predicate surface in a reviewed focused-subject context."""
     special = _analyze_special_present_surface(surface, expected_person)
     if special is not None:
         return special
@@ -361,7 +344,6 @@ def analyze_subject_focus_restrictive(
             note="This subject person is outside the currently reviewed restrictive mapping.",
         )
 
-    # Simple past keeps the same lexical surface and only reduces person contrasts.
     if SIMPLE_PAST_TENSE in finite.tense_aspects:
         contextual = _contextual_persons(finite.persons)
         return SubjectFocusRestrictiveAnalysis(
@@ -384,7 +366,6 @@ def analyze_subject_focus_restrictive(
             ),
         )
 
-    # AHAW/AH ordinary present forms are full forms; focused present requires ah.
     if (
         COPULAR_PRESENT_TENSE in finite.tense_aspects
         and any(lemma in COPULAR_LEMMAS for lemma in finite.lemmas)
@@ -406,9 +387,6 @@ def analyze_subject_focus_restrictive(
             ),
         )
 
-    # For short-a present/progressive paradigms, a full -aa finite form is a focus
-    # conflict only when the exact reviewed paradigm licenses a reduced counterpart
-    # for this same lemma and expected person.
     for tense in (SIMPLE_PRESENT_TENSE, PRESENT_PROGRESSIVE_TENSE):
         if tense not in finite.tense_aspects:
             continue
