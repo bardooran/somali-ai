@@ -37,3 +37,6 @@ jobs:
 
       - name: Print frozen morphology paradigm v6 measurement
         run: python -m src.morphology_paradigm_v6
+
+      - name: Print frozen morphology paradigm v7 baseline
+        run: python -m src.morphology_paradigm_v7
