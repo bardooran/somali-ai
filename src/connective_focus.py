@@ -7,13 +7,22 @@ of two conjoined clauses. The executable scope is deliberately split by role:
   reviewed true subject focus and delegate to the existing restrictive
   subject-focus case/agreement analyzers.
 - ``buuna = b=uu=na`` and lexical ``beyna`` are modeled as focus markers that
-  already contain a subject clitic. For these forms we check only whether the
+  already contain a subject clitic. For these forms we check whether the
   encoded subject person is compatible with an exact reviewed finite verb.
 
+For ``buuna``/``beyna``, a separate discourse-safety signal may compare the
+right subject clitic with a reviewed ``wuu``/``way``/``waad`` statement clitic
+in the immediately preceding clause. Disjoint person sets mean only that a
+subject switch requires context: Green's source example itself coordinates a
+1sg first clause with 3sg masculine ``buuna`` in the second clause. The checker
+therefore never treats a subject switch as a grammatical agreement error.
+
 All executable connective forms require an overt comma or semicolon establishing
-a preceding clause. The checker never generates an unattested clitic+``-na``
-paradigm, never infers the antecedent of the subject clitic, and never rewrites a
-connective focus form automatically.
+a preceding clause. Analysis is bounded to the immediately following clause so a
+later connective cannot be incorrectly attached to an earlier comma. The checker
+never generates an unattested clitic+``-na`` paradigm, never infers the
+antecedent of the subject clitic, and never rewrites a connective focus form
+automatically.
 """
 
 from __future__ import annotations
@@ -27,10 +36,16 @@ from src.subject_focus_agreement import analyze_subject_focus_agreement
 
 TOKEN_RE = re.compile(r"[^\W\d_]+(?:['’][^\W\d_]+)*", flags=re.UNICODE)
 CLAUSE_BOUNDARY_RE = re.compile(r"[,;]")
+LEFT_CLAUSE_BOUNDARY_RE = re.compile(r"[,;.!?]")
 CONNECTIVE_FOCUS_PARTICLES = {"ayaana": "ayaa", "baana": "baa"}
 CONNECTIVE_FOCUS_CLITICS = {
     "buuna": ("buu", ("3sg_m",)),
     "beyna": ("bay", ("3sg_f", "3pl")),
+}
+STATEMENT_SUBJECT_CLITICS = {
+    "wuu": ("3sg_m",),
+    "way": ("3sg_f", "3pl"),
+    "waad": ("2sg", "2pl"),
 }
 MAX_FINITE_GAP = 4
 
@@ -67,13 +82,74 @@ class ConnectiveCliticFocusAnalysis:
     agreement_agrees: bool | None = None
     conjunction: str | None = None
     boundary: str | None = None
+    left_subject_clitic: str | None = None
+    left_subject_persons: tuple[str, ...] = ()
+    same_subject_continuity_agrees: bool | None = None
     evidence: str | None = None
     rule_id: str = "GRAM-CONNFOCUS-006"
+    continuity_rule_id: str | None = None
     note: str = ""
 
 
 def _normalized_base_particle(surface: str) -> str | None:
     return CONNECTIVE_FOCUS_PARTICLES.get(surface.casefold())
+
+
+def _bounded_clause_tail(sentence: str, boundary_match: re.Match[str]) -> str:
+    """Return only the clause immediately following this comma/semicolon."""
+    tail = sentence[boundary_match.end() :]
+    next_boundary = LEFT_CLAUSE_BOUNDARY_RE.search(tail)
+    if next_boundary is not None:
+        tail = tail[: next_boundary.start()]
+    return tail.strip()
+
+
+def _immediate_left_clause(text: str) -> str:
+    """Return the text after the last earlier clause/sentence boundary."""
+    boundaries = list(LEFT_CLAUSE_BOUNDARY_RE.finditer(text))
+    if not boundaries:
+        return text
+    return text[boundaries[-1].end() :]
+
+
+def _nearest_left_statement_subject_context(
+    text: str,
+) -> tuple[str | None, tuple[str, ...]]:
+    """Return a reviewed statement subject clitic from the immediate left clause."""
+    tokens = TOKEN_RE.findall(_immediate_left_clause(text))
+    for token in reversed(tokens):
+        persons = STATEMENT_SUBJECT_CLITICS.get(token.casefold())
+        if persons is not None:
+            return token, persons
+    return None, ()
+
+
+def _continuity_value(
+    left_subject_persons: tuple[str, ...],
+    right_subject_persons: tuple[str, ...],
+) -> bool | None:
+    if not left_subject_persons or not right_subject_persons:
+        return None
+    return any(person in right_subject_persons for person in left_subject_persons)
+
+
+def _continuity_note(continuity: bool | None) -> str:
+    if continuity is True:
+        return (
+            "The immediately preceding clause contains a reviewed statement subject "
+            "clitic compatible with the right focus-connective subject person set, so "
+            "same-subject continuation is possible but not proved."
+        )
+    if continuity is False:
+        return (
+            "The immediately preceding clause contains a reviewed statement subject "
+            "clitic with a disjoint person set. A subject switch can be grammatical "
+            "with connective -na and therefore requires context rather than correction."
+        )
+    return (
+        "No reviewed wuu/way/waad statement subject clitic was available in the "
+        "immediately preceding clause, so antecedent continuity remains unjudged."
+    )
 
 
 def analyze_connective_subject_focus(sentence: str) -> ConnectiveFocusAnalysis:
@@ -85,7 +161,7 @@ def analyze_connective_subject_focus(sentence: str) -> ConnectiveFocusAnalysis:
     unsafe before broader clause segmentation exists.
     """
     for boundary_match in CLAUSE_BOUNDARY_RE.finditer(sentence):
-        tail = sentence[boundary_match.end() :].strip()
+        tail = _bounded_clause_tail(sentence, boundary_match)
         tokens = TOKEN_RE.findall(tail)
         if len(tokens) < 3:
             continue
@@ -160,12 +236,23 @@ def analyze_connective_clitic_focus(sentence: str) -> ConnectiveCliticFocusAnaly
     intervening tokens may precede the finite verb. The function does not assign
     a semantic role to that focused phrase. It checks only the subject person
     already encoded by the reviewed focus clitic against exact finite morphology.
+
+    Subject continuity is a separate discourse signal. Only a reviewed
+    ``wuu``/``way``/``waad`` in the immediately preceding clause may supply the
+    left person set. Bare subject-focus ``baa/ayaa``, ambiguous ``baan``, earlier
+    non-adjacent clauses, and unmodeled antecedents remain unjudged.
     """
     for boundary_match in CLAUSE_BOUNDARY_RE.finditer(sentence):
-        tail = sentence[boundary_match.end() :].strip()
+        tail = _bounded_clause_tail(sentence, boundary_match)
         tokens = TOKEN_RE.findall(tail)
         if len(tokens) < 3:
             continue
+
+        left_subject_clitic, left_subject_persons = (
+            _nearest_left_statement_subject_context(
+                sentence[: boundary_match.start()]
+            )
+        )
 
         max_clitic_index = min(len(tokens) - 1, 5)
         for clitic_index in range(1, max_clitic_index):
@@ -176,6 +263,8 @@ def analyze_connective_clitic_focus(sentence: str) -> ConnectiveCliticFocusAnaly
 
             base_focus_clitic, subject_persons = profile
             focused_phrase = tuple(tokens[:clitic_index])
+            continuity = _continuity_value(left_subject_persons, subject_persons)
+            continuity_note = _continuity_note(continuity)
             verb_candidates = tokens[
                 clitic_index + 1 : clitic_index + 1 + MAX_FINITE_GAP + 1
             ]
@@ -200,14 +289,23 @@ def analyze_connective_clitic_focus(sentence: str) -> ConnectiveCliticFocusAnaly
                     agreement_agrees=agrees,
                     conjunction="-na",
                     boundary=boundary_match.group(0),
-                    evidence="source_backed_focus_subject_clitic_plus_conjunction_na+exact_reviewed_finite_morphology",
+                    left_subject_clitic=left_subject_clitic,
+                    left_subject_persons=left_subject_persons,
+                    same_subject_continuity_agrees=continuity,
+                    evidence=(
+                        "source_backed_focus_subject_clitic_plus_conjunction_na"
+                        "+exact_reviewed_finite_morphology"
+                        "+immediate_left_statement_subject_continuity"
+                    ),
                     rule_id="GRAM-CONNFOCUS-007",
+                    continuity_rule_id="GRAM-CONNFOCUS-009",
                     note=(
-                        f"{particle} is a reviewed connective focus form whose base subject-clitic "
-                        f"focus form is {base_focus_clitic}; only connective -na is removed "
-                        "conceptually. Agreement is checked between the encoded subject person(s) "
-                        "and an exact reviewed finite verb. The antecedent and semantic role of the "
-                        "focused phrase are not inferred. No automatic rewrite."
+                        f"{particle} is a reviewed connective focus form whose base "
+                        f"subject-clitic focus form is {base_focus_clitic}; only connective "
+                        "-na is removed conceptually. Agreement is checked between the "
+                        "encoded subject person(s) and an exact reviewed finite verb. "
+                        f"{continuity_note} The semantic role of the focused phrase and "
+                        "the identity of any antecedent are not inferred. No automatic rewrite."
                     ),
                 )
 
@@ -223,12 +321,20 @@ def analyze_connective_clitic_focus(sentence: str) -> ConnectiveCliticFocusAnaly
                 agreement_agrees=None,
                 conjunction="-na",
                 boundary=boundary_match.group(0),
-                evidence="source_backed_focus_subject_clitic_plus_conjunction_na+unreviewed_predicate",
+                left_subject_clitic=left_subject_clitic,
+                left_subject_persons=left_subject_persons,
+                same_subject_continuity_agrees=continuity,
+                evidence=(
+                    "source_backed_focus_subject_clitic_plus_conjunction_na"
+                    "+unreviewed_predicate+immediate_left_statement_subject_continuity"
+                ),
                 rule_id="GRAM-CONNFOCUS-006",
+                continuity_rule_id="GRAM-CONNFOCUS-009",
                 note=(
-                    f"{particle} is a reviewed connective focus form, but no exact reviewed finite "
-                    "verb was found in the local predicate window. Agreement remains unjudged; no "
-                    "verb form or antecedent is guessed."
+                    f"{particle} is a reviewed connective focus form, but no exact reviewed "
+                    "finite verb was found in the local predicate window. Local agreement "
+                    f"remains unjudged. {continuity_note} No verb form, semantic role, "
+                    "antecedent identity, or automatic rewrite is guessed."
                 ),
             )
 
