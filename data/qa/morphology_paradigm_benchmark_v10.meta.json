@@ -2,8 +2,8 @@
   "benchmark_version": "v10",
   "benchmark_name": "Independent Conjugation-2A finite present morphology challenge v10",
   "manifest_path": "data/qa/morphology_paradigm_benchmark_v10.jsonl",
-  "manifest_git_blob_sha": null,
-  "freeze_commit": null,
+  "manifest_git_blob_sha": "f71e1197eb8c2d2ad4e07faddcc3195dfe3bd62d",
+  "freeze_commit": "2fe3ea5077fe9f94d54b0f390f2f5e312f0de7d6",
   "pre_freeze_runtime_commit": "8ab922fa00f71367fe07394d9f40e2041bf08c40",
   "source_family": "Hersi 2022 Waan ku salaamay 1",
   "publisher": "Liban Ali Hersi / University of Helsinki-hosted teaching materials",
@@ -18,8 +18,22 @@
   "positive_unique_surface_count": 10,
   "unknown_case_count": 8,
   "total_case_count": 22,
-  "pre_freeze_overlap_status": "unmeasured",
-  "measured_result": null,
+  "pre_freeze_overlap_status": "measured",
+  "measured_result": {
+    "full_test_suite": "1058/1058 passed",
+    "somali_ai_combined_positive_surface_recognition": "0/10",
+    "somali_ai_master_positive_surface_recognition": "0/10",
+    "somali_ai_combined_deep_feature_rows": "0/14",
+    "somali_ai_combined_conjugation_2a_matches": "0/10",
+    "somali_ai_combined_present_tense_matches": "0/10",
+    "somali_ai_syncretic_surfaces_preserved": "0/4",
+    "somali_ai_reviewed_exact_positive_surface_recognition": "0/10",
+    "somali_ai_reviewed_rule_derived_positive_surface_recognition": "0/10",
+    "unknown_safety": "8/8 for combined runtime and master exact",
+    "tested_head_commit": "c3355ef8c11faee2a2fa63753bbd7b6dcf63007c",
+    "tested_pull_request_merge_commit": "bea6838d90755f2ec635b270ba4fc951d52df9fd",
+    "workflow_run_id": 33450477266
+  },
   "benchmark_policy": {
     "answers_are_evaluation_only": true,
     "runtime_rule_learning_from_v10_allowed": false,
@@ -38,5 +52,5 @@
     "independent_of_saeed_development": true,
     "independent_of_puglielli_mansuur_stage1h_development": true
   },
-  "notes": "Frozen after Stage 1H merged. Positive rows are only the two full Conjugation-2A present paradigms explicitly printed in Hersi exercise 7.4: nadiifi and qurxi. The source prints seven person slots for each lemma; because 1sg=3sg masculine and 2sg=3sg feminine, the 14 positive rows occupy 10 unique surfaces. The same source set's wordlist explicitly classifies both lemmas as v2a, so the conjugation label is source-backed rather than inferred from spelling. Hersi is evaluation-only for v10 answers and may not be used to authorize runtime rules targeting these forms after freeze."
+  "notes": "Frozen after Stage 1H merged. Positive rows are only the two full Conjugation-2A present paradigms explicitly printed in Hersi exercise 7.4: nadiifi and qurxi. The source prints seven person slots for each lemma; because 1sg=3sg masculine and 2sg=3sg feminine, the 14 positive rows occupy 10 unique surfaces. The same source set's wordlist explicitly classifies both lemmas as v2a, so the conjugation label is source-backed rather than inferred from spelling. The first post-freeze measurement found zero combined or master positive-surface hits, zero exact-reviewed or rule-derived hits, 0/14 complete deep-feature rows, 0/4 syncretic surfaces preserved, and 8/8 unknown safety. Hersi remains evaluation-only and may not be used to authorize runtime rules targeting v10 forms."
 }
