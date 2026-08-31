@@ -1,18 +1,18 @@
 """Conservative agreement analysis for reviewed Somali subject-focus clauses.
 
 This module distinguishes true subject focus from the non-subject/object-focus
-patterns handled elsewhere. Initial executable scope is exact reviewed evidence
-for::
+patterns handled elsewhere. Initial executable scope is exact reviewed lexical
+evidence for::
 
     Cali baa yimid.
     Maryan baa qososhay.
 
-Bare ``baa`` is licensed because the noun immediately before it is itself the
-focused subject. Proper-name person/gender is never guessed: only subjects
-listed in the reviewed rule data are judged. Predicate agreement comes from the
-shared exact finite-morphology bridge when available, with exact sentence-level
-fallback evidence for reviewed surfaces such as ``qososhay``. No unseen forms
-are derived and no automatic rewrite is produced.
+and a source-backed particle-level generalization from bare ``baa`` to bare
+``ayaa`` in the same subject-focus slot. Proper-name person/gender is never
+guessed: only subjects listed in the reviewed rule data are judged. Predicate
+agreement comes from the shared exact finite-morphology bridge when available,
+with exact sentence-level fallback evidence for reviewed surfaces such as
+``qososhay``. No unseen forms are derived and no automatic rewrite is produced.
 """
 
 from __future__ import annotations
@@ -52,15 +52,30 @@ def _load_records() -> list[dict]:
     ]
 
 
-def _subject_profiles() -> dict[str, tuple[str, str]]:
-    profiles: dict[str, tuple[str, str]] = {}
+def _subject_profiles() -> dict[str, tuple[str, str, tuple[str, ...]]]:
+    profiles: dict[str, tuple[str, str, tuple[str, ...]]] = {}
     for record in _load_records():
-        if record.get("category") != "subject_focus_baa":
+        if record.get("category") not in {"subject_focus_particle", "subject_focus_baa"}:
             continue
         subject = record.get("subject")
         person = record.get("subject_person")
-        if isinstance(subject, str) and isinstance(person, str):
-            profiles[subject.casefold()] = (person, record.get("id", "GRAM-SUBJFOCUS-001"))
+        particles = record.get("focus_particles")
+        if not isinstance(particles, list):
+            legacy_particle = record.get("focus_particle")
+            particles = [legacy_particle] if isinstance(legacy_particle, str) else []
+        normalized_particles = tuple(
+            particle.casefold() for particle in particles if isinstance(particle, str)
+        )
+        if (
+            isinstance(subject, str)
+            and isinstance(person, str)
+            and normalized_particles
+        ):
+            profiles[subject.casefold()] = (
+                person,
+                record.get("id", "GRAM-SUBJFOCUS-001"),
+                normalized_particles,
+            )
     return profiles
 
 
@@ -78,26 +93,25 @@ def _reviewed_predicate_persons(surface: str) -> tuple[str, ...]:
 
 
 def analyze_subject_focus_agreement(sentence: str) -> SubjectFocusAgreementAnalysis:
-    """Analyze exact reviewed ``FOCUSED_SUBJECT + baa + predicate`` agreement.
+    """Analyze exact reviewed ``FOCUSED_SUBJECT + baa/ayaa + predicate`` agreement.
 
-    Only an immediately adjacent reviewed proper-name subject plus bare ``baa``
-    enters this rule. A known exact finite verb is checked through shared
-    morphology; otherwise an exact reviewed sentence-level predicate surface may
-    supply person evidence. Unknown predicates remain unjudged rather than being
-    guessed.
+    Only an immediately adjacent reviewed proper-name subject plus a particle
+    licensed in that subject's rule record enters this rule. A known exact finite
+    verb is checked through shared morphology; otherwise an exact reviewed
+    sentence-level predicate surface may supply person evidence. Unknown
+    predicates remain unjudged rather than being guessed.
     """
     tokens = TOKEN_RE.findall(sentence)
     if len(tokens) < 3:
         return SubjectFocusAgreementAnalysis(recognized=False)
 
     subject, particle, predicate = tokens[0], tokens[1], tokens[2]
-    if particle.casefold() != "baa":
-        return SubjectFocusAgreementAnalysis(recognized=False)
-
     profile = _subject_profiles().get(subject.casefold())
     if profile is None:
         return SubjectFocusAgreementAnalysis(recognized=False)
-    expected_person, rule_id = profile
+    expected_person, rule_id, allowed_particles = profile
+    if particle.casefold() not in allowed_particles:
+        return SubjectFocusAgreementAnalysis(recognized=False)
 
     finite = analyze_reviewed_finite_verb(predicate)
     if finite.recognized and finite.persons:
@@ -113,9 +127,10 @@ def analyze_subject_focus_agreement(sentence: str) -> SubjectFocusAgreementAnaly
             evidence="exact_reviewed_finite_morphology",
             rule_id=rule_id,
             note=(
-                "The noun immediately before baa is the reviewed focused subject. Bare baa is "
-                "licensed in this subject-focus structure; agreement is checked against exact "
-                "reviewed finite morphology and no subject clitic is required by this rule."
+                "The noun immediately before the reviewed baa/ayaa particle is the focused "
+                "subject. Bare baa or bare ayaa is licensed in this subject-focus structure; "
+                "agreement is checked against exact reviewed finite morphology and no subject "
+                "clitic is required by this rule."
             ),
         )
 
@@ -133,9 +148,9 @@ def analyze_subject_focus_agreement(sentence: str) -> SubjectFocusAgreementAnaly
             evidence="exact_native_reviewed_sentence_surface",
             rule_id=rule_id,
             note=(
-                "The noun immediately before baa is the reviewed focused subject. Predicate "
-                "person comes only from an exact native-reviewed sentence surface; no lemma or "
-                "unseen paradigm is inferred."
+                "The noun immediately before the reviewed baa/ayaa particle is the focused "
+                "subject. Predicate person comes only from an exact native-reviewed sentence "
+                "surface; no lemma or unseen paradigm is inferred."
             ),
         )
 
