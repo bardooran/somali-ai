@@ -34,6 +34,22 @@ def test_iibsan_is_an_exact_reviewed_habitual_stem_for_iibso():
     assert candidate.features["tense_aspect"] == "tagto_caadaley"
 
 
+def test_raadin_is_exact_reviewed_class2_habitual_stem_for_raadi():
+    candidates = [
+        candidate
+        for candidate in analyze_surface_form("raadin")
+        if candidate.analysis_type == "past_habitual_stem"
+    ]
+    assert len(candidates) == 1
+    candidate = candidates[0]
+    assert candidate.lemma == "raadi"
+    assert candidate.features["conjugation_class"] == "II"
+    assert candidate.features["form"] == "infinitive"
+    assert candidate.features["possible_use"] == "past_habitual_with_auxiliary"
+    assert candidate.features["tense_aspect"] == "tagto_caadaley"
+    assert candidate.status == "source_backed_context_required"
+
+
 def test_gothenburg_tone_marked_heesi_evidence_is_not_silently_normalized():
     assert not any(
         candidate.analysis_type == "past_habitual_stem"
@@ -109,6 +125,47 @@ def test_plural_rejects_singular_habitual_auxiliary():
     assert result.agrees is False
 
 
+def test_class2_raadin_masculine_habitual_agrees_on_new_sentence():
+    result = analyze_past_habitual_auxiliary_agreement(
+        "Ninku wuu raadin jiray shaqo."
+    )
+    assert result.recognized
+    assert result.habitual_stem == "raadin"
+    assert result.habitual_lemma == "raadi"
+    assert result.expected_person == "3sg_m"
+    assert set(result.auxiliary_persons) == {"1sg", "3sg_m"}
+    assert result.agrees is True
+
+
+def test_class2_raadin_feminine_rejects_masculine_auxiliary_on_new_sentence():
+    result = analyze_past_habitual_auxiliary_agreement(
+        "Gabadhu way raadin jiray buugga."
+    )
+    assert result.recognized
+    assert result.habitual_lemma == "raadi"
+    assert result.expected_person == "3sg_f"
+    assert set(result.auxiliary_persons) == {"1sg", "3sg_m"}
+    assert result.agrees is False
+
+
+def test_class2_raadin_plural_habitual_agrees_on_new_sentence():
+    result = analyze_past_habitual_auxiliary_agreement(
+        "Macallimiintu way raadin jireen ardayda."
+    )
+    assert result.recognized
+    assert result.habitual_lemma == "raadi"
+    assert result.expected_person == "3pl"
+    assert result.auxiliary_persons == ("3pl",)
+    assert result.agrees is True
+
+
+def test_class2_finite_past_raadiyay_is_not_reinterpreted_as_habitual_infinitive():
+    result = analyze_past_habitual_auxiliary_agreement(
+        "Ninku wuu raadiyay jiray shaqo."
+    )
+    assert result.recognized is False
+
+
 def test_future_auxiliary_after_reviewed_iibsan_stem_is_left_unjudged_here():
     result = analyze_past_habitual_auxiliary_agreement(
         "Ninku wuu iibsan doonaa hilibka."
@@ -144,6 +201,14 @@ def _run_checker(sentence: str) -> str:
 
 def test_cli_reports_iibsan_habitual_auxiliary_conflict_without_autofix():
     sentence = "Gabadhu way iibsan jiray rootiga."
+    output = _run_checker(sentence)
+    assert "possible past habitual auxiliary agreement conflict" in output
+    assert "Expected 3sg_f" in output
+    assert f"Safe corrected text:\n{sentence}" in output
+
+
+def test_cli_reports_raadin_habitual_auxiliary_conflict_without_autofix():
+    sentence = "Gabadhu way raadin jiray buugga."
     output = _run_checker(sentence)
     assert "possible past habitual auxiliary agreement conflict" in output
     assert "Expected 3sg_f" in output
