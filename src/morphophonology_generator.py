@@ -50,6 +50,12 @@ def _apply_conj2_processes(
     if agreement == "t" and lemma.endswith("i") and "i_t_assibilation" in processes:
         return lemma + "s" + tam, "i_t_assibilation"
     if (
+        agreement == "n"
+        and lemma.endswith("i")
+        and "i_n_weak_causative_manner_alternation" in processes
+    ):
+        return lemma + "nn" + tam, "i_n_weak_causative_manner_alternation"
+    if (
         not agreement
         and lemma.endswith("i")
         and tam[:1].lower() in {"a", "e", "i", "o", "u"}
