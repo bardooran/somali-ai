@@ -3,25 +3,36 @@
   "status": "reviewed_rule_derived",
   "part_of_speech": "verb",
   "conjugation_class": "2A",
-  "scope": "finite_present_only",
+  "scope": "finite_present_and_past",
   "open_class_generation": false,
   "correction_authority": false,
   "present_morphology": {
     "2sg": {"agreement": "t", "tam": "aa"},
     "3sg_f": {"agreement": "t", "tam": "aa"}
   },
+  "past_morphology": {
+    "2sg": {"agreement": "t", "tam": "ay"}
+  },
   "processes": {
     "i_t_assibilation": {
       "description": "A t-initial person-agreement marker surfaces as s after an i-final verb stem.",
-      "source": "Green & Morrison (2018), On the morphophonology of domains in Somali verbs and nouns, accepted manuscript pp. 23-24: kari+t+aa -> karisaa 'she cooks it'; the discussion states that t assibilates to s after an i-final verb stem and that this t agreement marker pertains to 2sg, 3sg feminine, and 2pl."
+      "source": "Green & Morrison (2018), accepted manuscript pp. 23-24, explicitly gives kari+t+aa -> karisaa and describes t-assibilation after i. Puglielli & Cabdallah Cumar Mansuur (1997), Grammatica della lingua somala per le scuole medie superiori, pp. 97-98 of the grammar (PDF pp. 98-99), independently states that a t-initial ending after an i-final stem changes t to s and explicitly gives wey kari-s-ay (kari+t+ay) and waad joogi-s-ay (joogi+t+ay)."
     }
   },
   "profiles": {
     "kari": {
-      "authorized_persons": ["2sg", "3sg_f"],
+      "authorized_present_persons": ["2sg", "3sg_f"],
+      "authorized_past_persons": [],
       "processes": ["i_t_assibilation"],
       "class_evidence": "Saeed (1999), Somali, uses kari as the Conjugation 2A example verb; Green & Morrison (2018) also treats kari as an i-final stem in its explicit assibilation example.",
-      "development_evidence": "Green & Morrison (2018) explicitly gives kari+t+aa -> karisaa and states that t-assibilation after i applies to the 2sg/3sg feminine/2pl t-agreement marker. This first runtime slice authorizes only the printed -t-aa surface shared by 2sg and 3sg feminine; 2pl remains ungenerated until its ending is separately reviewed."
+      "development_evidence": "Green & Morrison (2018) explicitly gives kari+t+aa -> karisaa. The runtime authorizes only the printed present -t-aa surface shared by 2sg and 3sg feminine; no kari past form or 2pl form is generated from this profile."
+    },
+    "joogi": {
+      "authorized_present_persons": [],
+      "authorized_past_persons": ["2sg"],
+      "processes": ["i_t_assibilation"],
+      "class_evidence": "Puglielli & Cabdallah Cumar Mansuur (1997), section 6.3.2.1, describes the causative -in/-i extension and treats the i-final derived stem as the locus for Conjugation-II-style suffixal sound changes.",
+      "development_evidence": "Puglielli & Cabdallah Cumar Mansuur (1997), PDF p. 99, explicitly prints waad joogi-s-ay and decomposes it as joogi+t+ay while stating that t changes to s when attached to the same kind of i-final stem. Only this printed 2sg past form is authorized."
     }
   },
   "benchmark_isolation": {
@@ -29,8 +40,9 @@
     "v6_answers_used_as_runtime_evidence": false,
     "v7_answers_used_as_runtime_evidence": false,
     "v8_answers_used_as_runtime_evidence": false,
+    "v9_answers_used_as_runtime_evidence": false,
     "frozen_benchmark_profile_lemmas_allowed": false,
-    "note": "The runtime profile is authorized from Green & Morrison plus independent conjugation classification, not from any frozen benchmark answer. Generation is finite and lemma-specific."
+    "note": "Runtime profiles are authorized from independent development sources, not frozen benchmark answers. Generation is finite, lemma-specific, tense-specific, and person-specific. Fayruus v9 remains evaluation-only."
   },
-  "notes": "First Conjugation-2 morphophonology slice. Only kari present 2sg/3sg feminine is authorized. The runtime does not infer other i-final lemmas, does not reverse-strip -saa, and grants no correction authority."
+  "notes": "Finite Conjugation-2A morphophonology only. kari is present 2sg/3sg feminine; joogi is past 2sg only. The runtime does not infer other i-final lemmas, does not reverse-strip -saa/-say, does not fill unreviewed paradigm cells, and grants no correction authority."
 }
