@@ -2,7 +2,7 @@
 
 This module implements only source-backed structures where omission of the
 subject clitic is explicitly described as invalid. It does not rewrite text.
-Optional clitic environments and true subject-focus ``SUBJECT + baa`` are
+Optional clitic environments and true subject-focus ``SUBJECT + baa/ayaa`` are
 intentionally kept separate.
 """
 
@@ -68,8 +68,9 @@ def scan_focus_particle_clitics(text: str) -> list[FocusParticleFinding]:
         SUBJECT + focused material + baa/ayaa + following predicate material
 
     At least one token must occur between the explicit subject and the focus
-    particle. This is crucial: adjacent ``Cali baa yimid`` and ``Maryan baa
-    qososhay`` are true subject-focus examples and must not be flagged here.
+    particle. This is crucial: adjacent ``Cali baa yimid``, ``Cali ayaa yimid``,
+    ``Maryan baa qososhay`` and ``Maryan ayaa qososhay`` are true subject-focus
+    examples and must not be flagged here.
 
     First/second-person reviewed subjects follow the existing SLS rule. For
     third-person subjects, execution is conservative: subject person/number must
@@ -98,7 +99,7 @@ def scan_focus_particle_clitics(text: str) -> list[FocusParticleFinding]:
                 continue
 
             # Require predicate material after the particle; sentence-final baa
-            # alone is not enough evidence for this rule.
+            # or ayaa alone is not enough evidence for this rule.
             if particle_index + 1 >= len(tokens):
                 break
 
@@ -106,8 +107,8 @@ def scan_focus_particle_clitics(text: str) -> list[FocusParticleFinding]:
                 token.group(0).casefold() for token in tokens[index + 1 : particle_index]
             ]
             if reviewed_third and not first_second:
-                # Do not turn every third-person non-adjacent baa phrase into an
-                # object-focus claim. Require a directly reviewed focused-object
+                # Do not turn every third-person non-adjacent baa/ayaa phrase into
+                # an object-focus claim. Require a directly reviewed focused-object
                 # head in the intervening material.
                 if not focused_tokens or focused_tokens[0] not in REVIEWED_FOCUSED_OBJECT_HEADS:
                     continue
@@ -115,8 +116,8 @@ def scan_focus_particle_clitics(text: str) -> list[FocusParticleFinding]:
                 note = (
                     "Reviewed third-person subject precedes a separately focused object. "
                     "The reviewed structure requires the matching subject clitic (for example "
-                    "buu/bay) rather than bare baa/ayaa. True adjacent subject focus is a "
-                    "different construction."
+                    "buu/bay/ayuu/ayay) rather than bare baa/ayaa. True adjacent subject focus "
+                    "is a different construction."
                 )
             else:
                 rule_id = "GRAM-FOCUS-004"
