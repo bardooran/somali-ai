@@ -11,6 +11,12 @@ def _rows() -> list[dict]:
     return [json.loads(line) for line in BENCHMARK.read_text(encoding="utf-8").splitlines() if line.strip()]
 
 
+def _git_blob_sha(path: Path) -> str:
+    payload = path.read_bytes()
+    header = f"blob {len(payload)}\0".encode("ascii")
+    return hashlib.sha1(header + payload).hexdigest()
+
+
 def test_v5_shape_and_source_family_are_frozen() -> None:
     rows = _rows()
     positives = [row for row in rows if row["benchmark_role"] == "positive"]
@@ -50,10 +56,9 @@ def test_v5_preserves_known_syncretism() -> None:
     assert {row["person"] for row in heestay} == {"2sg", "3sg_f"}
 
 
-def test_v5_manifest_hash_is_versioned_in_metadata_file() -> None:
+def test_v5_manifest_identity_is_versioned_in_metadata_file() -> None:
     metadata = json.loads(Path("data/qa/morphology_paradigm_benchmark_v5.meta.json").read_text(encoding="utf-8"))
-    digest = hashlib.sha256(BENCHMARK.read_bytes()).hexdigest()
-    assert metadata["manifest_sha256"] == digest
+    assert metadata["manifest_git_blob_sha"] == _git_blob_sha(BENCHMARK)
     assert metadata["benchmark_version"] == "v5"
     assert metadata["positive_case_count"] == 37
     assert metadata["unknown_case_count"] == 8
