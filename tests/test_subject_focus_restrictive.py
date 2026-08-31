@@ -101,13 +101,13 @@ def test_exact_native_subject_focus_surface_still_outranks_general_paradigm():
     assert result.evidence == "exact_native_reviewed_sentence_surface"
 
 
-def test_unmodeled_present_focus_is_not_judged_from_full_paradigm():
-    plural = analyze_subject_focus_agreement("Carruurta ayaa yimaaddaan.")
+def test_unmodeled_past_progressive_focus_is_not_judged_from_full_paradigm():
+    plural = analyze_subject_focus_agreement("Carruurta ayaa imanayeen.")
     assert plural.recognized is True
     assert plural.agrees is None
     assert "not_yet_modeled" in (plural.evidence or "")
 
-    singular = analyze_subject_focus_agreement("Wiilka ayaa yimaaddaa.")
+    singular = analyze_subject_focus_agreement("Wiilka ayaa imanayay.")
     assert singular.recognized is True
     assert singular.agrees is None
     assert "not_yet_modeled" in (singular.evidence or "")
