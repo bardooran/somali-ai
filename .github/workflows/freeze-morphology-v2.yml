@@ -10,6 +10,9 @@ on:
       - ".github/workflows/freeze-morphology-v2.yml"
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   freeze:
     runs-on: ubuntu-latest
@@ -41,6 +44,21 @@ jobs:
             exit 1
           fi
 
+      - name: Verify frozen v2 identity
+        run: |
+          echo "79b3534f7b51c1cf8c963ba6515e028f7cc93ae2b771297847508867a889851e  benchmark_results/morphology_challenge_v2.jsonl" | sha256sum -c -
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          meta = json.loads(Path('benchmark_results/morphology_challenge_v2.meta.json').read_text(encoding='utf-8'))
+          assert meta['manifest_sha256'] == '79b3534f7b51c1cf8c963ba6515e028f7cc93ae2b771297847508867a889851e'
+          assert meta['case_count'] == 136
+          assert meta['positive_case_count'] == 120
+          assert meta['unknown_probe_count'] == 16
+          assert meta['selection_is_analyzer_blind'] is True
+          assert meta['definitions_copied'] is False
+          PY
+
       - name: Upload frozen v2 candidate manifest
         uses: actions/upload-artifact@v4
         with:
@@ -48,3 +66,18 @@ jobs:
           path: benchmark_results/
           if-no-files-found: error
           retention-days: 30
+
+      - name: Commit exact frozen v2 manifest
+        run: |
+          mkdir -p data/qa
+          cp benchmark_results/morphology_challenge_v2.jsonl data/qa/morphology_challenge_v2.jsonl
+          cp benchmark_results/morphology_challenge_v2.meta.json data/qa/morphology_challenge_v2.meta.json
+          git add data/qa/morphology_challenge_v2.jsonl data/qa/morphology_challenge_v2.meta.json
+          if git diff --cached --quiet; then
+            echo "Frozen v2 manifest already committed; nothing to do."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Freeze morphology challenge v2 dataset"
+          git push origin HEAD:main
