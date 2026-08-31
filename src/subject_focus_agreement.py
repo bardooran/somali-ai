@@ -1,18 +1,10 @@
 """Conservative agreement analysis for reviewed Somali subject-focus clauses.
 
-This module distinguishes true subject focus from the non-subject/object-focus
-patterns handled elsewhere. Initial executable scope is exact reviewed lexical
-evidence for::
-
-    Cali baa yimid.
-    Maryan baa qososhay.
-
-and a source-backed particle-level generalization from bare ``baa`` to bare
-``ayaa`` in the same subject-focus slot. Proper-name person/gender is never
-guessed: only subjects listed in the reviewed rule data are judged. Predicate
-agreement comes from the shared exact finite-morphology bridge when available,
-with exact sentence-level fallback evidence for reviewed surfaces such as
-``qososhay``. No unseen forms are derived and no automatic rewrite is produced.
+True subject focus is kept separate from non-subject/object focus. Proper names
+are licensed only from exact reviewed profiles. Common nouns are licensed only
+when their absolute focus form can be paired with an already reviewed ``-u``
+subject form. Focused plurals are recognized but left unjudged until the
+restrictive/reduced focus-verb paradigm is modeled explicitly.
 """
 
 from __future__ import annotations
@@ -22,10 +14,13 @@ import re
 from dataclasses import dataclass
 from pathlib import Path
 
+from src.noun_gender_agreement import REVIEWED_PLURAL_FORMS, REVIEWED_SINGULAR_FORMS
+from src.noun_subject_case import expected_subject_form
 from src.reviewed_finite_verb import analyze_reviewed_finite_verb
 
 RULE_PATH = Path("rules/grammar/subject_focus_agreement.jsonl")
 TOKEN_RE = re.compile(r"[^\W\d_]+(?:['’][^\W\d_]+)*", flags=re.UNICODE)
+FOCUS_PARTICLES = {"baa", "ayaa"}
 
 
 @dataclass(frozen=True)
@@ -66,17 +61,30 @@ def _subject_profiles() -> dict[str, tuple[str, str, tuple[str, ...]]]:
         normalized_particles = tuple(
             particle.casefold() for particle in particles if isinstance(particle, str)
         )
-        if (
-            isinstance(subject, str)
-            and isinstance(person, str)
-            and normalized_particles
-        ):
+        if isinstance(subject, str) and isinstance(person, str) and normalized_particles:
             profiles[subject.casefold()] = (
                 person,
                 record.get("id", "GRAM-SUBJFOCUS-001"),
                 normalized_particles,
             )
     return profiles
+
+
+def _common_noun_profile(surface: str) -> tuple[str | None, str, str] | None:
+    """Map an absolute focus form to exact reviewed subject evidence only."""
+    reviewed_subject = expected_subject_form(surface)
+    if reviewed_subject is None:
+        return None
+    folded = reviewed_subject.casefold()
+
+    gender = REVIEWED_SINGULAR_FORMS.get(folded)
+    if gender == "masculine":
+        return "3sg_m", "GRAM-SUBJFOCUS-005", "reviewed_common_noun_absolute_pair"
+    if gender == "feminine":
+        return "3sg_f", "GRAM-SUBJFOCUS-005", "reviewed_common_noun_absolute_pair"
+    if folded in REVIEWED_PLURAL_FORMS:
+        return None, "GRAM-SUBJFOCUS-006", "plural_focus_restrictive_paradigm_pending"
+    return None
 
 
 def _reviewed_predicate_persons(surface: str) -> tuple[str, ...]:
@@ -93,25 +101,51 @@ def _reviewed_predicate_persons(surface: str) -> tuple[str, ...]:
 
 
 def analyze_subject_focus_agreement(sentence: str) -> SubjectFocusAgreementAnalysis:
-    """Analyze exact reviewed ``FOCUSED_SUBJECT + baa/ayaa + predicate`` agreement.
+    """Analyze reviewed ``FOCUSED_SUBJECT + baa/ayaa + predicate`` agreement.
 
-    Only an immediately adjacent reviewed proper-name subject plus a particle
-    licensed in that subject's rule record enters this rule. A known exact finite
-    verb is checked through shared morphology; otherwise an exact reviewed
-    sentence-level predicate surface may supply person evidence. Unknown
-    predicates remain unjudged rather than being guessed.
+    Proper names require an exact rule profile. Common nouns require an absolute
+    form whose paired ``-u`` subject surface is already explicitly reviewed.
+    Singular common nouns can therefore reuse exact 3sg masculine/feminine
+    finite morphology. Reviewed plurals are recognized but left unjudged because
+    focused subjects use a restrictive verb paradigm that is not modeled yet.
     """
     tokens = TOKEN_RE.findall(sentence)
     if len(tokens) < 3:
         return SubjectFocusAgreementAnalysis(recognized=False)
 
     subject, particle, predicate = tokens[0], tokens[1], tokens[2]
+    particle_key = particle.casefold()
+
     profile = _subject_profiles().get(subject.casefold())
-    if profile is None:
-        return SubjectFocusAgreementAnalysis(recognized=False)
-    expected_person, rule_id, allowed_particles = profile
-    if particle.casefold() not in allowed_particles:
-        return SubjectFocusAgreementAnalysis(recognized=False)
+    evidence = "exact_reviewed_subject_profile"
+    if profile is not None:
+        expected_person, rule_id, allowed_particles = profile
+        if particle_key not in allowed_particles:
+            return SubjectFocusAgreementAnalysis(recognized=False)
+    else:
+        if particle_key not in FOCUS_PARTICLES:
+            return SubjectFocusAgreementAnalysis(recognized=False)
+        common = _common_noun_profile(subject)
+        if common is None:
+            return SubjectFocusAgreementAnalysis(recognized=False)
+        expected_person, rule_id, evidence = common
+        if expected_person is None:
+            return SubjectFocusAgreementAnalysis(
+                recognized=True,
+                subject=subject,
+                particle=particle,
+                predicate=predicate,
+                expected_person=None,
+                agrees=None,
+                evidence=evidence,
+                rule_id=rule_id,
+                note=(
+                    "The common-noun focused subject is linked to exact reviewed plural noun "
+                    "evidence, but focused subjects use a restrictive/reduced verb paradigm. "
+                    "Plural predicate agreement is therefore left unjudged until that paradigm "
+                    "is modeled explicitly."
+                ),
+            )
 
     finite = analyze_reviewed_finite_verb(predicate)
     if finite.recognized and finite.persons:
@@ -124,13 +158,16 @@ def analyze_subject_focus_agreement(sentence: str) -> SubjectFocusAgreementAnaly
             expected_person=expected_person,
             predicate_persons=finite.persons,
             agrees=agrees,
-            evidence="exact_reviewed_finite_morphology",
+            evidence=(
+                "exact_reviewed_finite_morphology"
+                if evidence == "exact_reviewed_subject_profile"
+                else f"{evidence}+exact_reviewed_finite_morphology"
+            ),
             rule_id=rule_id,
             note=(
-                "The noun immediately before the reviewed baa/ayaa particle is the focused "
-                "subject. Bare baa or bare ayaa is licensed in this subject-focus structure; "
-                "agreement is checked against exact reviewed finite morphology and no subject "
-                "clitic is required by this rule."
+                "The noun immediately before bare baa/ayaa is the focused subject. Common-noun "
+                "focus uses the reviewed absolute/non-subject noun surface, while predicate "
+                "agreement is checked only against exact reviewed finite morphology."
             ),
         )
 
@@ -148,9 +185,9 @@ def analyze_subject_focus_agreement(sentence: str) -> SubjectFocusAgreementAnaly
             evidence="exact_native_reviewed_sentence_surface",
             rule_id=rule_id,
             note=(
-                "The noun immediately before the reviewed baa/ayaa particle is the focused "
-                "subject. Predicate person comes only from an exact native-reviewed sentence "
-                "surface; no lemma or unseen paradigm is inferred."
+                "The noun immediately before bare baa/ayaa is the focused subject. Predicate "
+                "person comes only from an exact native-reviewed surface; no unseen paradigm is "
+                "inferred."
             ),
         )
 
