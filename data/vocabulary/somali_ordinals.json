@@ -1,0 +1,49 @@
+{
+  "language": "so",
+  "dataset": "Somali Ordinal Numbers",
+  "status": "reviewed_conservative",
+  "rule": {
+    "suffix": "aad",
+    "description": "Ordinal numbers are formed with the adjectival suffix -aad, with documented stem/sound changes in word forms.",
+    "numeric_notation": ["1aad", "2aad", "36-aad"],
+    "numeric_notation_status": "reviewed_productive"
+  },
+  "exact_word_forms": [
+    {"value": 1, "forms": ["kowaad", "koowaad"], "status": "reviewed"},
+    {"value": 2, "forms": ["labaad"], "status": "reviewed"},
+    {"value": 3, "forms": ["saddexaad"], "status": "reviewed"},
+    {"value": 4, "forms": ["afraad", "afaraad"], "status": "reviewed_variants"},
+    {"value": 5, "forms": ["shanaad"], "status": "reviewed"},
+    {"value": 6, "forms": ["lixaad"], "status": "reviewed"},
+    {"value": 7, "forms": ["toddobaad"], "status": "reviewed_context_sensitive", "note": "Same surface form can also mean week; sentence context is required."},
+    {"value": 8, "forms": ["siddeedaad"], "status": "reviewed"},
+    {"value": 9, "forms": ["sagaalaad"], "status": "reviewed"},
+    {"value": 10, "forms": ["tobnaad", "tobanaad"], "status": "reviewed_variants"},
+    {"value": 11, "forms": ["kow iyo tobnaad"], "status": "reviewed"},
+    {"value": 12, "forms": ["laba iyo tobnaad", "labo iyo tobnaad"], "status": "reviewed_variants"},
+    {"value": 13, "forms": ["saddex iyo tobnaad"], "status": "reviewed"},
+    {"value": 14, "forms": ["afar iyo tobnaad"], "status": "reviewed"},
+    {"value": 15, "forms": ["shan iyo tobnaad"], "status": "reviewed"},
+    {"value": 16, "forms": ["lix iyo tobnaad"], "status": "reviewed"},
+    {"value": 17, "forms": ["toddoba iyo tobnaad"], "status": "reviewed"},
+    {"value": 18, "forms": ["siddeed iyo tobnaad"], "status": "reviewed"},
+    {"value": 19, "forms": ["sagaal iyo tobnaad"], "status": "reviewed"},
+    {"value": 20, "forms": ["labaatanaad"], "status": "reviewed"},
+    {"value": 30, "forms": ["soddonaad"], "status": "reviewed"},
+    {"value": 40, "forms": ["afartanaad"], "status": "reviewed"},
+    {"value": 50, "forms": ["kontonaad"], "status": "reviewed"},
+    {"value": 60, "forms": ["lixdanaad"], "status": "reviewed"},
+    {"value": 70, "forms": ["toddobaatanaad"], "status": "reviewed"},
+    {"value": 80, "forms": ["siddeetanaad"], "status": "reviewed"},
+    {"value": 90, "forms": ["sagaashanaad"], "status": "reviewed"},
+    {"value": 100, "forms": ["boqolaad", "boqlaad"], "status": "reviewed_variants"},
+    {"value": 1000, "forms": ["kumaad"], "status": "reviewed"}
+  ],
+  "sources": [
+    "Morgan Nilsson, Beginner's Somali Grammar / Workbook: ordinal suffix -aad and 1aad/2aad/3aad",
+    "Colloquial Somali: -aad ordinals and numeric notation such as 2aad/9aad",
+    "Harvard ELIAS Somali numbers: ordinal vocabulary through large bases",
+    "Project submission 2026-08-31"
+  ],
+  "safety": "Numeric ordinal notation is productive. Word-form generation is not open-ended: exact reviewed forms are recognized, while unseen word ordinals remain unknown until the morphophonology is safely implemented."
+}
