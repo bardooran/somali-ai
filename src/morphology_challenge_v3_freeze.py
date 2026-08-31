@@ -15,7 +15,6 @@ from pathlib import Path
 from typing import Iterable
 
 from .morphology_challenge_v2_freeze import (
-    DEFAULT_QUOTAS,
     SOMALI_LETTERS,
     SOURCE_COMMIT,
     SOURCE_REPOSITORY,
@@ -25,6 +24,18 @@ from .morphology_challenge_v2_freeze import (
 V2_MANIFEST_PATH = Path("data/qa/morphology_challenge_v2.jsonl")
 SELECTION_SEED = "somali-ai-morphology-challenge-v3-2026-08-31"
 UNKNOWN_PROBE_COUNT = 16
+
+# v2 consumed most of the small adjective inventory in the pinned Qaamuus
+# snapshot. After removing every v2 positive surface there are only six eligible
+# adjective headwords left. v3 therefore takes all six rather than weakening
+# disjointness or consulting either analyzer. The other source-only quotas stay
+# fixed. This decision is based exclusively on the pinned source inventory.
+V3_DEFAULT_QUOTAS = {
+    "noun": 48,
+    "verb": 48,
+    "adjective": 6,
+    "numeral": 8,
+}
 
 
 def v2_positive_surfaces(path: Path = V2_MANIFEST_PATH) -> set[str]:
@@ -50,7 +61,7 @@ def selection_hash(surface: str, pos: str) -> str:
 def select_pairs(
     pool: dict[tuple[str, str], list[dict]],
     excluded_surfaces: set[str],
-    quotas: dict[str, int] = DEFAULT_QUOTAS,
+    quotas: dict[str, int] = V3_DEFAULT_QUOTAS,
 ) -> tuple[tuple[str, str, str], ...]:
     selected: list[tuple[str, str, str]] = []
     excluded = {surface.casefold() for surface in excluded_surfaces}
@@ -87,7 +98,7 @@ def build_manifest(
     source_root: Path,
     *,
     v2_path: Path = V2_MANIFEST_PATH,
-    quotas: dict[str, int] = DEFAULT_QUOTAS,
+    quotas: dict[str, int] = V3_DEFAULT_QUOTAS,
     unknown_probe_count: int = UNKNOWN_PROBE_COUNT,
 ) -> tuple[list[dict], dict]:
     pool = source_pool(source_root)
@@ -168,7 +179,15 @@ def build_manifest(
 
     pool_counts = {
         pos: sum(1 for _, candidate_pos in pool if candidate_pos == pos)
-        for pos in DEFAULT_QUOTAS
+        for pos in V3_DEFAULT_QUOTAS
+    }
+    available_after_v2_counts = {
+        pos: sum(
+            1
+            for surface, candidate_pos in pool
+            if candidate_pos == pos and surface.casefold() not in excluded
+        )
+        for pos in V3_DEFAULT_QUOTAS
     }
     metadata = {
         "benchmark_version": "v3",
@@ -182,6 +201,8 @@ def build_manifest(
         "v2_positive_overlap_count": 0,
         "quotas": dict(quotas),
         "candidate_pool_type_counts": pool_counts,
+        "available_after_v2_type_counts": available_after_v2_counts,
+        "adjective_quota_policy": "use all six eligible pinned-source adjectives remaining after v2 exclusion",
         "selected_pair_count": sum(quotas.values()),
         "positive_case_count": len(ordered_surfaces),
         "unknown_probe_count": unknown_probe_count,
