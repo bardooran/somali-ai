@@ -90,7 +90,11 @@ def _to_entry(record: dict) -> VocabularyEntry:
 def _default_records() -> list[dict]:
     records: list[dict] = []
     for path in DEFAULT_VOCABULARY_PATHS:
-        records.extend(_load_jsonl(path))
+        records.extend(
+            record
+            for record in _load_jsonl(path)
+            if record.get("include_in_general_vocabulary", True)
+        )
     return records
 
 
