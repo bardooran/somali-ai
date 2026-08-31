@@ -119,7 +119,7 @@ def lookup_word(
     known = bool(entries or morphology or regional)
 
     if entries and len(entries) > 1:
-        note = "Exact headword has multiple reviewed analyses; context is required to choose among them."
+        note = "Exact headword has multiple dictionary analyses; context is required to choose among them."
     elif entries and morphology:
         note = "Exact source-backed headword and reviewed morphology evidence found."
     elif entries:
