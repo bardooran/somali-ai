@@ -34,3 +34,5 @@ def test_v8_measurement_does_not_change_runtime_or_learn_answers() -> None:
     assert integrity["benchmark_answers_are_evaluation_only"] is True
     assert integrity["runtime_rules_changed_in_measurement_step"] is False
     assert integrity["runtime_rule_learning_from_v8_allowed"] is False
+    assert value["combined"]["authority_diagnostics"]["reviewed_exact_surfaces"] == []
+    assert value["combined"]["authority_diagnostics"]["reviewed_rule_derived_surfaces"] == []
