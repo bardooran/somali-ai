@@ -13,6 +13,10 @@ Implemented source-backed scopes:
   paradigms instead reuse their explicitly sourced present surfaces;
 - affirmative present progressive: reviewed finite ``-aa`` surfaces supply the
   corresponding short-``-a`` reduced forms;
+- affirmative past progressive: exact reviewed full past-progressive surfaces
+  are reinterpreted through the same reduced person classes, while AQAAN,
+  AAL/YAAL and AHAW/AH are explicitly excluded because the reviewed school
+  grammar states that they do not have this form;
 - copular AHAW/AH present: the source-backed reduced absolutive form is invariant
   ``ah``.
 
@@ -51,6 +55,7 @@ ALL_CONTEXTUAL_PERSONS = (
 )
 
 SIMPLE_PAST_TENSE = "tagto"
+PAST_PROGRESSIVE_TENSE = "tagto_socota"
 SIMPLE_PRESENT_TENSE = "joogto_caadaley"
 PRESENT_PROGRESSIVE_TENSE = "joogto_socota"
 COPULAR_PRESENT_TENSE = "joogto"
@@ -65,6 +70,7 @@ PRESENT_REUSE_TENSES = {
 PRESENT_REUSE_LEMMAS = set(PRESENT_REUSE_TENSES)
 COPULAR_LEMMAS = {"ahaw/ah"}
 SHORT_PRESENT_SKIP_DERIVED_1PL = {"imow", "dheh"}
+PAST_PROGRESSIVE_EXCLUDED_LEMMAS = {"aqaan", "aal/yaal", "ahaw/ah"}
 
 
 @dataclass(frozen=True)
@@ -305,6 +311,12 @@ def _has_expected_short_form(lemma: str, tense: str, expected_person: str) -> bo
     return False
 
 
+def _past_progressive_supported(finite) -> bool:
+    if PAST_PROGRESSIVE_TENSE not in finite.tense_aspects:
+        return False
+    return any(lemma not in PAST_PROGRESSIVE_EXCLUDED_LEMMAS for lemma in finite.lemmas)
+
+
 def analyze_subject_focus_restrictive(
     surface: str,
     expected_person: str,
@@ -363,6 +375,30 @@ def analyze_subject_focus_restrictive(
                 "Focused subjects use the source-backed restrictive simple-past mapping. "
                 "The lexical surface remains exact reviewed morphology; only its person "
                 "interpretation changes in focus context."
+            ),
+        )
+
+    if _past_progressive_supported(finite):
+        contextual = _contextual_persons(finite.persons)
+        return SubjectFocusRestrictiveAnalysis(
+            recognized=True,
+            covered=True,
+            surface=surface,
+            expected_person=expected_person,
+            restrictive_source_person=source_person,
+            full_surface_persons=finite.persons,
+            contextual_persons=contextual,
+            lemmas=finite.lemmas,
+            tense_aspects=finite.tense_aspects,
+            agrees=expected_person in contextual,
+            paradigm="past_progressive_reuse",
+            source_full_surfaces=(surface,),
+            note=(
+                "Focused subjects use the reviewed restrictive person classes in the past "
+                "progressive while retaining exact main-clause past-progressive endings. "
+                "The ordinary surface stays unchanged globally; only its person interpretation "
+                "is reduced in true subject-focus context. AQAAN, AAL/YAAL and AHAW/AH are "
+                "excluded because the reviewed grammar states that they do not have this form."
             ),
         )
 
