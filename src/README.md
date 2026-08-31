@@ -4,31 +4,30 @@ Executable Python code for the Somali grammar foundation.
 
 ## Main responsibilities
 
-- sentence agreement analysis;
-- focus, negation, tense, aspect, mood, noun and clitic analysis;
-- conservative morphology lookup;
-- `vocabulary.py` for reviewed word lookup;
-- `numbers.py` for evidence-constrained Somali cardinal numbers;
-- `calendar_terms.py` for Gregorian months and Somali traditional seasons;
-- `datetime_terms.py` for weekdays, full Gregorian date display, relative-day lookup, durations, and reviewed relative-time phrases;
-- `age.py` for the reviewed numeric `N jir` age construction;
-- `directions.py` for exact reviewed direction/location vocabulary;
+- sentence agreement, focus, negation, tense, aspect, mood, noun, and clitic analysis;
+- conservative morphology and vocabulary lookup;
+- `numbers.py` — evidence-constrained cardinal numbers;
+- `ordinals.py` — productive numeric `N-aad` notation plus exact reviewed written ordinals;
+- `calendar_terms.py` — Gregorian months and Somali traditional seasons;
+- `datetime_terms.py` — weekdays, full dates, relative days/time, and durations;
+- `age.py` — reviewed numeric `N jir` age construction;
+- `directions.py` — reviewed direction/location vocabulary;
+- `measurements.py` — metric measurement expressions and documented Somali unit variants;
+- `function_words.py` — grammar-aware high-frequency/function-word classification;
 - regional-variant analysis.
 
-`numbers.py` does not invent arbitrary large-number phrases from an unchecked productive rule.
+## Conservative behavior
 
-`calendar_terms.py` treats Somali seasons as region-sensitive and does not mechanically translate them into Western seasons.
+`numbers.py` does not invent arbitrary large-number phrases.
 
-`datetime_terms.py` deliberately does **not** generate clock-hour translations. Somali sources show different clock conventions, including direct hour wording and a documented traditional six-hour relationship, so the convention must be established before automatic clock conversion is safe.
+`ordinals.py` recognizes numeric forms such as `1aad` and `36-aad` productively, but it does not guess unseen written-out ordinal morphophonology.
 
-`age.py` recognizes numeric `N jir` without guessing that broad social labels such as `dhallinyaro` equal one fixed age range.
+`datetime_terms.py` does not yet generate clock-hour translations automatically; the project preference is Jigjiga/Hargeisa-style direct clock wording, while other regional conventions remain separately recognizable when evidenced.
 
-`directions.py` preserves context-sensitive terms such as `bari`, `hore`, `kor`, `dhexe`, and `horta` instead of forcing one interpretation in every sentence.
+`measurements.py` recognizes units and symbols without converting values or forcing one spelling where sources support variants.
 
-## Separation rule
-
-`src/` contains **code**, not raw linguistic source material. Reviewed evidence belongs under `data/` or `rules/`; human-readable source notes belong under `sources/` or `docs/`.
+`function_words.py` is deliberately **not** a stopword remover. Somali particles, clitics, focus markers, and connectives often carry essential grammar and are marked unsafe for blind deletion.
 
 ## Safety rule
 
-Analyzer code should only make judgments that reviewed evidence supports. Unsupported word forms, numeral expressions, calendar spellings, clock conventions, regional meanings, or sentence interpretations remain unknown/context-dependent rather than guessed.
+Analyzer code should only make judgments that reviewed evidence supports. Unsupported forms, spellings, regional conventions, or sentence interpretations remain unknown/context-dependent rather than guessed.
