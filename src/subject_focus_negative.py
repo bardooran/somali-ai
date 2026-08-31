@@ -1,8 +1,8 @@
 """Conservative Somali negative true-subject-focus analysis.
 
-Negative subject focus differs from ordinary main-clause ``ma`` negation.  The
+Negative subject focus differs from ordinary main-clause ``ma`` negation. The
 embedded/subjunctive negative ``aan`` fuses with ``baa/ayaa`` and is written
-``baan/ayaan``.  Those spellings are ambiguous with subject-clitic combinations
+``baan/ayaan``. Those spellings are ambiguous with subject-clitic combinations
 in other focus constructions, so this module never interprets the marker alone.
 A negative-subject-focus reading requires an exact reviewed negative predicate.
 
@@ -26,7 +26,6 @@ from pathlib import Path
 
 from src.morphology_candidates import DEFAULT_MORPHOLOGY_PATHS
 from src.noun_gender_agreement import REVIEWED_PLURAL_FORMS, REVIEWED_SINGULAR_FORMS
-from src.noun_subject_case import expected_non_subject_form, expected_subject_form
 
 TOKEN_RE = re.compile(r"[^\W\d_]+(?:['’][^\W\d_]+)*", flags=re.UNICODE)
 NEGATIVE_FOCUS_MARKERS = {"baan", "ayaan"}
@@ -34,7 +33,17 @@ COVERED_TENSE_ASPECTS = {"tagto", "tagto_socota"}
 MAX_PREDICATE_GAP = 4
 SUBJECT_FOCUS_RULE_PATH = Path("rules/grammar/subject_focus_agreement.jsonl")
 
-# Exact published negative-focus predicate evidence.  This is sentence-level
+NON_SUBJECT_TO_SUBJECT = (
+    ("sha", "shu"),
+    ("ka", "ku"),
+    ("ga", "gu"),
+    ("ha", "hu"),
+    ("ta", "tu"),
+    ("da", "du"),
+)
+SUBJECT_TO_NON_SUBJECT = tuple((subject, non_subject) for non_subject, subject in NON_SUBJECT_TO_SUBJECT)
+
+# Exact published negative-focus predicate evidence. This is sentence-level
 # evidence only; it must not be used to invent a BAX paradigm.
 EXACT_SOURCE_PREDICATES = {
     ("cali", "bixin"): "source_exact_cali_bixin",
@@ -54,6 +63,28 @@ class SubjectFocusNegativeAnalysis:
     evidence: str | None = None
     rule_id: str = "GRAM-SUBJFOCUS-NEG-001"
     note: str = ""
+
+
+def _replace_suffix_preserving_case(form: str, source: str, target: str) -> str:
+    if not form.casefold().endswith(source):
+        return form
+    return form[: len(form) - len(source)] + target
+
+
+def _expected_subject_form(form: str) -> str | None:
+    folded = form.casefold()
+    for non_subject, subject in NON_SUBJECT_TO_SUBJECT:
+        if folded.endswith(non_subject):
+            return _replace_suffix_preserving_case(form, non_subject, subject)
+    return None
+
+
+def _expected_non_subject_form(form: str) -> str | None:
+    folded = form.casefold()
+    for subject, non_subject in SUBJECT_TO_NON_SUBJECT:
+        if folded.endswith(subject):
+            return _replace_suffix_preserving_case(form, subject, non_subject)
+    return None
 
 
 def _reviewed_proper_subjects() -> set[str]:
@@ -85,13 +116,13 @@ def _subject_case_profile(surface: str) -> tuple[bool, str, str] | None:
 
     # Wrong ordinary nominative/subject form used under focus.
     if _is_reviewed_common_subject(surface):
-        absolute = expected_non_subject_form(surface)
+        absolute = _expected_non_subject_form(surface)
         if absolute is None:
             return None
         return False, absolute, "reviewed_common_noun_wrong_focus_case"
 
     # Correct absolute form must map back to an exact reviewed subject surface.
-    nominative = expected_subject_form(surface)
+    nominative = _expected_subject_form(surface)
     if nominative is None or not _is_reviewed_common_subject(nominative):
         return None
     return True, surface, "reviewed_common_noun_absolute_pair"
@@ -129,8 +160,8 @@ def _negative_predicate(surface: str) -> tuple[str, str] | None:
     records = _covered_negative_index().get(surface.casefold(), ())
     if not records:
         return None
-    tenses = []
-    lemmas = []
+    tenses: list[str] = []
+    lemmas: list[str] = []
     for record in records:
         features = record.get("features", {})
         tense = features.get("tense_aspect")
@@ -149,7 +180,7 @@ def analyze_subject_focus_negative(sentence: str) -> SubjectFocusNegativeAnalysi
 
     Because ``baan/ayaan`` are orthographically ambiguous, the function returns
     ``recognized=False`` unless the predicate independently proves the negative
-    reading.  For common nouns, the ordinary ``-u`` subject surface is then a
+    reading. For common nouns, the ordinary ``-u`` subject surface is then a
     review-only case conflict; the paired absolute surface is required.
     """
     tokens = TOKEN_RE.findall(sentence)
