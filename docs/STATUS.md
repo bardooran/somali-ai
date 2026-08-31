@@ -1,82 +1,114 @@
-# Project Status
+# Somali AI Project Status
 
-This is the quick dashboard for the Somali grammar foundation.
+This is the quick dashboard for **Somali AI — Somali-First Language Intelligence**.
 
 ## Overall stage
 
-**Core grammar-engine foundation: approximately 5/10 and expanding quickly.**
+**Somali-first assistant MVP: active. Language foundation: broad and still expanding.**
 
-The project has an executable, evidence-backed grammar engine. The main remaining job is breadth: more reviewed words/forms, sentence constructions, regional evidence, independent QA, and conflict testing.
+The repository is no longer only a grammar checker. It now combines an evidence-backed Somali language foundation with a conversational assistant layer around a strong reasoning model.
 
-## Coverage dashboard
+The current goal is two-track:
+
+1. keep expanding and reviewing Somali grammar, morphology, vocabulary, regional variation, corpora, and QA;
+2. make that knowledge directly useful to a Somali-first assistant that can converse, explain, reason, compare, plan, teach, and help with writing.
+
+## Working AI layer
+
+Implemented now:
+
+- terminal chat via `somali_ai.py`;
+- local browser chat via `somali_ai_web.py`;
+- OpenAI Responses API model adapter;
+- multi-turn in-process conversation history;
+- retrieval over reviewed Somali knowledge and external candidate layers;
+- exact-form and sentence-level grammatical retrieval;
+- runtime local date/time context for relative-date planning;
+- conservative response checking and safe orthography/variant fixes;
+- a 60-task Somali assistant capability evaluation set;
+- offline deterministic tests that do not require an API key.
+
+The assistant prefers the reviewed **Jigjiga / Northwestern-Hargeisa** output profile while recognizing supported regional variation.
+
+## External evidence now stored
+
+The project has audited and connected three major external sources without treating them as automatic truth:
+
+| Source | Current role | Stored/imported status |
+|---|---|---|
+| GiellaLT Somali | morphology, vocabulary, grammatical-word discovery | 12,363 lexical candidates + 352 grammatical candidates |
+| Somali Language Standard (SLS) | grammar and orthography cross-checking | 108 structured rule candidates |
+| SomNLP-Corpus | natural-text QA, frequency, later training/evaluation | pipeline audited; bulk corpus not copied into this repo |
+
+All generated external candidate records preserve provenance and remain `promotion_allowed: false` until reviewed.
+
+## Language coverage dashboard
 
 | Area | Status | Main next need |
 |---|---|---|
+| Conversational assistant | Active MVP | Real-model quality evaluation and richer natural Somali examples |
+| Knowledge retrieval | Active | Better cross-source ranking and natural-text evidence |
 | Orthography | Active | Expand only with safe source-backed rules |
 | Personal pronouns / clitics | Active | Broader construction coverage |
 | Subject–verb / noun agreement | Active / Growing | More verbs, nouns, sentence shapes |
-| Focus (`baa` / `ayaa`) | Active / Growing | More complex constructions |
+| Focus (`baa` / `ayaa`) | Active / Growing | More complex constructions and contextual QA |
 | Negation / future / aspect / mood | Active / Growing | More reviewed paradigms and contexts |
-| Verb morphology | Reviewed / Growing | More lemmas and independent paradigms |
+| Verb morphology | Reviewed / Growing | Larger independently verified paradigm coverage |
+| Noun morphology / gender polarity | Active / Growing | More noun classes and real-sentence QA |
 | Somali cardinal numbers | Active / Reviewed | Carefully extend large/approximate quantities |
 | Somali ordinals | Active / Reviewed | More compound written-out ordinal evidence |
-| Gregorian months / weekdays / dates | Active / Reviewed | Broader natural date-sentence QA |
-| Somali traditional seasons | Active / Region-sensitive | More Jigjiga/Northwestern evidence |
-| Relative days/time | Active / Conservative | More rare forms and richer constructions |
-| Clock expressions | Preference decided / Conservative | Implement and test Jigjiga/Hargeisa direct clock generation separately |
+| Dates / weekdays / months | Active / Reviewed | More natural planning/date QA |
+| Relative days/time | Active / Conservative | More rare forms and contextual examples |
+| Clock expressions | Preference decided / Conservative | Implement broader Jigjiga/Hargeisa direct-clock behavior |
 | Age expressions | Active / Conservative | More age sentence grammar |
 | Directions/location | Active / Conservative | More route/location constructions |
-| Measurements | Active / Reviewed | More units, compounds, and natural sentence QA |
+| Measurements | Active / Reviewed | More units and natural sentence QA |
 | Grammar-bearing function words | Active / Reviewed | Expand categories without blind stopword deletion |
 | Regional variants | Active / Growing | Larger pair-by-pair inventory |
-| Vocabulary data | Active / Growing | Expand reviewed everyday words and verbs |
-| Somali corpus | Started | Use maahmaahyo for research/QA |
-| Independent QA / holdouts | Growing | Much larger unseen-example dataset |
-| LLM training | Not started | Later, after stronger language foundation |
+| Vocabulary | Active / Growing | Promote more independently supported everyday words |
+| Natural Somali corpus | Started / External pipeline audited | High-quality provenance-preserving conversational examples |
+| Independent QA / holdouts | Growing | Much larger unseen assistant + language evaluation |
+| Standalone Somali model training | Not started | Later, after stronger clean training data and evaluation |
 
-## New ordinal coverage
+## Important distinction
 
-`data/vocabulary/somali_ordinals.json` + `src/ordinals.py` provide:
+The repository now **uses a general reasoning model as the assistant brain**, but it does not yet train a standalone Somali LLM from scratch.
 
-- productive numeric notation such as `1aad`, `2aad`, `36-aad`, and larger positive `N-aad` forms;
-- exact reviewed written forms including `kowaad/koowaad`, `labaad`, `saddexaad`, `afraad/afaraad`, `shanaad`, `lixaad`, `toddobaad`, `siddeedaad`, `sagaalaad`, `tobnaad/tobanaad`, 11–20, tens, `boqolaad/boqlaad`, and `kumaad`;
-- explicit ambiguity for `toddobaad` = ordinal **seventh** or noun **week**;
-- no guessing of unseen written-out ordinal morphophonology.
+Current architecture:
 
-## New measurement coverage
+```text
+Somali user message
+        ↓
+conversation history + runtime context
+        ↓
+Somali evidence retrieval
+        ↓
+general reasoning model
+        ↓
+Somali-first generation instructions
+        ↓
+conservative Somali response checker
+        ↓
+final answer
+```
 
-`data/vocabulary/somali_measurement_terms.jsonl` + `src/measurements.py` cover reviewed metric length, mass, volume, and temperature vocabulary, including:
-
-- `milimitir`, `sentimitir`, `mitir`;
-- `kiiloomitir / kiilomitir / kiilo mitir`;
-- `miligaraam`, `garaam`, `kiilogaraam / kiilo`, `tan`;
-- `mililitir` and reviewed liter variants `litir / liitar / litar / liitir`;
-- `heerkul`, `darajo`, `kulul`, `qabow`, `diirran`;
-- common symbols such as `mm`, `cm`, `m`, `km`, `mg`, `g`, `kg`, `L`, and `°C`;
-- no unit conversion and no unsafe spelling normalization.
-
-## Function-word policy
-
-`data/vocabulary/somali_function_words.json` + `src/function_words.py` replace the idea of a generic Somali stopword list with a grammar-aware inventory.
-
-Forms such as `ayaa`, `baa`, `waa`, `oo`, `ee`, `ah`, `ku`, `ka`, `u`, `la`, `loo`, `aan`, `aad`, `ay`, `uu`, `waxaa`, `waxa`, `waxaan`, `waxaad`, `wuxuu`, and `waxay` are grammar-bearing and **not safe for blind deletion**.
-
-`qof` and `dadka` remain content words, and English `this` is excluded from Somali data.
+This lets the project be useful now while the Somali-specific foundation continues improving.
 
 ## Current principles
 
-- Evidence before rules.
+- Evidence before trusted language rules.
 - Never invent Somali words or paradigms from one example.
 - Prefer unknown/context-required over unsafe correction.
 - Preserve regional variation and source provenance.
+- External candidates are clues, not automatic truth.
 - Test new behavior against the full GitHub Actions suite.
-- Build high-frequency language areas in larger evidence-backed batches.
-- Keep grammar-bearing words for analysis; do not copy generic English-style stopword assumptions into Somali NLP.
+- Keep QA/holdout data separate from the normal knowledge index.
+- Build broad useful capabilities now, then continuously improve rare grammar and edge cases.
 
 ## Immediate priorities
 
-1. Expand high-frequency grammar/vocabulary in larger reviewed batches.
-2. Add more noun, adjective, quantity, measurement, date/time, and everyday sentence evidence.
-3. Increase independent QA and contradiction/ambiguity tests.
-4. Implement the chosen Jigjiga/Hargeisa direct clock convention with reviewed tests, while keeping other regional conventions separate.
-5. Continue strengthening the language foundation before any LLM training stage.
+1. Run the assistant against a real configured reasoning model and score the 60-task capability suite with human/native review.
+2. Add high-quality natural Somali example/conversation evidence with provenance and license tracking.
+3. Improve long-conversation memory/session behavior without contaminating reviewed language knowledge.
+4. Continue large cross-source promotion passes across syntax, verbs, nouns, orthography, and regional variants.
+5. Grow evaluation coverage before any claim that the system is complete or fully independent.
