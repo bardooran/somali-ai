@@ -5,12 +5,15 @@
   "manifest_git_blob_sha": null,
   "freeze_commit": null,
   "pre_freeze_runtime_commit": "8ab922fa00f71367fe07394d9f40e2041bf08c40",
-  "source_family": "Hersi 2022 Waan ku salaamay 1 Key to Exercises",
+  "source_family": "Hersi 2022 Waan ku salaamay 1",
   "publisher": "Liban Ali Hersi / University of Helsinki-hosted teaching materials",
   "source_url": "https://blogs.helsinki.fi/alihersi/files/2023/08/Waan_ku_salaamay_1_KeyToExercises_F2_Units_1-10.pdf",
   "publication_year": 2022,
   "source_pages": [26],
   "source_exercise": "7.4",
+  "classification_source_url": "https://blogs.helsinki.fi/alihersi/files/2023/08/Waan_ku_salaamay_1_WordList_Units_1-12.pdf",
+  "classification_source_pages": [25, 27],
+  "classification_source_note": "The official wordlist explicitly labels nadiifi as v2a tr. and qurxi as v2a tr.; the exercise key independently prints their full seven-person general-present paradigms.",
   "positive_case_count": 14,
   "positive_unique_surface_count": 10,
   "unknown_case_count": 8,
@@ -35,5 +38,5 @@
     "independent_of_saeed_development": true,
     "independent_of_puglielli_mansuur_stage1h_development": true
   },
-  "notes": "Frozen after Stage 1H merged. Positive rows are only the two full Conjugation-2A present paradigms explicitly printed in Hersi exercise 7.4: nadiifi and qurxi. The source prints seven person slots for each lemma; because 1sg=3sg masculine and 2sg=3sg feminine, the 14 positive rows occupy 10 unique surfaces. Hersi is evaluation-only for v10 answers and may not be used to authorize runtime rules targeting these forms after freeze."
+  "notes": "Frozen after Stage 1H merged. Positive rows are only the two full Conjugation-2A present paradigms explicitly printed in Hersi exercise 7.4: nadiifi and qurxi. The source prints seven person slots for each lemma; because 1sg=3sg masculine and 2sg=3sg feminine, the 14 positive rows occupy 10 unique surfaces. The same source set's wordlist explicitly classifies both lemmas as v2a, so the conjugation label is source-backed rather than inferred from spelling. Hersi is evaluation-only for v10 answers and may not be used to authorize runtime rules targeting these forms after freeze."
 }
