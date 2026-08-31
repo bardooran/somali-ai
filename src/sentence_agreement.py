@@ -85,13 +85,7 @@ def _append_subject_focus_mismatches(
     findings: list[SentenceAgreementFinding],
     tokens: list[re.Match[str]],
 ) -> None:
-    """Append exact reviewed true-subject-focus conflicts.
-
-    The first noun in these frames is the focused subject itself, so bare ``baa``
-    or bare ``ayaa`` is valid. This path only reports predicate-person conflicts
-    from the dedicated exact-evidence analyzer; matching and unknown predicates
-    stay silent.
-    """
+    """Append exact reviewed true-subject-focus conflicts."""
     for index in range(len(tokens) - 2):
         subject_match, particle_match, predicate_match = tokens[index : index + 3]
         if particle_match.group(0).casefold() not in SUBJECT_FOCUS_PARTICLES:
@@ -102,7 +96,15 @@ def _append_subject_focus_mismatches(
         result = analyze_subject_focus_agreement(candidate)
         if not result.recognized or result.agrees is not False:
             continue
+
         expected = result.expected_person or "reviewed subject person"
+        if result.evidence and "restrictive_simple_past" in result.evidence:
+            expected_forms = (
+                f"a restrictive focused-subject simple-past form licensed for {expected}",
+            )
+        else:
+            expected_forms = (f"a reviewed {expected} predicate",)
+
         findings.append(
             SentenceAgreementFinding(
                 pronoun=subject_match.group(0),
@@ -110,7 +112,7 @@ def _append_subject_focus_mismatches(
                 pronoun_start=subject_match.start(),
                 verb_start=predicate_match.start(),
                 agrees=False,
-                expected_forms=(f"a reviewed {expected} predicate",),
+                expected_forms=expected_forms,
                 note=result.note,
             )
         )
@@ -124,10 +126,11 @@ def scan_sentence_agreement(text: str) -> list[SentenceAgreementFinding]:
     ``waa``. A clitic check is skipped when an independent subject pronoun is
     already present in the nearby left context, preventing duplicate reports.
 
-    Exact reviewed true subject-focus frames are also checked. In those frames
-    bare ``baa`` or bare ``ayaa`` is licensed because the noun before it is the
-    focused subject; only predicate-person conflict is reportable. Matching pairs
-    and unknown forms stay silent. No corrections are generated.
+    Exact reviewed true subject-focus frames are also checked. Bare ``baa`` or
+    bare ``ayaa`` is licensed because the noun before it is the focused subject;
+    predicate agreement is delegated to the dedicated subject-focus analyzer,
+    including its restrictive simple-past mode. Unknown/unmodeled forms stay
+    silent. No corrections are generated.
     """
     tokens = list(TOKEN_RE.finditer(text))
     pronouns = _known_subject_pronouns()
