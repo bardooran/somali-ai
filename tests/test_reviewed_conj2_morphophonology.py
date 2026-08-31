@@ -77,17 +77,36 @@ def test_kari_reviewed_vowel_initial_present_cells_use_y_glide() -> None:
     assert plural_candidate.correction_allowed is False
 
 
-def test_kari_profile_remains_present_only_and_withholds_unsafe_1pl() -> None:
-    for person in ("1sg", "2sg", "3sg_m", "3sg_f", "2pl", "3pl"):
+def test_kari_1pl_uses_reviewed_weak_causative_nasal_alternation() -> None:
+    assert _persons("karinnaa", "kari") == {"1pl"}
+    candidate = generate_conj2_present("kari", "1pl")
+    assert candidate is not None
+    assert candidate.surface == "karinnaa"
+    assert candidate.lemma == "kari"
+    assert candidate.person == "1pl"
+    assert candidate.tense_aspect == "present"
+    assert candidate.mood == "indicative"
+    assert candidate.conjugation_class == "2A"
+    assert candidate.rule_id.endswith(":i_n_weak_causative_manner_alternation")
+    assert candidate.correction_allowed is False
+
+    analyses = [item for item in analyze_morphology("karinnaa") if item.lemma == "kari"]
+    assert {item.features.get("person") for item in analyses} == {"1pl"}
+    assert all(item.features.get("tense_aspect") == "present" for item in analyses)
+    assert all(item.features.get("conjugation_class") == "2A" for item in analyses)
+    assert all(item.authority == "reviewed_rule_derived" for item in analyses)
+    assert all(item.correction_allowed is False for item in analyses)
+
+
+def test_kari_present_paradigm_is_complete_but_past_remains_unreviewed() -> None:
+    for person in ("1sg", "2sg", "3sg_m", "3sg_f", "1pl", "2pl", "3pl"):
         assert generate_conj2_present("kari", person) is not None
 
-    assert generate_conj2_present("kari", "1pl") is None
     assert generate_conj2_past("kari", "1sg") is None
     assert generate_conj2_past("kari", "2sg") is None
     assert generate_conj2_past("kari", "3sg_f") is None
 
     for ungenerated in (
-        "karinnaa",
         "karisay",
         "kariseen",
         "akhrisaa",
@@ -163,6 +182,7 @@ def test_conj2_profile_does_not_reverse_guess_similar_surfaces() -> None:
         "kariiszz",
         "kariyzz",
         "kariyqaan",
+        "karinnzz",
         "joogiszz",
         "joogiqsay",
     ):
