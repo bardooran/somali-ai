@@ -12,6 +12,7 @@ on:
       - "src/giellalt_challenge_v2.py"
       - "src/morphology_challenge_v3.py"
       - "src/morphology_challenge_v3_comparison.py"
+      - "src/morphology_challenge_v3_gap_audit.py"
       - "src/giellalt_challenge_v3.py"
       - "src/master_recognition.py"
       - "tests/test_morphology_comparison.py"
@@ -19,6 +20,7 @@ on:
       - "tests/test_morphology_challenge_v2_frozen.py"
       - "tests/test_morphology_challenge_v2_scoring.py"
       - "tests/test_morphology_challenge_v3_scoring.py"
+      - "tests/test_morphology_challenge_v3_diagnostics.py"
       - "data/qa/morphology_benchmark_v1.jsonl"
       - "data/qa/morphology_challenge_v2.jsonl"
       - "data/qa/morphology_challenge_v2.meta.json"
@@ -26,6 +28,9 @@ on:
       - "data/qa/morphology_challenge_v3.meta.json"
       - "data/master/recognition_index.jsonl"
       - "data/master/recognition_index.meta.json"
+      - "data/imported/giellalt/lexical_candidates.jsonl"
+      - "data/usage/external/wikipedia_usage_candidates.jsonl"
+      - "data/usage/external/xlsum_usage_candidates.jsonl"
       - ".github/workflows/giellalt-runtime.yml"
   workflow_dispatch:
 
@@ -119,6 +124,21 @@ jobs:
           python -m src.morphology_challenge_v3 > somali-ai-challenge-v3.json
           cat somali-ai-challenge-v3.json
 
+      - name: Build diagnostic-only v3 gap audit
+        run: |
+          python -m src.morphology_challenge_v3_gap_audit > morphology-v3-gap-audit.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          value = json.loads(Path("morphology-v3-gap-audit.json").read_text(encoding="utf-8"))
+          print(json.dumps({
+              "positive_case_count": value["positive_case_count"],
+              "diagnostic_state_counts": value["diagnostic_state_counts"],
+              "per_pos_state_counts": value["per_pos_state_counts"],
+              "safety": value["safety"],
+          }, indent=2, sort_keys=True))
+          PY
+
       - name: Run frozen challenge v3 against compiled GiellaLT FST
         run: |
           python -m src.giellalt_challenge_v3 \
@@ -146,5 +166,6 @@ jobs:
             giellalt-challenge-v2.json
             morphology-comparison-v2.json
             somali-ai-challenge-v3.json
+            morphology-v3-gap-audit.json
             giellalt-challenge-v3.json
             morphology-comparison-v3.json

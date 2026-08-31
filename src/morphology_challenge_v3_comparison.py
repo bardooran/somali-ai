@@ -6,7 +6,7 @@ import argparse
 import json
 from pathlib import Path
 
-from .morphology_challenge_v3 import MANIFEST_PATH
+from .morphology_challenge_v3 import MANIFEST_PATH, TARGET_TYPES
 
 META_PATH = MANIFEST_PATH.with_suffix(".meta.json")
 PRIMARY_METRICS = (
@@ -15,6 +15,12 @@ PRIMARY_METRICS = (
     "type_precision",
     "exact_type_case_rate",
     "unknown_safety_rate",
+)
+PER_POS_METRICS = (
+    "recognition_rate",
+    "expected_type_coverage",
+    "type_precision",
+    "exact_type_case_rate",
 )
 
 
@@ -25,6 +31,8 @@ def _read_somali(path: Path) -> dict:
     for key in ("reviewed", "master"):
         if not isinstance(value.get(key), dict) or not isinstance(value[key].get("score"), dict):
             raise ValueError(f"missing {key} score in {path}")
+        if not isinstance(value[key].get("per_pos"), dict):
+            raise ValueError(f"missing {key} per-POS diagnostics in {path}")
     return value
 
 
@@ -32,6 +40,8 @@ def _read_giellalt(path: Path) -> dict:
     value = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(value, dict) or not isinstance(value.get("score"), dict):
         raise ValueError(f"invalid GiellaLT v3 report: {path}")
+    if not isinstance(value.get("per_pos"), dict):
+        raise ValueError(f"missing GiellaLT per-POS diagnostics in {path}")
     return value
 
 
@@ -47,6 +57,11 @@ def compare(somali_ai_path: Path, giellalt_path: Path) -> dict:
         "somali_ai_reviewed": somali["reviewed"]["score"],
         "somali_ai_master": somali["master"]["score"],
         "giellalt": giella["score"],
+    }
+    per_pos = {
+        "somali_ai_reviewed": somali["reviewed"]["per_pos"],
+        "somali_ai_master": somali["master"]["per_pos"],
+        "giellalt": giella["per_pos"],
     }
 
     for name, score in scores.items():
@@ -64,6 +79,27 @@ def compare(somali_ai_path: Path, giellalt_path: Path) -> dict:
         values = {name: float(score[metric]) for name, score in scores.items()}
         metrics[metric] = {**values, "leaders": _leaders(values)}
 
+    category_metrics: dict[str, dict] = {}
+    for part_of_speech in sorted(TARGET_TYPES):
+        values_by_metric: dict[str, dict] = {}
+        case_counts = {
+            name: int(system_breakdown[part_of_speech]["positive_case_count"])
+            for name, system_breakdown in per_pos.items()
+        }
+        if len(set(case_counts.values())) != 1:
+            raise ValueError(f"per-POS case counts disagree for {part_of_speech}")
+        for metric in PER_POS_METRICS:
+            values = {
+                name: float(system_breakdown[part_of_speech][metric])
+                for name, system_breakdown in per_pos.items()
+            }
+            values_by_metric[metric] = {**values, "leaders": _leaders(values)}
+        category_metrics[part_of_speech] = {
+            "positive_case_count": next(iter(case_counts.values())),
+            "metrics": values_by_metric,
+            "systems": {name: breakdown[part_of_speech] for name, breakdown in per_pos.items()},
+        }
+
     return {
         "benchmark": {
             "version": "v3",
@@ -77,6 +113,7 @@ def compare(somali_ai_path: Path, giellalt_path: Path) -> dict:
         },
         "systems": scores,
         "primary_metrics": metrics,
+        "per_pos": category_metrics,
         "master_runtime_note": {
             "recognition_only": True,
             "provisional_records_do_not_gain_correction_authority": True,
@@ -84,6 +121,7 @@ def compare(somali_ai_path: Path, giellalt_path: Path) -> dict:
         "interpretation": {
             "same_frozen_manifest": True,
             "metric_leaders_are_descriptive": True,
+            "per_pos_labels_are_evaluation_only": True,
             "overall_winner_declared": False,
             "reason_no_single_winner": "v3 has no arbitrary weighted composite score",
             "scope": "lexical recognition, coarse POS agreement, and unknown safety",

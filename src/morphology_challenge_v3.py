@@ -94,6 +94,20 @@ def expected_types(case: dict) -> set[str]:
     return result
 
 
+def _normalized_observations(
+    recognized_surfaces: set[str],
+    types_by_surface: dict[str, set[str]],
+) -> tuple[set[str], dict[str, set[str]]]:
+    recognized = {value.casefold() for value in recognized_surfaces}
+    normalized_types = {
+        surface.casefold(): {
+            value.casefold() for value in values if value.casefold() in TARGET_TYPES
+        }
+        for surface, values in types_by_surface.items()
+    }
+    return recognized, normalized_types
+
+
 def score_system(
     *,
     system: str,
@@ -104,13 +118,7 @@ def score_system(
     cases = load_cases(path)
     positives = tuple(case for case in cases if case["split"] == "challenge")
     unknowns = tuple(case for case in cases if case["split"] == "unknown")
-    recognized = {value.casefold() for value in recognized_surfaces}
-    normalized_types = {
-        surface.casefold(): {
-            value.casefold() for value in values if value.casefold() in TARGET_TYPES
-        }
-        for surface, values in types_by_surface.items()
-    }
+    recognized, normalized_types = _normalized_observations(recognized_surfaces, types_by_surface)
 
     recognized_positive = 0
     expected_count = 0
@@ -160,6 +168,63 @@ def score_system(
         unknown_safety_rate=_ratio(len(unknowns) - unknown_accepted, len(unknowns)),
         runtime_winner_declared=False,
     )
+
+
+def per_pos_breakdown(
+    *,
+    recognized_surfaces: set[str],
+    types_by_surface: dict[str, set[str]],
+    path: Path = MANIFEST_PATH,
+) -> dict[str, dict]:
+    """Return category diagnostics without creating a new benchmark score.
+
+    POS labels come from the already-frozen v3 manifest and are used only for
+    evaluation diagnostics. They must never be promoted into runtime data.
+    """
+    recognized, normalized_types = _normalized_observations(recognized_surfaces, types_by_surface)
+    positives = tuple(case for case in load_cases(path) if case["split"] == "challenge")
+    result: dict[str, dict] = {}
+    for part_of_speech in sorted(TARGET_TYPES):
+        subset = tuple(case for case in positives if part_of_speech in expected_types(case))
+        recognized_count = 0
+        expected_count = 0
+        matched_count = 0
+        returned_count = 0
+        unexpected_count = 0
+        fully_typed = 0
+        exact_typed = 0
+        for case in subset:
+            surface = str(case["surface"]).casefold()
+            expected = expected_types(case)
+            actual = normalized_types.get(surface, set())
+            if surface in recognized:
+                recognized_count += 1
+            matched = expected & actual
+            unexpected = actual - expected
+            expected_count += len(expected)
+            matched_count += len(matched)
+            returned_count += len(actual)
+            unexpected_count += len(unexpected)
+            if expected <= actual:
+                fully_typed += 1
+            if expected == actual:
+                exact_typed += 1
+        result[part_of_speech] = {
+            "positive_case_count": len(subset),
+            "recognized_case_count": recognized_count,
+            "recognition_rate": _ratio(recognized_count, len(subset)),
+            "expected_type_count": expected_count,
+            "matched_expected_type_count": matched_count,
+            "expected_type_coverage": _ratio(matched_count, expected_count),
+            "returned_type_count": returned_count,
+            "unexpected_type_count": unexpected_count,
+            "type_precision": _precision(matched_count, returned_count),
+            "fully_typed_case_count": fully_typed,
+            "fully_typed_case_rate": _ratio(fully_typed, len(subset)),
+            "exact_type_case_count": exact_typed,
+            "exact_type_case_rate": _ratio(exact_typed, len(subset)),
+        }
+    return result
 
 
 def _report_details(cases: tuple[dict, ...], recognized: set[str], types: dict[str, set[str]]) -> dict:
@@ -253,10 +318,20 @@ def report(path: Path = MANIFEST_PATH) -> dict:
     return {
         "reviewed": {
             "score": asdict(reviewed_score),
+            "per_pos": per_pos_breakdown(
+                recognized_surfaces=reviewed_recognized,
+                types_by_surface=reviewed_types,
+                path=path,
+            ),
             **_report_details(cases, reviewed_recognized, reviewed_types),
         },
         "master": {
             "score": asdict(master_score),
+            "per_pos": per_pos_breakdown(
+                recognized_surfaces=master_recognized,
+                types_by_surface=master_types,
+                path=path,
+            ),
             "recognized_positive_confidence_presence": master_confidence_counts,
             **_report_details(cases, master_recognized, master_types),
         },
@@ -264,6 +339,7 @@ def report(path: Path = MANIFEST_PATH) -> dict:
             "benchmark_was_frozen_before_master_runtime_evaluation": True,
             "benchmark_manifest_sha256": "7222ef7a4e4f0c9b960b5feece50aaba11737dc7f3265040cfdac6a3e99ffd6c",
             "coarse_pos_challenge_only": True,
+            "per_pos_labels_are_evaluation_only": True,
             "master_recognition_does_not_authorize_correction": True,
             "recognition_is_not_full_morphological_correctness": True,
             "runtime_winner_declared": False,

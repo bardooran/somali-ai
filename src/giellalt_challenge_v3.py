@@ -8,7 +8,13 @@ from dataclasses import asdict
 from pathlib import Path
 
 from .giellalt_runtime_benchmark import coarse_types, run_hfst_lookup
-from .morphology_challenge_v3 import MANIFEST_PATH, expected_types, load_cases, score_system
+from .morphology_challenge_v3 import (
+    MANIFEST_PATH,
+    expected_types,
+    load_cases,
+    per_pos_breakdown,
+    score_system,
+)
 
 
 def giellalt_report(analyzer: Path, giellalt_commit: str, path: Path = MANIFEST_PATH) -> dict:
@@ -66,6 +72,11 @@ def giellalt_report(analyzer: Path, giellalt_commit: str, path: Path = MANIFEST_
             "analyzer_path": str(analyzer),
             "compiled_fst_evaluated": True,
         },
+        "per_pos": per_pos_breakdown(
+            recognized_surfaces=recognized,
+            types_by_surface=types_by_surface,
+            path=path,
+        ),
         "unrecognized_positive_surfaces": misses,
         "type_misses": type_misses,
         "unknown_surfaces_with_analysis": unknown_hits,
@@ -73,6 +84,7 @@ def giellalt_report(analyzer: Path, giellalt_commit: str, path: Path = MANIFEST_
             "selection_was_frozen_before_runtime_evaluation": True,
             "benchmark_manifest_sha256": "7222ef7a4e4f0c9b960b5feece50aaba11737dc7f3265040cfdac6a3e99ffd6c",
             "compiled_giellalt_fst_evaluated": True,
+            "per_pos_labels_are_evaluation_only": True,
             "coarse_pos_challenge_only": True,
             "recognition_is_not_full_morphological_correctness": True,
             "runtime_winner_declared": False,
