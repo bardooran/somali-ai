@@ -6,6 +6,11 @@ come from explicit native review or reviewed morphology. This matters because
 Somali noun plurals can change grammatical gender, and third-person plural
 statements use the ay/way family regardless of singular gender.
 
+The ordinary third-person statement construction is recognized in both the
+already-reviewed fused spellings ``wuu``/``way`` and the independently sourced
+separated spellings ``waa uu``/``waa ay``. The separated support is exact and
+does not generate additional pronoun combinations.
+
 This layer is review-only and never rewrites text.
 """
 
@@ -35,6 +40,8 @@ STRONG_GENDER_SUFFIXES = (
 )
 
 STATEMENT_CLITICS = {"wuu", "way"}
+SEPARATED_STATEMENT_CLITICS = {"uu": "wuu", "ay": "way"}
+SEPARATED_EXPECTED_CLITICS = {"wuu": "waa uu", "way": "waa ay"}
 SINGULAR_COPULAS = {"yahay", "tahay"}
 
 
@@ -138,12 +145,35 @@ def _find_singular_copula(tokens: list[str], subject_index: int) -> str | None:
     return None
 
 
-def analyze_noun_gender_agreement(sentence: str) -> NounGenderAgreementAnalysis:
-    """Analyze a noun subject followed by ``wuu``/``way``.
+def _statement_clitic(
+    tokens: list[str], subject_index: int
+) -> tuple[str | None, str | None, bool]:
+    """Return surface, fused comparison form, and whether it is separated."""
+    if subject_index + 1 >= len(tokens):
+        return None, None, False
 
-    Number takes priority for the statement clitic: reviewed plural subjects
-    expect ``way``. For singular subjects, grammatical gender controls
-    ``wuu``/``way`` and ``yahay``/``tahay``. If number is unknown, only the
+    first = tokens[subject_index + 1]
+    folded = first.casefold()
+    if folded in STATEMENT_CLITICS:
+        return first, folded, False
+
+    if folded != "waa" or subject_index + 2 >= len(tokens):
+        return None, None, False
+
+    short_pronoun = tokens[subject_index + 2]
+    normalized = SEPARATED_STATEMENT_CLITICS.get(short_pronoun.casefold())
+    if normalized is None:
+        return None, None, False
+    return f"{first} {short_pronoun}", normalized, True
+
+
+def analyze_noun_gender_agreement(sentence: str) -> NounGenderAgreementAnalysis:
+    """Analyze a noun subject followed by a reviewed third-person statement clitic.
+
+    The statement clitic may be fused ``wuu``/``way`` or exact separated
+    ``waa uu``/``waa ay``. Number takes priority: reviewed plural subjects expect
+    the ay/way family. For singular subjects, grammatical gender controls
+    uu/wuu versus ay/way and ``yahay``/``tahay``. If number is unknown, only the
     conclusions that are safe from gender alone are returned.
     """
     tokens = TOKEN_RE.findall(sentence)
@@ -152,8 +182,8 @@ def analyze_noun_gender_agreement(sentence: str) -> NounGenderAgreementAnalysis:
 
     for index in range(len(tokens) - 1):
         subject = tokens[index]
-        clitic = tokens[index + 1]
-        if clitic.casefold() not in STATEMENT_CLITICS:
+        clitic_surface, normalized_clitic, separated = _statement_clitic(tokens, index)
+        if clitic_surface is None or normalized_clitic is None:
             continue
         if subject.casefold() in PERSONAL_PRONOUN_FORMS:
             continue
@@ -163,24 +193,28 @@ def analyze_noun_gender_agreement(sentence: str) -> NounGenderAgreementAnalysis:
         if gender is None and number is None:
             continue
 
-        expected_clitic: str | None = None
+        expected_normalized: str | None = None
         clitic_agrees: bool | None = None
 
         if number == "plural":
-            expected_clitic = "way"
-            clitic_agrees = clitic.casefold() == "way"
+            expected_normalized = "way"
+            clitic_agrees = normalized_clitic == "way"
         elif number == "singular":
             if gender == "masculine":
-                expected_clitic = "wuu"
-                clitic_agrees = clitic.casefold() == "wuu"
+                expected_normalized = "wuu"
+                clitic_agrees = normalized_clitic == "wuu"
             elif gender == "feminine":
-                expected_clitic = "way"
-                clitic_agrees = clitic.casefold() == "way"
+                expected_normalized = "way"
+                clitic_agrees = normalized_clitic == "way"
         elif gender == "feminine":
             # With unknown number, both reviewed feminine singular and plural
-            # statement patterns are compatible with way; wuu is not.
-            expected_clitic = "way"
-            clitic_agrees = clitic.casefold() == "way"
+            # statement patterns are compatible with ay/way; uu/wuu is not.
+            expected_normalized = "way"
+            clitic_agrees = normalized_clitic == "way"
+
+        expected_clitic = expected_normalized
+        if separated and expected_normalized is not None:
+            expected_clitic = SEPARATED_EXPECTED_CLITICS[expected_normalized]
 
         copula = _find_singular_copula(tokens, index)
         expected_copula: str | None = None
@@ -189,13 +223,18 @@ def analyze_noun_gender_agreement(sentence: str) -> NounGenderAgreementAnalysis:
             expected_copula = "yahay" if gender == "masculine" else "tahay"
             copula_agrees = copula.casefold() == expected_copula
 
+        realization_evidence = (
+            " Exact separated waa + short-subject-pronoun realization is source-backed."
+            if separated
+            else ""
+        )
         return NounGenderAgreementAnalysis(
             recognized=True,
             subject=subject,
             gender=gender,
             number=number,
             number_evidence=number_evidence,
-            clitic=clitic,
+            clitic=clitic_surface,
             expected_clitic=expected_clitic,
             clitic_agrees=clitic_agrees,
             copula=copula,
@@ -204,7 +243,7 @@ def analyze_noun_gender_agreement(sentence: str) -> NounGenderAgreementAnalysis:
             note=(
                 f"Gender evidence: {gender_evidence}. Number evidence: {number_evidence}. "
                 "Number and gender remain separate because Somali pluralization can change "
-                "grammatical gender."
+                f"grammatical gender.{realization_evidence}"
             ),
         )
 
