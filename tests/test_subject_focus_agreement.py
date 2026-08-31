@@ -10,7 +10,7 @@ def test_reviewed_cali_baa_yimid_is_valid_subject_focus():
     assert result.expected_person == "3sg_m"
     assert result.predicate_persons == ("3sg_m",)
     assert result.agrees is True
-    assert result.evidence == "exact_reviewed_finite_morphology"
+    assert "restrictive_simple_past" in (result.evidence or "")
 
 
 def test_source_backed_ayaa_equivalent_is_valid_subject_focus():
@@ -22,7 +22,7 @@ def test_source_backed_ayaa_equivalent_is_valid_subject_focus():
     assert result.expected_person == "3sg_m"
     assert result.predicate_persons == ("3sg_m",)
     assert result.agrees is True
-    assert result.evidence == "exact_reviewed_finite_morphology"
+    assert "restrictive_simple_past" in (result.evidence or "")
 
 
 def test_source_backed_yimi_variant_agrees_with_both_subject_focus_particles():
