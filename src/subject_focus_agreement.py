@@ -22,6 +22,7 @@ from src.subject_focus_restrictive import analyze_subject_focus_restrictive
 RULE_PATH = Path("rules/grammar/subject_focus_agreement.jsonl")
 TOKEN_RE = re.compile(r"[^\W\d_]+(?:['’][^\W\d_]+)*", flags=re.UNICODE)
 FOCUS_PARTICLES = {"baa", "ayaa"}
+MAX_PREDICATE_GAP = 4
 
 
 @dataclass(frozen=True)
@@ -102,18 +103,19 @@ def _reviewed_predicate_persons(surface: str) -> tuple[str, ...]:
 
 
 def analyze_subject_focus_agreement(sentence: str) -> SubjectFocusAgreementAnalysis:
-    """Analyze reviewed ``FOCUSED_SUBJECT + baa/ayaa + predicate`` agreement.
+    """Analyze reviewed ``FOCUSED_SUBJECT + baa/ayaa + ... + predicate`` agreement.
 
     Exact sentence-level subject-focus evidence has first priority. Otherwise,
     known simple-past finite surfaces are interpreted through the restrictive
-    paradigm. Full ordinary finite agreement is never used as a fallback in
-    subject focus, because reduced agreement can differ in person/number.
+    paradigm. Up to four intervening lexical tokens are permitted so object or
+    adverbial material can precede the predicate. Full ordinary finite agreement
+    is never used as a fallback in subject focus.
     """
     tokens = TOKEN_RE.findall(sentence)
     if len(tokens) < 3:
         return SubjectFocusAgreementAnalysis(recognized=False)
 
-    subject, particle, predicate = tokens[0], tokens[1], tokens[2]
+    subject, particle = tokens[0], tokens[1]
     particle_key = particle.casefold()
 
     profile = _subject_profiles().get(subject.casefold())
@@ -130,51 +132,60 @@ def analyze_subject_focus_agreement(sentence: str) -> SubjectFocusAgreementAnaly
             return SubjectFocusAgreementAnalysis(recognized=False)
         expected_person, rule_id, subject_evidence = common
 
-    # Exact native-reviewed subject-focus predicate surfaces outrank any broader
-    # paradigm inference. This preserves examples such as Maryan baa qososhay
-    # without deriving an unseen qos- paradigm.
-    reviewed_persons = _reviewed_predicate_persons(predicate)
-    if reviewed_persons:
-        agrees = expected_person in reviewed_persons
-        return SubjectFocusAgreementAnalysis(
-            recognized=True,
-            subject=subject,
-            particle=particle,
-            predicate=predicate,
-            expected_person=expected_person,
-            predicate_persons=reviewed_persons,
-            agrees=agrees,
-            evidence="exact_native_reviewed_sentence_surface",
-            rule_id=rule_id,
-            note=(
-                "The noun immediately before bare baa/ayaa is the focused subject. Predicate "
-                "person comes only from an exact native-reviewed subject-focus surface; no "
-                "unseen paradigm is inferred."
-            ),
-        )
+    predicate_candidates = tokens[2 : 2 + MAX_PREDICATE_GAP + 1]
+    first_unmodeled_finite: tuple[str, object] | None = None
 
-    restrictive = analyze_subject_focus_restrictive(predicate, expected_person)
-    if restrictive.covered:
-        return SubjectFocusAgreementAnalysis(
-            recognized=True,
-            subject=subject,
-            particle=particle,
-            predicate=predicate,
-            expected_person=expected_person,
-            predicate_persons=restrictive.contextual_persons,
-            agrees=restrictive.agrees,
-            evidence=f"{subject_evidence}+restrictive_simple_past_exact_morphology",
-            rule_id=rule_id,
-            note=(
-                "Focused subjects use the reviewed restrictive/reduced simple-past paradigm. "
-                "The predicate surface itself comes from exact reviewed finite morphology, but "
-                "its person interpretation is contextual: 2sg, 2pl and 3pl use the ordinary "
-                "3sg-masculine-shaped past form; 3sg feminine remains distinct. No automatic "
-                "rewrite."
-            ),
-        )
+    for predicate in predicate_candidates:
+        # Exact native-reviewed subject-focus predicate surfaces outrank broader
+        # paradigm analysis. This preserves Maryan baa qososhay without deriving
+        # an unseen qos- paradigm.
+        reviewed_persons = _reviewed_predicate_persons(predicate)
+        if reviewed_persons:
+            agrees = expected_person in reviewed_persons
+            return SubjectFocusAgreementAnalysis(
+                recognized=True,
+                subject=subject,
+                particle=particle,
+                predicate=predicate,
+                expected_person=expected_person,
+                predicate_persons=reviewed_persons,
+                agrees=agrees,
+                evidence="exact_native_reviewed_sentence_surface",
+                rule_id=rule_id,
+                note=(
+                    "The noun before bare baa/ayaa is the focused subject. Predicate person "
+                    "comes only from an exact native-reviewed subject-focus surface; no unseen "
+                    "paradigm is inferred."
+                ),
+            )
 
-    if restrictive.recognized:
+        restrictive = analyze_subject_focus_restrictive(predicate, expected_person)
+        if restrictive.covered:
+            return SubjectFocusAgreementAnalysis(
+                recognized=True,
+                subject=subject,
+                particle=particle,
+                predicate=predicate,
+                expected_person=expected_person,
+                predicate_persons=restrictive.contextual_persons,
+                agrees=restrictive.agrees,
+                evidence=f"{subject_evidence}+restrictive_simple_past_exact_morphology",
+                rule_id=rule_id,
+                note=(
+                    "Focused subjects use the reviewed restrictive/reduced simple-past paradigm. "
+                    "The predicate surface itself comes from exact reviewed finite morphology, "
+                    "but its person interpretation is contextual: 2sg, 2pl and 3pl use the "
+                    "ordinary 3sg-masculine-shaped past form; 3sg feminine remains distinct. "
+                    "Intervening object/adverbial material does not control agreement. No "
+                    "automatic rewrite."
+                ),
+            )
+
+        if restrictive.recognized and first_unmodeled_finite is None:
+            first_unmodeled_finite = (predicate, restrictive)
+
+    if first_unmodeled_finite is not None:
+        predicate, _ = first_unmodeled_finite
         return SubjectFocusAgreementAnalysis(
             recognized=True,
             subject=subject,
@@ -191,6 +202,7 @@ def analyze_subject_focus_agreement(sentence: str) -> SubjectFocusAgreementAnaly
             ),
         )
 
+    predicate = predicate_candidates[0] if predicate_candidates else None
     return SubjectFocusAgreementAnalysis(
         recognized=True,
         subject=subject,
@@ -201,7 +213,7 @@ def analyze_subject_focus_agreement(sentence: str) -> SubjectFocusAgreementAnaly
         evidence="predicate_unreviewed",
         rule_id=rule_id,
         note=(
-            "The reviewed subject-focus frame is recognized, but the predicate lacks exact "
+            "The reviewed subject-focus frame is recognized, but no nearby predicate has exact "
             "reviewed finite or sentence-level evidence. It is left unjudged rather than guessed."
         ),
     )
