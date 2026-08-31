@@ -75,7 +75,9 @@ def test_v9_positive_lemmas_are_disjoint_from_current_finite_development_profile
     }
 
     assert positive_lemmas == {"cafi", "layli", "caddee", "cashee", "malee"}
-    assert development == {"bar", "dil", "xidh", "kari"}
+    # The development inventory is expected to grow after the freeze. The
+    # permanent holdout guard is disjointness: no v9 answer lemma may become a
+    # finite runtime development profile.
     assert positive_lemmas.isdisjoint(development)
 
 
