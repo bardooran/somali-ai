@@ -46,6 +46,11 @@ def _ratio(numerator: int, denominator: int) -> float:
     return numerator / denominator if denominator else 1.0
 
 
+def _prediction_precision(matched: int, returned: int) -> float:
+    """Return POS precision, treating no predictions as 0 rather than vacuous 1."""
+    return matched / returned if returned else 0.0
+
+
 def load_cases(path: Path = MANIFEST_PATH) -> tuple[dict, ...]:
     cases: list[dict] = []
     seen_ids: set[str] = set()
@@ -147,7 +152,7 @@ def score_system(
         expected_type_coverage=_ratio(matched_type_count, expected_type_count),
         returned_type_count=returned_type_count,
         unexpected_type_count=unexpected_type_count,
-        type_precision=_ratio(matched_type_count, returned_type_count),
+        type_precision=_prediction_precision(matched_type_count, returned_type_count),
         fully_typed_case_count=fully_typed_cases,
         fully_typed_case_rate=_ratio(fully_typed_cases, len(positives)),
         exact_type_case_count=exact_type_cases,
@@ -218,6 +223,7 @@ def somali_ai_report(path: Path = MANIFEST_PATH) -> dict:
             "selection_was_frozen_before_runtime_evaluation": True,
             "coarse_pos_challenge_only": True,
             "recognition_is_not_full_morphological_correctness": True,
+            "zero_prediction_precision_is_zero": True,
             "runtime_winner_declared": False,
         },
     }
