@@ -114,7 +114,7 @@ def _append_subject_focus_mismatches(
         expected = result.expected_person or "reviewed subject person"
         if result.evidence and "restrictive_simple_past" in result.evidence:
             expected_forms = (
-                f"a restrictive focused-subject simple-past form licensed for {expected}",
+                f"a reviewed {expected} predicate under restrictive focused-subject simple-past agreement",
             )
         else:
             expected_forms = (f"a reviewed {expected} predicate",)
@@ -152,7 +152,6 @@ def scan_sentence_agreement(text: str) -> list[SentenceAgreementFinding]:
     verbs = _known_agreement_verbs()
     findings: list[SentenceAgreementFinding] = []
 
-    # Independent subject pronouns.
     for index, token_match in enumerate(tokens):
         pronoun = token_match.group(0)
         if pronoun.casefold() not in pronouns:
@@ -166,8 +165,6 @@ def scan_sentence_agreement(text: str) -> list[SentenceAgreementFinding]:
             _append_mismatch(findings, token_match, candidate)
             break
 
-    # Anchored subject clitics. Bare ``ay`` and similar forms are deliberately
-    # not scanned because they can be ambiguous outside a recognized context.
     for index, token_match in enumerate(tokens):
         clitic = token_match.group(0)
         if clitic.casefold() not in subject_clitics or index == 0:
