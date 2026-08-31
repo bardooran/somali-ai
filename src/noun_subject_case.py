@@ -1,13 +1,16 @@
 """Context-limited Somali definite-noun subject-case analysis.
 
-Two reviewed contexts are distinguished:
+Three reviewed contexts are distinguished:
 
 * ordinary explicit subjects before ``wuu/way`` use the ``-u`` subject surface;
 * noun subjects focused by bare ``baa/ayaa`` use the paired absolute/non-subject
-  surface instead.
+  surface instead;
+* negative true-subject focus with ``baan/ayaan`` uses that same absolute surface,
+  but only when an exact reviewed negative predicate independently disambiguates
+  the otherwise ambiguous fused marker.
 
-The focus branch is deliberately stricter than the ordinary suffix mapping: it
-runs only for noun surfaces whose paired ``-u`` form already occurs in the
+The focus branches are deliberately stricter than the ordinary suffix mapping:
+they run only for noun surfaces whose paired ``-u`` form already occurs in the
 project's explicit reviewed singular/plural subject inventory. No unseen noun
 pair is promoted to an executable grammar judgment.
 """
@@ -18,6 +21,8 @@ import json
 import re
 from dataclasses import dataclass
 from pathlib import Path
+
+from src.subject_focus_negative import analyze_subject_focus_negative
 
 TOKEN_RE = re.compile(r"[^\W\d_]+(?:['’][^\W\d_]+)*['’]?", flags=re.UNICODE)
 
@@ -145,13 +150,27 @@ def _analyze_focus_case(noun: str, marker: str) -> NounSubjectCaseAnalysis | Non
 
 
 def analyze_noun_subject_case(sentence: str) -> NounSubjectCaseAnalysis:
-    """Analyze reviewed noun case before ``wuu/way`` and bare ``baa/ayaa``.
+    """Analyze reviewed noun case in ordinary and true-subject-focus contexts.
 
     Ordinary ``<noun> wuu/way`` keeps the established ``-u`` subject rule.
     Adjacent ``<noun> baa/ayaa`` is treated as true noun subject focus only when
-    the noun belongs to an exact reviewed subject/absolute pair. Proper names and
-    unknown noun pairs remain outside this case analyzer.
+    the noun belongs to an exact reviewed subject/absolute pair. Negative
+    ``baan/ayaan`` focus is delegated to the dedicated analyzer and activates
+    only after an exact negative predicate disambiguates the fused marker.
+    Proper names and unknown noun pairs remain outside ordinary noun-case rewrites.
     """
+    negative_focus = analyze_subject_focus_negative(sentence)
+    if negative_focus.recognized and negative_focus.subject and negative_focus.marker:
+        return NounSubjectCaseAnalysis(
+            recognized=True,
+            noun_form=negative_focus.subject,
+            marker=negative_focus.marker,
+            expected_subject_form=negative_focus.expected_subject_form,
+            agrees=negative_focus.case_agrees,
+            rule_id="GRAM-SUBJFOCUS-NEG-003",
+            note=negative_focus.note,
+        )
+
     tokens = TOKEN_RE.findall(sentence)
     if len(tokens) < 2:
         return NounSubjectCaseAnalysis(recognized=False)
