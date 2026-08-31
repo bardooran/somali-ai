@@ -6,8 +6,9 @@ pronouns in a short local window, subject clitics only in anchored
 ``SUBJECT + baa/ayaa + ... + predicate`` frames, overt second-clause connective
 subject focus ``SUBJECT + baana/ayaana + ... + predicate`` frames, reviewed
 clitic-bearing connective focus ``... + buuna/beyna + ... + predicate`` frames,
-and clause-initial connective statement ``wuuna/wayna + ... + predicate``
-frames. Unknown verbs are ignored or left unjudged rather than treated as errors.
+clause-initial connective statement ``wuuna/wayna + ... + predicate`` frames,
+and exact clitic-bearing waxaa-family connectives ``waxayna/waxaadna``.
+Unknown verbs are ignored or left unjudged rather than treated as errors.
 """
 
 from __future__ import annotations
@@ -18,6 +19,7 @@ from dataclasses import dataclass
 from src.agreement import analyze_pronoun_verb, _load_jsonl, PRONOUN_PATH, AGREEMENT_PATH
 from src.connective_focus import analyze_connective_clitic_focus
 from src.connective_statement import analyze_connective_statement
+from src.connective_waxaa_focus import analyze_connective_waxaa_focus
 from src.subject_focus_agreement import analyze_subject_focus_agreement
 
 
@@ -313,6 +315,60 @@ def _append_connective_statement_mismatch(
     )
 
 
+def _append_connective_waxaa_mismatch(
+    findings: list[SentenceAgreementFinding],
+    text: str,
+    tokens: list[re.Match[str]],
+) -> None:
+    """Append exact waxayna/waxaadna subject-clitic/finite-verb conflicts."""
+    result = analyze_connective_waxaa_focus(text)
+    if (
+        not result.recognized
+        or result.agreement_agrees is not False
+        or not result.particle
+        or not result.verb
+        or not result.subject_persons
+    ):
+        return
+
+    particle_match = next(
+        (
+            match
+            for match in tokens
+            if match.group(0).casefold() == result.particle.casefold()
+        ),
+        None,
+    )
+    if particle_match is None:
+        return
+    verb_match = next(
+        (
+            match
+            for match in tokens
+            if match.start() > particle_match.end()
+            and match.group(0).casefold() == result.verb.casefold()
+        ),
+        None,
+    )
+    if verb_match is None:
+        return
+
+    encoded = "/".join(result.subject_persons)
+    findings.append(
+        SentenceAgreementFinding(
+            pronoun=particle_match.group(0),
+            verb=verb_match.group(0),
+            pronoun_start=particle_match.start(),
+            verb_start=verb_match.start(),
+            agrees=False,
+            expected_forms=(
+                f"a reviewed finite predicate compatible with connective waxaa-focus clitic person(s) {encoded}",
+            ),
+            note=result.note,
+        )
+    )
+
+
 def scan_sentence_agreement(text: str) -> list[SentenceAgreementFinding]:
     """Find reviewed subject/verb agreement conflicts in conservative contexts.
 
@@ -328,9 +384,11 @@ def scan_sentence_agreement(text: str) -> list[SentenceAgreementFinding]:
     ``beyna`` are instead treated as focus+subject-clitic+connective forms: only
     their encoded subject person is checked against exact finite morphology.
     Reviewed clause-initial ``wuuna``/``wayna`` are statement/declarative
-    clitic+connective forms and are checked separately from focus. Unknown or
-    unmodeled forms stay silent, and standalone connective forms remain
-    context-dependent.
+    clitic+connective forms and are checked separately from focus. Exact
+    ``waxayna``/``waxaadna`` are waxaa-family focus+subject-clitic connectives
+    checked only against exact finite morphology, while person-neutral
+    ``waxaana`` never creates an agreement finding. Unknown or unmodeled forms
+    stay silent, and standalone connective forms remain context-dependent.
     """
     tokens = list(TOKEN_RE.finditer(text))
     pronouns = _known_subject_pronouns()
@@ -373,4 +431,5 @@ def scan_sentence_agreement(text: str) -> list[SentenceAgreementFinding]:
     _append_connective_subject_focus_mismatches(findings, text, tokens)
     _append_connective_clitic_focus_mismatch(findings, text, tokens)
     _append_connective_statement_mismatch(findings, text, tokens)
+    _append_connective_waxaa_mismatch(findings, text, tokens)
     return findings
