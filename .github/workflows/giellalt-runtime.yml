@@ -7,9 +7,16 @@ on:
       - "src/morphology_benchmark.py"
       - "src/morphology_comparison.py"
       - "src/giellalt_runtime_benchmark.py"
+      - "src/morphology_challenge_v2.py"
+      - "src/morphology_challenge_v2_comparison.py"
+      - "src/giellalt_challenge_v2.py"
       - "tests/test_morphology_comparison.py"
       - "tests/test_giellalt_runtime_benchmark.py"
+      - "tests/test_morphology_challenge_v2_frozen.py"
+      - "tests/test_morphology_challenge_v2_scoring.py"
       - "data/qa/morphology_benchmark_v1.jsonl"
+      - "data/qa/morphology_challenge_v2.jsonl"
+      - "data/qa/morphology_challenge_v2.meta.json"
       - ".github/workflows/giellalt-runtime.yml"
   workflow_dispatch:
 
@@ -65,14 +72,14 @@ jobs:
       - name: Run Somali AI benchmark v1
         run: python -m src.morphology_benchmark > somali-ai-benchmark-v1.json
 
-      - name: Run frozen benchmark against compiled GiellaLT FST
+      - name: Run frozen v1 benchmark against compiled GiellaLT FST
         run: |
           python -m src.giellalt_runtime_benchmark \
             --analyzer "${{ steps.analyzer.outputs.path }}" \
             --giellalt-commit 5278929712e9c0c67f254f1a1dc64c80ea7b2b8d \
             > giellalt-runtime-benchmark-v1.json
 
-      - name: Build side-by-side comparison
+      - name: Build v1 side-by-side comparison
         run: |
           python -m src.morphology_comparison \
             --somali-ai somali-ai-benchmark-v1.json \
@@ -80,11 +87,32 @@ jobs:
             > morphology-comparison-v1.json
           cat morphology-comparison-v1.json
 
+      - name: Run Somali AI analyzer-blind challenge v2
+        run: python -m src.morphology_challenge_v2 > somali-ai-challenge-v2.json
+
+      - name: Run analyzer-blind challenge v2 against compiled GiellaLT FST
+        run: |
+          python -m src.giellalt_challenge_v2 \
+            --analyzer "${{ steps.analyzer.outputs.path }}" \
+            --giellalt-commit 5278929712e9c0c67f254f1a1dc64c80ea7b2b8d \
+            > giellalt-challenge-v2.json
+
+      - name: Build v2 side-by-side comparison
+        run: |
+          python -m src.morphology_challenge_v2_comparison \
+            --somali-ai somali-ai-challenge-v2.json \
+            --giellalt giellalt-challenge-v2.json \
+            > morphology-comparison-v2.json
+          cat morphology-comparison-v2.json
+
       - name: Upload reproducible benchmark results
         uses: actions/upload-artifact@v4
         with:
-          name: morphology-benchmark-v1
+          name: morphology-benchmark-v1-v2
           path: |
             somali-ai-benchmark-v1.json
             giellalt-runtime-benchmark-v1.json
             morphology-comparison-v1.json
+            somali-ai-challenge-v2.json
+            giellalt-challenge-v2.json
+            morphology-comparison-v2.json
