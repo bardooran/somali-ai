@@ -2,25 +2,27 @@
 
 Negative subject focus differs from ordinary main-clause ``ma`` negation. The
 embedded/subjunctive negative ``aan`` fuses with ``baa/ayaa`` and is written
-``baan/ayaan``. Those spellings are ambiguous with subject-clitic combinations
-in other focus constructions, so this module never interprets the marker alone.
-A negative-subject-focus reading requires an exact reviewed negative predicate.
+``baan/ayaan``. Ordinary Somali spelling does not encode the pitch distinction
+that can separate negative ``baa + aan`` from non-subject-focus ``baa + 1sg aan``.
+The marker alone is therefore never enough to choose a negative-subject-focus
+reading.
 
 When negation co-occurs with focus, Somali uses the reduced subjunctive. In the
 simple and progressive aspects these reduced forms do not distinguish present
-from past and do not distinguish person/number. The project therefore reuses
-only exact person-neutral negative morphology already independently reviewed:
+from past and do not distinguish person/number. The project reuses only exact
+person-neutral negative morphology already independently reviewed.
 
-- simple reduced subjunctive: exact surfaces such as ``cunin`` and
-  ``iman/imanin``;
-- progressive reduced subjunctive: exact surfaces such as ``cunayn(in)`` and
-  ``imanayn(in)``.
+A second safety check is important: if the same written predicate surface also
+has a reviewed non-negative verb analysis, ``baan/ayaan`` plus that surface is
+still orthographically ambiguous. The analyzer then requires either exact
+sentence-level evidence or an independently reviewed negative-context item. At
+present ``waxba`` is the only such executable context item.
 
-The underlying Qaamuus records are tagged as past negative morphology because
-that is the paradigm in which the exact spellings were reviewed. Inside the
-negative-focus construction, Gothenburg grammar evidence licenses the broader
-present-or-past reduced-subjunctive interpretation. No suffix derivation is
-performed. Habitual and future reduced subjunctives remain separate stages.
+Bare positive ``baa/ayaa`` before an exact covered reduced negative predicate is
+recognized as a review-only marker conflict: true negative subject focus requires
+``baan/ayaan``. No automatic rewrite is made. Connective forms such as ``ayaana``
+and clauses without a focus marker remain outside this rule until separately
+modeled.
 """
 
 from __future__ import annotations
@@ -31,10 +33,13 @@ from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
 
-from src.morphology_candidates import DEFAULT_MORPHOLOGY_PATHS
+from src.morphology_candidates import DEFAULT_MORPHOLOGY_PATHS, analyze_surface_form
 
 TOKEN_RE = re.compile(r"[^\W\d_]+(?:['’][^\W\d_]+)*", flags=re.UNICODE)
 NEGATIVE_FOCUS_MARKERS = {"baan", "ayaan"}
+POSITIVE_TO_NEGATIVE_FOCUS = {"baa": "baan", "ayaa": "ayaan"}
+ALL_REVIEWED_FOCUS_MARKERS = NEGATIVE_FOCUS_MARKERS | set(POSITIVE_TO_NEGATIVE_FOCUS)
+NEGATIVE_CONTEXT_ITEMS = {"waxba"}
 COVERED_SOURCE_TENSE_ASPECTS = {"tagto", "tagto_socota"}
 REDUCED_LABELS = {
     "tagto": "reduced_subjunctive_simple",
@@ -72,6 +77,11 @@ class SubjectFocusNegativeAnalysis:
     temporal_scope: tuple[str, ...] = ()
     expected_subject_form: str | None = None
     case_agrees: bool | None = None
+    marker_agrees: bool | None = None
+    expected_marker: str | None = None
+    orthographically_ambiguous: bool = False
+    predicate_has_nonnegative_analysis: bool | None = None
+    negative_context_evidence: tuple[str, ...] = ()
     evidence: str | None = None
     rule_id: str = "GRAM-SUBJFOCUS-NEG-001"
     note: str = ""
@@ -144,14 +154,12 @@ def _subject_case_profile(surface: str) -> tuple[bool, str, str] | None:
     if folded in _reviewed_proper_subjects():
         return True, surface, "exact_reviewed_proper_subject"
 
-    # Wrong ordinary nominative/subject form used under focus.
     if _is_reviewed_common_subject(surface):
         absolute = _expected_non_subject_form(surface)
         if absolute is None:
             return None
         return False, absolute, "reviewed_common_noun_wrong_focus_case"
 
-    # Correct absolute form must map back to an exact reviewed subject surface.
     nominative = _expected_subject_form(surface)
     if nominative is None or not _is_reviewed_common_subject(nominative):
         return None
@@ -212,20 +220,59 @@ def _negative_predicate(surface: str) -> tuple[str, tuple[str, ...], str] | None
     return reduced_label, ("present", "past"), lemma_label
 
 
-def analyze_subject_focus_negative(sentence: str) -> SubjectFocusNegativeAnalysis:
-    """Analyze exact reviewed ``SUBJECT + baan/ayaan + ... + NEG`` focus clauses.
+def _has_nonnegative_verb_analysis(surface: str) -> bool:
+    """Return True when the same reviewed spelling also has a non-negative verb use."""
+    for candidate in analyze_surface_form(surface):
+        features = candidate.features
+        if features.get("part_of_speech") != "verb":
+            continue
+        if features.get("polarity") == "negative":
+            continue
+        return True
+    return False
 
-    Because ``baan/ayaan`` are orthographically ambiguous, the function returns
-    ``recognized=False`` unless the predicate independently proves the negative
-    reading. For common nouns, the ordinary ``-u`` subject surface is then a
-    review-only case conflict; the paired absolute surface is required.
+
+def _negative_context_evidence(tokens: list[str]) -> tuple[str, ...]:
+    found: list[str] = []
+    for token in tokens:
+        folded = token.casefold()
+        if folded in NEGATIVE_CONTEXT_ITEMS and folded not in found:
+            found.append(folded)
+    return tuple(found)
+
+
+def _expected_negative_marker(marker: str) -> str | None:
+    folded = marker.casefold()
+    if folded in NEGATIVE_FOCUS_MARKERS:
+        return marker
+    expected = POSITIVE_TO_NEGATIVE_FOCUS.get(folded)
+    if expected is None:
+        return None
+    if marker and marker[0].isupper():
+        return expected.capitalize()
+    return expected
+
+
+def analyze_subject_focus_negative(sentence: str) -> SubjectFocusNegativeAnalysis:
+    """Analyze reviewed negative true-subject-focus clauses conservatively.
+
+    ``baan/ayaan`` alone never proves negation. A covered reduced negative
+    predicate can support the reading only if its spelling has no reviewed
+    non-negative verb analysis, or if independent reviewed negative context
+    (currently ``waxba``) resolves that polarity ambiguity. Exact published
+    sentence evidence remains independently licensed.
+
+    Bare ``baa/ayaa`` plus a covered reduced negative predicate is recognized as
+    a review-only marker conflict. Connective ``ayaana`` and markerless strings
+    are intentionally not folded into this rule.
     """
     tokens = TOKEN_RE.findall(sentence)
     if len(tokens) < 3:
         return SubjectFocusNegativeAnalysis(recognized=False)
 
     subject, marker = tokens[0], tokens[1]
-    if marker.casefold() not in NEGATIVE_FOCUS_MARKERS:
+    marker_folded = marker.casefold()
+    if marker_folded not in ALL_REVIEWED_FOCUS_MARKERS:
         return SubjectFocusNegativeAnalysis(recognized=False)
 
     case_profile = _subject_case_profile(subject)
@@ -234,10 +281,17 @@ def analyze_subject_focus_negative(sentence: str) -> SubjectFocusNegativeAnalysi
     case_agrees, expected_surface, subject_evidence = case_profile
 
     candidates = tokens[2 : 2 + MAX_PREDICATE_GAP + 1]
-    for predicate in candidates:
-        exact_key = (subject.casefold(), predicate.casefold())
-        exact_evidence = EXACT_SOURCE_PREDICATES.get(exact_key)
-        if exact_evidence is not None:
+    negative_context = _negative_context_evidence(candidates)
+    marker_is_negative = marker_folded in NEGATIVE_FOCUS_MARKERS
+
+    # Preserve the exact published BAX example without deriving an unseen
+    # paradigm. Positive baa/ayaa with bixin is not judged from this one example.
+    if marker_is_negative:
+        for predicate in candidates:
+            exact_key = (subject.casefold(), predicate.casefold())
+            exact_evidence = EXACT_SOURCE_PREDICATES.get(exact_key)
+            if exact_evidence is None:
+                continue
             return SubjectFocusNegativeAnalysis(
                 recognized=True,
                 covered=True,
@@ -248,18 +302,52 @@ def analyze_subject_focus_negative(sentence: str) -> SubjectFocusNegativeAnalysi
                 temporal_scope=("past",),
                 expected_subject_form=expected_surface,
                 case_agrees=case_agrees,
+                marker_agrees=True,
+                expected_marker=marker,
+                orthographically_ambiguous=True,
+                predicate_has_nonnegative_analysis=None,
+                negative_context_evidence=negative_context,
                 evidence=f"{subject_evidence}+{exact_evidence}",
                 note=(
-                    "Exact published negative subject-focus example. The fused marker is "
-                    "baa/ayaa + negative aan, not ordinary ma. No BAX paradigm is inferred "
-                    "from this single surface."
+                    "Exact published negative subject-focus example. The written fused marker is "
+                    "orthographically ambiguous in general, but this exact sentence-level source "
+                    "licenses the negative reading. No BAX paradigm is inferred."
                 ),
             )
 
+    for predicate in candidates:
         negative = _negative_predicate(predicate)
         if negative is None:
             continue
+
         reduced_label, temporal_scope, lemma = negative
+        has_nonnegative = _has_nonnegative_verb_analysis(predicate)
+        if has_nonnegative and not negative_context:
+            return SubjectFocusNegativeAnalysis(
+                recognized=False,
+                subject=subject,
+                marker=marker,
+                predicate=predicate,
+                tense_aspect=reduced_label,
+                temporal_scope=temporal_scope,
+                expected_subject_form=expected_surface,
+                case_agrees=None,
+                marker_agrees=None,
+                expected_marker=_expected_negative_marker(marker),
+                orthographically_ambiguous=True,
+                predicate_has_nonnegative_analysis=True,
+                evidence="reviewed_predicate_surface_has_negative_and_nonnegative_analyses",
+                note=(
+                    "The predicate spelling has both reviewed negative and non-negative verb analyses. "
+                    "Because Somali writing also leaves baan/ayaan focus ambiguity unresolved, the "
+                    "project keeps this sentence unjudged without independent negative context."
+                ),
+            )
+
+        expected_marker = _expected_negative_marker(marker)
+        marker_agrees = marker_is_negative
+        rule_id = "GRAM-SUBJFOCUS-NEG-001" if marker_agrees else "GRAM-SUBJFOCUS-NEG-004"
+        context_label = "+negative_context_" + "_".join(negative_context) if negative_context else ""
         return SubjectFocusNegativeAnalysis(
             recognized=True,
             covered=True,
@@ -270,23 +358,38 @@ def analyze_subject_focus_negative(sentence: str) -> SubjectFocusNegativeAnalysi
             temporal_scope=temporal_scope,
             expected_subject_form=expected_surface,
             case_agrees=case_agrees,
-            evidence=f"{subject_evidence}+exact_person_neutral_{reduced_label}",
+            marker_agrees=marker_agrees,
+            expected_marker=expected_marker,
+            orthographically_ambiguous=marker_is_negative,
+            predicate_has_nonnegative_analysis=has_nonnegative,
+            negative_context_evidence=negative_context,
+            evidence=f"{subject_evidence}+exact_person_neutral_{reduced_label}{context_label}",
+            rule_id=rule_id,
             note=(
-                f"The predicate is an exact reviewed person-neutral {reduced_label} surface "
-                f"for {lemma}. Under negation plus focus, the reduced subjunctive does not "
-                "distinguish present from past or person/number; temporal interpretation comes "
-                f"from context. This independently disambiguates {marker} as negative subject "
-                "focus. Common-noun focused subjects use the absolute case. No automatic rewrite."
+                f"The predicate is an exact reviewed person-neutral {reduced_label} surface for {lemma}. "
+                "Under negation plus focus, the reduced subjunctive does not distinguish present from "
+                "past or person/number. "
+                + (
+                    f"Reviewed negative context ({', '.join(negative_context)}) supports the negative reading. "
+                    if negative_context
+                    else "The predicate has no competing reviewed non-negative verb analysis, so it supports the negative reading. "
+                )
+                + (
+                    "The negative focus marker agrees with this reading. "
+                    if marker_agrees
+                    else f"Bare {marker} does not contain negative aan; review against {expected_marker}. "
+                )
+                + "Common-noun focused subjects use the absolute case. No automatic rewrite."
             ),
         )
 
-    # The marker alone is too ambiguous to license a negative-focus analysis.
     return SubjectFocusNegativeAnalysis(
         recognized=False,
         subject=subject,
         marker=marker,
+        orthographically_ambiguous=marker_is_negative,
         note=(
-            "baan/ayaan is orthographically ambiguous outside a reviewed negative predicate "
-            "context, so the project leaves this clause unjudged."
+            "The focus marker and surrounding predicate do not provide enough reviewed evidence for "
+            "a negative true-subject-focus reading, so the project leaves this clause unjudged."
         ),
     )
