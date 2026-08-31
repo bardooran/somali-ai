@@ -6,7 +6,11 @@ from src.assistant.model import (
     StaticModelAdapter,
     _extract_output_text,
 )
-from src.assistant.pipeline import ConversationSession, SomaliAssistant
+from src.assistant.pipeline import (
+    DEFAULT_HISTORY_MESSAGES,
+    ConversationSession,
+    SomaliAssistant,
+)
 from src.assistant.prompts import build_instructions
 from src.assistant.retrieval import KnowledgeIndex
 from src.assistant.types import ChatMessage
@@ -193,6 +197,49 @@ def test_conversation_session_keeps_turn_history():
         ChatMessage(role="user", content="Ma i fahantay?"),
         ChatMessage(role="assistant", content="Haa."),
     )
+
+
+def test_conversation_session_defaults_to_thirty_turns():
+    assistant = SomaliAssistant(
+        StaticModelAdapter("Haa."),
+        knowledge=KnowledgeIndex(),
+        response_rules=(),
+    )
+    session = ConversationSession(assistant)
+    assert DEFAULT_HISTORY_MESSAGES == 60
+    assert session.max_messages == 60
+
+
+def test_conversation_session_trims_complete_turn_pairs():
+    assistant = SomaliAssistant(
+        StaticModelAdapter("Haa."),
+        knowledge=KnowledgeIndex(),
+        response_rules=(),
+    )
+    session = ConversationSession(assistant, max_messages=4)
+    session.ask("Koowaad")
+    session.ask("Labaad")
+    session.ask("Saddexaad")
+    assert session.history == (
+        ChatMessage(role="user", content="Labaad"),
+        ChatMessage(role="assistant", content="Haa."),
+        ChatMessage(role="user", content="Saddexaad"),
+        ChatMessage(role="assistant", content="Haa."),
+    )
+
+
+def test_conversation_session_rejects_odd_history_limit():
+    assistant = SomaliAssistant(
+        StaticModelAdapter("Haa."),
+        knowledge=KnowledgeIndex(),
+        response_rules=(),
+    )
+    try:
+        ConversationSession(assistant, max_messages=3)
+    except ValueError as exc:
+        assert "even" in str(exc)
+    else:
+        raise AssertionError("expected paired-history validation")
 
 
 def test_conversation_session_clear():

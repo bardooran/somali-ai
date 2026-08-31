@@ -18,6 +18,7 @@ DEFAULT_RESPONSE_RULE_DIRS = (
     Path("rules/orthography"),
     Path("rules/variants"),
 )
+DEFAULT_HISTORY_MESSAGES = 60
 
 
 def load_response_rules(
@@ -85,11 +86,22 @@ class SomaliAssistant:
 
 
 class ConversationSession:
-    """Small in-process conversation history for CLI/API callers."""
+    """In-process conversation history for CLI/API callers.
 
-    def __init__(self, assistant: SomaliAssistant, max_messages: int = 20) -> None:
+    History is kept as complete user/assistant pairs. The default keeps thirty
+    turns, which is substantially deeper than the first MVP while remaining
+    bounded for predictable request size.
+    """
+
+    def __init__(
+        self,
+        assistant: SomaliAssistant,
+        max_messages: int = DEFAULT_HISTORY_MESSAGES,
+    ) -> None:
         if max_messages < 2:
             raise ValueError("max_messages must be at least 2")
+        if max_messages % 2:
+            raise ValueError("max_messages must be even so conversation turns stay paired")
         self.assistant = assistant
         self.max_messages = max_messages
         self._history: list[ChatMessage] = []
