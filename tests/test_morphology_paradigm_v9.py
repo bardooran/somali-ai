@@ -39,3 +39,30 @@ def test_v9_authority_diagnostics_are_explicit() -> None:
         "reviewed_exact_surfaces",
         "reviewed_rule_derived_surfaces",
     }
+
+
+def test_v9_historical_baseline_is_recorded_as_clean_zero_overlap() -> None:
+    result = report()
+    measured = result["benchmark"]["measured_result"]
+
+    assert result["benchmark"]["freeze_commit"] == "f84bd99fab4162ded31d7469989b3200333df7da"
+    assert result["benchmark"]["manifest_git_blob_sha"] == "a3ed1aa4e9c44a42daee23c37ca585160cb6adda"
+    assert result["benchmark"]["pre_freeze_overlap_status"] == "measured"
+    assert measured["somali_ai_combined_positive_surface_recognition"] == "0/7"
+    assert measured["somali_ai_master_positive_surface_recognition"] == "0/7"
+    assert measured["somali_ai_combined_comparable_feature_rows"] == "0/7"
+    assert measured["somali_ai_reviewed_exact_positive_surface_recognition"] == "0/7"
+    assert measured["somali_ai_reviewed_rule_derived_positive_surface_recognition"] == "0/7"
+    assert measured["unknown_safety"] == "8/8 for combined runtime and master exact"
+    assert measured["workflow_run_id"] == 33448961752
+
+    # These are the live values at the measurement commit. Keeping the exact
+    # assertions here prevents the baseline-recording PR from silently changing
+    # the state it claims to have measured.
+    assert result["combined"]["recognized_unique_surface_count"] == 0
+    assert result["combined"]["comparable_feature_matched_row_count"] == 0
+    assert result["combined"]["authority_diagnostics"]["reviewed_exact_surfaces"] == []
+    assert result["combined"]["authority_diagnostics"]["reviewed_rule_derived_surfaces"] == []
+    assert result["combined"]["unknown_rejected_count"] == 8
+    assert result["master"]["recognized_unique_surface_count"] == 0
+    assert result["master"]["unknown_rejected_count"] == 8
