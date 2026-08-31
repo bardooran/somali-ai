@@ -3,7 +3,7 @@
   "benchmark_name": "Independent Class-I morphophonology challenge v8",
   "manifest_path": "data/qa/morphology_paradigm_benchmark_v8.jsonl",
   "manifest_git_blob_sha": "6c292ccbd714f244001904bdadfd402f5ac5a638",
-  "freeze_commit": null,
+  "freeze_commit": "21e2d6f23f6a16f14e94a5fd2040eed1a7ea84ec",
   "pre_freeze_runtime_commit": "a48bb5d6e131b07e192f3effaea0d347d83dd46b",
   "source_family": "Warner 1985 Somali Grammar Vol. 1",
   "publisher": "Mennonite Board in East Africa",
