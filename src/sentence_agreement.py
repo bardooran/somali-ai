@@ -117,6 +117,10 @@ def _append_subject_focus_mismatches(
             expected_forms = (
                 f"a reviewed {expected} predicate under restrictive focused-subject simple-past agreement",
             )
+        elif "restrictive_past_progressive" in evidence:
+            expected_forms = (
+                f"a reviewed {expected} predicate under restrictive focused-subject past-progressive agreement",
+            )
         elif "restrictive_simple_present" in evidence:
             expected_forms = (
                 f"a reviewed {expected} predicate under restrictive focused-subject simple-present agreement",
