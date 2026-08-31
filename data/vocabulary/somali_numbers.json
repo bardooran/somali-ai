@@ -1,0 +1,118 @@
+{
+  "language": "so",
+  "dataset": "Somali Numbers",
+  "version": "1.0.0-reviewed",
+  "reviewed_at": "2026-08-31",
+  "purpose": "Reviewed numeral vocabulary and exact number-expression analysis. This file does not authorize automatic correction by itself.",
+  "sources": [
+    {
+      "id": "nilsson_2025",
+      "citation": "Morgan Nilsson, Learner's Somali Grammar (2025), section 7 Numerals, pp. 65-66",
+      "url": "https://morgannilsson.se/LearnersSomaliGrammar.pdf",
+      "strength": "primary_grammar"
+    },
+    {
+      "id": "warner_numerals",
+      "citation": "Somali Grammar, Vol. 1, Lesson 7, Numerals",
+      "url": "https://arcadia.sba.uniroma3.it/bitstream/2307/5859/3/Somali%20Grammar_Vol.1_Warner.pdf",
+      "strength": "grammar_reference"
+    },
+    {
+      "id": "nilsson_2023_exercises",
+      "citation": "Morgan Nilsson, Aasaaska Naxwaha Afka Soomaaliga - Xallinta Layliyada Buugga 1aad (2023), numeral exercises",
+      "url": "https://morgannilsson.se/AasaaskaNaxwahaAfkaSoomaaligaXallintaLayliyadaBuugga1aad.pdf",
+      "strength": "university_teaching_material"
+    },
+    {
+      "id": "secondary_number_overview",
+      "citation": "Somali-language number overview used only for secondary confirmation of 11-99 order variation and bilyan",
+      "url": "https://en.wikipedia.org/wiki/Somali_language",
+      "strength": "secondary_reference"
+    },
+    {
+      "id": "project_submission_2026_08_31",
+      "citation": "User-provided Somali Numbers v1.0.0 batch, 2026-08-31",
+      "strength": "project_submitted_candidate"
+    }
+  ],
+  "policy": {
+    "cardinal_numerals_are_nouns": true,
+    "unknown_forms_remain_unjudged": true,
+    "automatic_correction": false,
+    "one_usage": {
+      "kow": "counting and complex numbers",
+      "hal": "one item before a noun, digit-sequence reading, and some independent uses"
+    },
+    "spelling": {
+      "reviewed": ["toddoba", "siddeed", "toddobaatan", "siddeetan"],
+      "submitted_not_promoted": ["todoba", "sideed", "sideedetan"]
+    },
+    "ordering": {
+      "unit_first": "Strongly grammar-backed pattern for 11-99: unit + iyo + tens.",
+      "tens_first": "Documented variant order. Recognize conservatively; do not use as an automatic correction target."
+    }
+  },
+  "base_numbers": [
+    {"value": 0, "canonical": "eber", "variants": [], "gender": "masculine", "status": "reviewed"},
+    {"value": 1, "canonical": "kow", "variants": ["hal"], "gender": "context_dependent", "status": "reviewed_usage_sensitive"},
+    {"value": 2, "canonical": "laba", "variants": ["labo"], "gender": "feminine", "status": "reviewed_regional_standard_variation"},
+    {"value": 3, "canonical": "saddex", "variants": [], "gender": "feminine", "status": "reviewed"},
+    {"value": 4, "canonical": "afar", "variants": [], "gender": "feminine", "status": "reviewed"},
+    {"value": 5, "canonical": "shan", "variants": [], "gender": "feminine", "status": "reviewed"},
+    {"value": 6, "canonical": "lix", "variants": [], "gender": "feminine", "status": "reviewed"},
+    {"value": 7, "canonical": "toddoba", "variants": ["toddobo"], "gender": "feminine", "status": "reviewed_regional_standard_variation"},
+    {"value": 8, "canonical": "siddeed", "variants": [], "gender": "feminine", "status": "reviewed"},
+    {"value": 9, "canonical": "sagaal", "variants": [], "gender": "masculine", "status": "reviewed"},
+    {"value": 10, "canonical": "toban", "variants": [], "gender": "masculine", "status": "reviewed"}
+  ],
+  "tens": [
+    {"value": 20, "form": "labaatan", "gender": "masculine"},
+    {"value": 30, "form": "soddon", "gender": "masculine"},
+    {"value": 40, "form": "afartan", "gender": "masculine"},
+    {"value": 50, "form": "konton", "gender": "masculine"},
+    {"value": 60, "form": "lixdan", "gender": "masculine"},
+    {"value": 70, "form": "toddobaatan", "gender": "masculine"},
+    {"value": 80, "form": "siddeetan", "gender": "masculine"},
+    {"value": 90, "form": "sagaashan", "gender": "masculine"}
+  ],
+  "composition_11_99": {
+    "range": [11, 99],
+    "exclude_multiples_of_10": true,
+    "canonical_pattern": "{unit} iyo {tens}",
+    "recognized_variant_pattern": "{tens} iyo {unit}",
+    "complex_one_uses": "kow",
+    "status": "reviewed_compositional_rule"
+  },
+  "hundred": {
+    "value": 100,
+    "form": "boqol",
+    "gender": "masculine",
+    "status": "reviewed"
+  },
+  "reviewed_large_numbers": [
+    {"value": 1000, "forms": ["kun"], "status": "explicit_primary_source"},
+    {"value": 2000, "forms": ["laba kun"], "status": "independently_attested"},
+    {"value": 4000, "forms": ["afar kun"], "status": "explicit_primary_source"},
+    {"value": 10000, "forms": ["toban kun"], "status": "independently_attested"},
+    {"value": 100000, "forms": ["boqol kun"], "status": "independently_attested"},
+    {"value": 1000000, "forms": ["milyan", "malyuun", "hal milyan"], "status": "reviewed_with_independent_attestation"},
+    {"value": 1000000000, "forms": ["bilyan"], "status": "secondary_source_only", "executable": false}
+  ],
+  "submitted_not_promoted": [
+    {"forms": ["todoba"], "reason": "Submitted spelling differs from the reviewed standard form toddoba; needs independent regional evidence."},
+    {"forms": ["sideed"], "reason": "Submitted spelling differs from the reviewed standard form siddeed; needs independent regional evidence."},
+    {"forms": ["sideedetan"], "reason": "Submitted spelling differs from the reviewed standard form siddeetan; needs independent regional evidence."},
+    {"forms": ["hal kun", "hal bilyan", "saddex bilyan"], "reason": "Submitted compounds are retained as candidates but are not promoted in this stage without independent evidence."}
+  ],
+  "submitted_large_examples": [
+    {"number": 125, "forms": ["boqol toban iyo shan", "boqol iyo labaatan iyo shan"], "status": "candidate_qa_not_executable"},
+    {"number": 512, "forms": ["shan boqol toban iyo laba", "shan boqol iyo laba iyo toban"], "status": "candidate_qa_not_executable"},
+    {"number": 1214, "forms": ["kun laba boqol toban iyo afar", "kun iyo laba boqol iyo afar iyo toban"], "status": "candidate_qa_not_executable"},
+    {"number": 12400, "forms": ["toban iyo laba kun afar boqol", "laba iyo toban kun iyo afar boqol"], "status": "candidate_qa_not_executable"},
+    {"number": 18500, "forms": ["toban iyo sideed kun shan boqol", "sideed iyo toban kun iyo shan boqol"], "status": "candidate_qa_not_executable"},
+    {"number": 75316, "forms": ["todobaatan iyo shan kun saddex boqol toban iyo lix", "todobaatan iyo shan kun iyo saddex boqol iyo lix iyo toban"], "status": "candidate_qa_not_executable"},
+    {"number": 112000, "forms": ["boqol toban iyo laba kun", "boqol iyo laba iyo toban kun"], "status": "candidate_qa_not_executable"},
+    {"number": 345617, "forms": ["saddex boqol afartan iyo shan kun, lix boqol toban iyo todoba", "saddex boqol afartan iyo shan kun, iyo lix boqol iyo todoba iyo toban"], "status": "candidate_qa_not_executable"},
+    {"number": 12000000, "forms": ["toban iyo laba milyan", "laba iyo toban milyan"], "status": "candidate_qa_not_executable"}
+  ]
+}
