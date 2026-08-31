@@ -1,0 +1,116 @@
+name: Freeze Morphology Challenge v4
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "src/morphology_challenge_v4_freeze.py"
+      - "tests/test_morphology_challenge_v4_freeze.py"
+      - ".github/workflows/freeze-morphology-v4.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  freeze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out Somali AI
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Check out pinned Qaamuus source
+        uses: actions/checkout@v4
+        with:
+          repository: bardooran/goobolabs
+          ref: 737cf848bfa8291d5580f5c34db04daef858c955
+          path: external/goobolabs
+
+      - name: Test v4 freeze generator
+        run: python -m pytest -q tests/test_morphology_challenge_v4_freeze.py
+
+      - name: Generate fresh analyzer-blind v4 manifest
+        run: |
+          mkdir -p benchmark_results
+          python -m src.morphology_challenge_v4_freeze \
+            --source-root external/goobolabs/resources/qaamuus \
+            --v2 data/qa/morphology_challenge_v2.jsonl \
+            --v3 data/qa/morphology_challenge_v3.jsonl \
+            --output benchmark_results/morphology_challenge_v4.jsonl \
+            --metadata benchmark_results/morphology_challenge_v4.meta.json
+          sha256sum benchmark_results/morphology_challenge_v4.jsonl
+
+      - name: Prove generator remains analyzer-blind
+        run: |
+          if grep -Eq 'hfst-lookup|morphology_candidates|giellalt_runtime_benchmark|giellalt_challenge|master_recognition|recognize_master' src/morphology_challenge_v4_freeze.py; then
+            echo "v4 freeze generator unexpectedly references analyzer/runtime code" >&2
+            exit 1
+          fi
+
+      - name: Verify disjointness and v4 invariants
+        run: |
+          python - <<'PY'
+          import hashlib
+          import json
+          from pathlib import Path
+
+          manifest = Path('benchmark_results/morphology_challenge_v4.jsonl')
+          meta = json.loads(Path('benchmark_results/morphology_challenge_v4.meta.json').read_text(encoding='utf-8'))
+          actual_sha = hashlib.sha256(manifest.read_bytes()).hexdigest()
+          assert actual_sha == meta['manifest_sha256']
+          assert meta['selection_is_analyzer_blind'] is True
+          assert meta['definitions_copied'] is False
+          assert meta['prior_positive_overlap_count'] == 0
+          assert meta['excluded_benchmarks'] == ['v2', 'v3']
+          assert meta['quotas'] == {'noun': 64, 'verb': 64, 'numeral': 16}
+          assert meta['selected_pair_count'] == 144
+          assert meta['unknown_probe_count'] == 16
+          assert meta['case_count'] == meta['positive_case_count'] + 16
+          assert meta['available_after_prior_exclusions_type_counts']['adjective'] == 0
+
+          prior = set()
+          for name in ('v2', 'v3'):
+              for line in Path(f'data/qa/morphology_challenge_{name}.jsonl').read_text(encoding='utf-8').splitlines():
+                  case = json.loads(line)
+                  if case.get('split') == 'challenge':
+                      prior.add(case['surface'].casefold())
+          v4 = [json.loads(line) for line in manifest.read_text(encoding='utf-8').splitlines() if line.strip()]
+          positives = {case['surface'].casefold() for case in v4 if case['split'] == 'challenge'}
+          assert not (prior & positives)
+          assert meta['excluded_prior_positive_surface_count'] == len(prior)
+          PY
+
+      - name: Run full test suite before freezing
+        run: python -m pytest -q
+
+      - name: Upload frozen v4 candidate manifest
+        uses: actions/upload-artifact@v4
+        with:
+          name: morphology-challenge-v4-freeze
+          path: benchmark_results/
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Commit exact frozen v4 benchmark
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p data/qa
+          cp benchmark_results/morphology_challenge_v4.jsonl data/qa/morphology_challenge_v4.jsonl
+          cp benchmark_results/morphology_challenge_v4.meta.json data/qa/morphology_challenge_v4.meta.json
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/qa/morphology_challenge_v4.jsonl data/qa/morphology_challenge_v4.meta.json
+          if git diff --cached --quiet; then
+            echo "Frozen v4 benchmark already committed"
+            exit 0
+          fi
+          git commit -m "Freeze analyzer-blind morphology challenge v4"
+          git pull --rebase origin main
+          git push origin HEAD:main
