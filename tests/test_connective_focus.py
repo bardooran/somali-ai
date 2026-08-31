@@ -127,78 +127,85 @@ def test_connective_ayaana_does_not_turn_reduced_negative_surface_into_negative_
 
 
 def test_buuna_is_buu_plus_connective_na_and_checks_3sg_m_finite_agreement():
-    result = analyze_connective_clitic_focus("Cali baa yimid, Maryan buuna arkay.")
+    result = analyze_connective_clitic_focus("Cali baa yimid, Muus buuna cunay.")
     assert result.recognized is True
-    assert result.focused_phrase == ("Maryan",)
+    assert result.focused_phrase == ("Muus",)
     assert result.particle == "buuna"
     assert result.base_focus_clitic == "buu"
     assert result.subject_persons == ("3sg_m",)
-    assert result.verb == "arkay"
+    assert result.verb == "cunay"
     assert result.agreement_agrees is True
     assert result.rule_id == "GRAM-CONNFOCUS-007"
-    assert analyze_connective_subject_focus("Cali baa yimid, Maryan buuna arkay.").recognized is False
+    assert analyze_connective_subject_focus("Cali baa yimid, Muus buuna cunay.").recognized is False
 
 
 def test_beyna_is_bay_plus_connective_na_and_checks_feminine_or_plural_agreement():
-    result = analyze_connective_clitic_focus("Cali baa yimid, Maryan beyna aragtay.")
+    result = analyze_connective_clitic_focus("Maryan baa timid, Muus beyna cuntay.")
     assert result.recognized is True
-    assert result.focused_phrase == ("Maryan",)
+    assert result.focused_phrase == ("Muus",)
     assert result.particle == "beyna"
     assert result.base_focus_clitic == "bay"
     assert result.subject_persons == ("3sg_f", "3pl")
-    assert result.verb == "aragtay"
+    assert result.verb == "cuntay"
     assert result.agreement_agrees is True
     assert result.rule_id == "GRAM-CONNFOCUS-007"
-    assert analyze_connective_subject_focus("Cali baa yimid, Maryan beyna aragtay.").recognized is False
+    assert analyze_connective_subject_focus("Maryan baa timid, Muus beyna cuntay.").recognized is False
 
 
 def test_connective_clitic_focus_reports_exact_finite_person_conflicts():
-    masculine = analyze_connective_clitic_focus("Cali baa yimid, Maryan buuna aragtay.")
+    masculine = analyze_connective_clitic_focus("Cali baa yimid, Muus buuna cuntay.")
     assert masculine.recognized is True
     assert masculine.agreement_agrees is False
 
-    feminine = analyze_connective_clitic_focus("Cali baa yimid, Maryan beyna arkay.")
+    feminine = analyze_connective_clitic_focus("Maryan baa timid, Muus beyna cunay.")
     assert feminine.recognized is True
     assert feminine.agreement_agrees is False
 
-    findings = scan_sentence_agreement("Cali baa yimid, Maryan buuna aragtay.")
+    findings = scan_sentence_agreement("Cali baa yimid, Muus buuna cuntay.")
     assert len(findings) == 1
     assert findings[0].pronoun == "buuna"
-    assert findings[0].verb == "aragtay"
+    assert findings[0].verb == "cuntay"
     assert "encoded subject person" in findings[0].note
 
 
 def test_connective_clitic_focus_keeps_context_and_paradigm_safety_boundaries():
     for sentence in (
-        "Maryan buuna arkay.",
-        "Maryan beyna aragtay.",
-        "Cali baa yimid, Maryan baadna aragtay.",
-        "Cali baa yimid, Maryan baanna aragnay.",
-        "Cali baa yimid, Maryan baydinna aragteen.",
+        "Muus buuna cunay.",
+        "Muus beyna cuntay.",
+        "Cali baa yimid, Muus baadna cuntay.",
+        "Cali baa yimid, Muus baanna cunnay.",
+        "Cali baa yimid, Muus baydinna cunteen.",
     ):
         assert analyze_connective_clitic_focus(sentence).recognized is False
 
-    assert _run_checker("Maryan buuna arkay.") == NO_FINDINGS
-    assert _run_checker("Maryan beyna aragtay.") == NO_FINDINGS
+    assert _run_checker("Muus buuna cunay.") == NO_FINDINGS
+    assert _run_checker("Muus beyna cuntay.") == NO_FINDINGS
 
 
-def test_connective_clitic_focus_does_not_guess_unknown_predicates():
-    result = analyze_connective_clitic_focus("Cali baa yimid, Maryan buuna arkXYZ.")
+def test_connective_clitic_focus_does_not_promote_unreviewed_finite_surfaces():
+    # arkay is familiar elsewhere in the project, but it is not independently
+    # promoted into the shared exact finite-morphology layer. Keep it unjudged.
+    result = analyze_connective_clitic_focus("Cali baa yimid, Maryan buuna arkay.")
     assert result.recognized is True
     assert result.agreement_agrees is None
     assert result.rule_id == "GRAM-CONNFOCUS-006"
+    assert _run_checker("Cali baa yimid, Maryan buuna arkay.") == NO_FINDINGS
+
+    unknown = analyze_connective_clitic_focus("Cali baa yimid, Maryan buuna arkXYZ.")
+    assert unknown.recognized is True
+    assert unknown.agreement_agrees is None
     assert _run_checker("Cali baa yimid, Maryan buuna arkXYZ.") == NO_FINDINGS
 
 
 def test_cli_accepts_valid_clitic_connective_focus_and_reports_mismatch_without_rewrite():
-    assert _run_checker("Cali baa yimid, Maryan buuna arkay.") == NO_FINDINGS
-    assert _run_checker("Cali baa yimid, Maryan beyna aragtay.") == NO_FINDINGS
+    assert _run_checker("Cali baa yimid, Muus buuna cunay.") == NO_FINDINGS
+    assert _run_checker("Maryan baa timid, Muus beyna cuntay.") == NO_FINDINGS
 
-    output = _run_checker("Cali baa yimid, Maryan buuna aragtay.")
+    output = _run_checker("Cali baa yimid, Muus buuna cuntay.")
     assert "possible subject-verb agreement conflict" in output
     assert "buuna" in output
-    assert "aragtay" in output
-    assert "Safe corrected text:\nCali baa yimid, Maryan buuna aragtay." in output
+    assert "cuntay" in output
+    assert "Safe corrected text:\nCali baa yimid, Muus buuna cuntay." in output
 
 
 def test_cli_accepts_valid_connective_focus_and_reports_agreement_conflict():
