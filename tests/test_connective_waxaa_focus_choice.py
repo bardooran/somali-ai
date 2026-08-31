@@ -115,9 +115,8 @@ def test_unpunctuated_same_subject_wuxuuna_uses_reviewed_left_finite_boundary():
     assert result.same_subject_continuity_agrees is True
 
 
-def test_wuxuuna_input_start_and_predicted_spellings_remain_outside_this_promotion():
+def test_predicted_wuxuuna_spellings_remain_outside_this_promotion():
     for sentence in (
-        "Wuxuuna cunay muus.",
         "Cali wuu yimid, waxuuna cunay muus.",
         "Cali wuu yimid, wuxuna cunay muus.",
     ):
