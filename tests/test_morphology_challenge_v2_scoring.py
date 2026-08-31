@@ -75,6 +75,21 @@ def test_score_system_uses_same_recognition_and_type_metrics(tmp_path):
     assert score.runtime_winner_declared is False
 
 
+def test_zero_returned_types_have_zero_precision(tmp_path):
+    path = tmp_path / "challenge.jsonl"
+    _write_cases(path)
+    score = score_system(
+        system="silent",
+        recognized_surfaces=set(),
+        types_by_surface={},
+        path=path,
+    )
+
+    assert score.returned_type_count == 0
+    assert score.matched_expected_type_count == 0
+    assert score.type_precision == 0.0
+
+
 def test_frozen_v2_loader_sees_committed_challenge():
     cases = load_cases()
     assert len(cases) == 136
