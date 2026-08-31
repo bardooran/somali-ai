@@ -1,0 +1,51 @@
+name: GiellaLT Runtime Benchmark
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "src/giellalt_runtime_benchmark.py"
+      - "tests/test_giellalt_runtime_benchmark.py"
+      - "data/qa/morphology_benchmark_v1.jsonl"
+      - ".github/workflows/giellalt-runtime.yml"
+  workflow_dispatch:
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out Somali AI
+        uses: actions/checkout@v4
+
+      - name: Check out pinned GiellaLT Somali source
+        uses: actions/checkout@v4
+        with:
+          repository: bardooran/GiellaLT
+          ref: 5278929712e9c0c67f254f1a1dc64c80ea7b2b8d
+          path: external/lang-som
+
+      - name: Install HFST and Constraint Grammar
+        run: |
+          wget https://apertium.projectjj.com/apt/install-nightly.sh -O - | sudo bash
+          sudo apt-get install -y cg3 hfst
+
+      - name: Build GiellaLT analyzer
+        working-directory: external/lang-som
+        run: |
+          ./autogen.sh
+          ./configure
+          make -j2
+
+      - name: Locate compiled analyzer
+        id: analyzer
+        shell: bash
+        run: |
+          analyzer="$(find external/lang-som -type f \( -name 'analyser-gt-desc.hfstol' -o -name 'analyser-gt-desc.hfst' -o -name 'analyser-gt-norm.hfstol' -o -name 'analyser-gt-norm.hfst' \) | head -n 1)"
+          test -n "$analyzer"
+          echo "path=$analyzer" >> "$GITHUB_OUTPUT"
+          echo "Using $analyzer"
+
+      - name: Run frozen benchmark against compiled GiellaLT FST
+        run: |
+          python -m src.giellalt_runtime_benchmark --analyzer "${{ steps.analyzer.outputs.path }}" --giellalt-commit 5278929712e9c0c67f254f1a1dc64c80ea7b2b8d
