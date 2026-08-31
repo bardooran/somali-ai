@@ -1,8 +1,9 @@
 """Small, source-backed Somali vocabulary lookup.
 
-Default lookup combines reviewed Qaamuus vocabulary datasets, reviewed
-calendar vocabulary, regional-variant metadata, and a conservative
-morphology-candidate layer. Homographs are preserved as multiple analyses.
+Default lookup combines reviewed Qaamuus vocabulary datasets, calendar/date
+and time vocabulary, age vocabulary, direction/location vocabulary, regional-
+variant metadata, and a conservative morphology-candidate layer. Homographs
+are preserved as multiple analyses.
 
 Inflected forms are only linked to lemmas when the exact surface form is stored
 in reviewed morphology data. The module does not perform open-ended suffix
@@ -24,11 +25,17 @@ EVERYDAY_VERB_VOCABULARY_PATH = Path(
     "data/vocabulary/qaamuus_2012_everyday_verbs.jsonl"
 )
 CALENDAR_VOCABULARY_PATH = Path("data/vocabulary/somali_calendar_terms.jsonl")
+DATETIME_VOCABULARY_PATH = Path("data/vocabulary/somali_datetime_terms.jsonl")
+AGE_VOCABULARY_PATH = Path("data/vocabulary/somali_age_terms.jsonl")
+DIRECTION_VOCABULARY_PATH = Path("data/vocabulary/somali_direction_terms.jsonl")
 DEFAULT_VOCABULARY_PATHS = (
     GRAMMAR_VOCABULARY_PATH,
     EVERYDAY_VOCABULARY_PATH,
     EVERYDAY_VERB_VOCABULARY_PATH,
     CALENDAR_VOCABULARY_PATH,
+    DATETIME_VOCABULARY_PATH,
+    AGE_VOCABULARY_PATH,
+    DIRECTION_VOCABULARY_PATH,
 )
 
 
@@ -93,13 +100,12 @@ def lookup_word(
 ) -> WordLookup:
     """Look up a Somali surface form across reviewed evidence layers.
 
-    Exact dictionary/calendar headwords, exact reviewed morphology mappings,
-    and regional-variant metadata are returned independently. Multiple analyses
-    are deliberately retained so callers can resolve them using sentence
-    context.
+    Exact reviewed headwords, exact reviewed morphology mappings, and regional-
+    variant metadata are returned independently. Multiple analyses are retained
+    so callers can resolve them using sentence context.
 
-    ``vocabulary_path`` can restrict only the dictionary dataset for tests or
-    specialized callers; reviewed morphology and regional evidence still use
+    ``vocabulary_path`` can restrict only the exact-headword dataset for tests
+    or specialized callers; reviewed morphology and regional evidence still use
     their normal project datasets.
     """
     query = form.strip()
