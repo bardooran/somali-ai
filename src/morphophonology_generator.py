@@ -49,6 +49,13 @@ def _apply_conj2_processes(
     """Return one reviewed Conjugation-2 surface plus a process label."""
     if agreement == "t" and lemma.endswith("i") and "i_t_assibilation" in processes:
         return lemma + "s" + tam, "i_t_assibilation"
+    if (
+        not agreement
+        and lemma.endswith("i")
+        and tam[:1].lower() in {"a", "e", "i", "o", "u"}
+        and "i_vowel_glide" in processes
+    ):
+        return lemma + "y" + tam, "i_vowel_glide"
     return lemma + agreement + tam, "concatenative_elsewhere"
 
 

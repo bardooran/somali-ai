@@ -16,6 +16,7 @@ V6 = Path("data/qa/morphology_paradigm_benchmark_v6.jsonl")
 V7 = Path("data/qa/morphology_paradigm_benchmark_v7.jsonl")
 V8 = Path("data/qa/morphology_paradigm_benchmark_v8.jsonl")
 V9 = Path("data/qa/morphology_paradigm_benchmark_v9.jsonl")
+V10 = Path("data/qa/morphology_paradigm_benchmark_v10.jsonl")
 
 
 def _positive_lemmas(path: Path) -> set[str]:
@@ -49,22 +50,44 @@ def test_kari_present_t_agreement_uses_reviewed_i_t_assibilation() -> None:
     assert all(item.conjugation_class == "2A" for item in candidates)
     assert all(item.correction_allowed is False for item in candidates)
 
+    assert _persons("karisaan", "kari") == {"2pl"}
+    plural_candidate = generate_conj2_present("kari", "2pl")
+    assert plural_candidate is not None
+    assert plural_candidate.surface == "karisaan"
+    assert plural_candidate.rule_id.endswith(":i_t_assibilation")
 
-def test_kari_profile_remains_present_only_and_deliberately_narrow() -> None:
-    assert generate_conj2_present("kari", "2sg") is not None
-    assert generate_conj2_present("kari", "3sg_f") is not None
-    assert generate_conj2_present("kari", "1sg") is None
+
+def test_kari_reviewed_vowel_initial_present_cells_use_y_glide() -> None:
+    assert _persons("kariyaa", "kari") == {"1sg", "3sg_m"}
+    assert _persons("kariyaan", "kari") == {"3pl"}
+
+    for person in ("1sg", "3sg_m"):
+        candidate = generate_conj2_present("kari", person)
+        assert candidate is not None
+        assert candidate.surface == "kariyaa"
+        assert candidate.rule_id.endswith(":i_vowel_glide")
+        assert candidate.tense_aspect == "present"
+        assert candidate.conjugation_class == "2A"
+        assert candidate.correction_allowed is False
+
+    plural_candidate = generate_conj2_present("kari", "3pl")
+    assert plural_candidate is not None
+    assert plural_candidate.surface == "kariyaan"
+    assert plural_candidate.rule_id.endswith(":i_vowel_glide")
+    assert plural_candidate.correction_allowed is False
+
+
+def test_kari_profile_remains_present_only_and_withholds_unsafe_1pl() -> None:
+    for person in ("1sg", "2sg", "3sg_m", "3sg_f", "2pl", "3pl"):
+        assert generate_conj2_present("kari", person) is not None
+
     assert generate_conj2_present("kari", "1pl") is None
-    assert generate_conj2_present("kari", "2pl") is None
-    assert generate_conj2_present("kari", "3pl") is None
+    assert generate_conj2_past("kari", "1sg") is None
     assert generate_conj2_past("kari", "2sg") is None
     assert generate_conj2_past("kari", "3sg_f") is None
 
     for ungenerated in (
-        "kariyaa",
         "karinnaa",
-        "karisaan",
-        "kariyaan",
         "karisay",
         "kariseen",
         "akhrisaa",
@@ -116,14 +139,19 @@ def test_joogi_profile_does_not_fill_unreviewed_paradigm_cells() -> None:
         )
 
 
-def test_unified_analyzer_preserves_kari_person_syncretism_without_correction_authority() -> None:
-    analyses = [item for item in analyze_morphology("karisaa") if item.lemma == "kari"]
-    assert {item.features.get("person") for item in analyses} == {"2sg", "3sg_f"}
-    assert all(item.features.get("tense_aspect") == "present" for item in analyses)
-    assert all(item.features.get("mood") == "indicative" for item in analyses)
-    assert all(item.features.get("conjugation_class") == "2A" for item in analyses)
-    assert all(item.authority == "reviewed_rule_derived" for item in analyses)
-    assert all(item.correction_allowed is False for item in analyses)
+def test_unified_analyzer_preserves_both_kari_present_syncretisms_without_correction_authority() -> None:
+    t_analyses = [item for item in analyze_morphology("karisaa") if item.lemma == "kari"]
+    assert {item.features.get("person") for item in t_analyses} == {"2sg", "3sg_f"}
+
+    glide_analyses = [item for item in analyze_morphology("kariyaa") if item.lemma == "kari"]
+    assert {item.features.get("person") for item in glide_analyses} == {"1sg", "3sg_m"}
+
+    for item in (*t_analyses, *glide_analyses):
+        assert item.features.get("tense_aspect") == "present"
+        assert item.features.get("mood") == "indicative"
+        assert item.features.get("conjugation_class") == "2A"
+        assert item.authority == "reviewed_rule_derived"
+        assert item.correction_allowed is False
 
 
 def test_conj2_profile_does_not_reverse_guess_similar_surfaces() -> None:
@@ -133,6 +161,8 @@ def test_conj2_profile_does_not_reverse_guess_similar_surfaces() -> None:
         "kariszz",
         "kariqsaa",
         "kariiszz",
+        "kariyzz",
+        "kariyqaan",
         "joogiszz",
         "joogiqsay",
     ):
@@ -143,10 +173,17 @@ def test_conj2_profile_does_not_reverse_guess_similar_surfaces() -> None:
         )
 
 
-def test_conj2_development_profiles_are_disjoint_from_frozen_v5_v6_v7_v8_v9_lemmas() -> None:
+def test_conj2_development_profiles_are_disjoint_from_all_frozen_v5_to_v10_lemmas() -> None:
     development = {value.casefold() for value in eligible_conj2_profile_lemmas()}
-    assert development.isdisjoint(_positive_lemmas(V5))
-    assert development.isdisjoint(_positive_lemmas(V6))
-    assert development.isdisjoint(_positive_lemmas(V7))
-    assert development.isdisjoint(_positive_lemmas(V8))
-    assert development.isdisjoint(_positive_lemmas(V9))
+    for benchmark in (V5, V6, V7, V8, V9, V10):
+        assert development.isdisjoint(_positive_lemmas(benchmark))
+
+
+def test_v10_surfaces_remain_unlearned_by_finite_conj2_runtime() -> None:
+    for line in V10.read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        row = json.loads(line)
+        if row.get("benchmark_role") != "positive":
+            continue
+        assert analyze_morphophonological_surface(str(row["surface"])) == ()
