@@ -1,0 +1,8 @@
+{"lemma":"da'","source_pos":"age_term","domain":"age","status":"reviewed","source":"Project submission 2026-08-31; common Somali usage","meaning":"age"}
+{"lemma":"jir","source_pos":"age_expression_unit","domain":"age","status":"reviewed","source":"Morgan Nilsson, Somali 2 Lesson 14; Beginner's Somali materials; project submission 2026-08-31","meaning":"age_in_years_expression"}
+{"lemma":"ilmo","source_pos":"person_age_term","domain":"age","status":"reviewed","source":"Project submission 2026-08-31; common Somali usage","meaning":"child"}
+{"lemma":"dhallaan","source_pos":"person_age_term","domain":"age","status":"reviewed","source":"Project submission 2026-08-31; common Somali usage","meaning":"baby_or_newborn_context_dependent"}
+{"lemma":"yar","source_pos":"age_description","domain":"age","status":"reviewed","source":"Project submission 2026-08-31; common Somali usage","meaning":"young_or_small_context_dependent"}
+{"lemma":"qof weyn","source_pos":"person_age_term","domain":"age","status":"reviewed_phrase","source":"Project submission 2026-08-31; common Somali usage","meaning":"adult_person_context_dependent"}
+{"lemma":"waayeel","source_pos":"person_age_term","domain":"age","status":"reviewed","source":"Project submission 2026-08-31; common Somali usage","meaning":"elderly_or_elder"}
+{"lemma":"dhallinyaro","source_pos":"person_age_term","domain":"age","status":"reviewed_context_sensitive","source":"Project submission 2026-08-31; common Somali usage","meaning":"youth_or_young_people; not automatically equivalent to teenager"}
