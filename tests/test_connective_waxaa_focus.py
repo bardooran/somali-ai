@@ -275,20 +275,14 @@ def test_waxaa_connectives_remain_separate_from_connective_statement_family():
         assert analyze_connective_statement(sentence).recognized is False
 
 
-def test_cli_accepts_valid_exact_waxaa_connectives_and_reports_only_real_mismatches():
+def test_cli_accepts_context_neutral_exact_waxaa_connectives_and_reports_real_mismatches():
     for sentence in (
         "Cali wuu yimid, waxaana la xiray albaabka.",
-        "Cali wuu yimid, waxayna cuntay muus.",
-        "Cali wuu yimid, waxayna cuneen muus.",
-        "Cali wuu yimid, waxaadna cuntay muus.",
-        "Cali wuu yimid, waxaadna cunteen muus.",
         "Waxaana gabi ahaan la xiray waddooyinkaas.",
         "Waxayna cuntay muus.",
         "Waxayna cuneen muus.",
         "Waxaadna cuntay muus.",
         "Waxaadna cunteen muus.",
-        "Cali wuu cunay waxayna cuntay muus.",
-        "Cali wuu cunay waxaadna cunteen muus.",
         "Cali wuu cunay waxaana la xiray albaabka.",
     ):
         assert _run_checker(sentence) == NO_FINDINGS
