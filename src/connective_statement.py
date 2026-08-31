@@ -12,6 +12,14 @@ The executable stage recognizes only clause-initial exact forms after an overt
 comma or semicolon. ``wuuna``/``wayna`` may check their encoded subject person(s)
 against exact reviewed finite morphology. ``waana`` is person-neutral: it is
 recognized without inventing a hidden short subject pronoun or agreement value.
+
+For clitic-bearing connectives, a separate discourse-safety signal compares the
+right connective subject person set with the nearest exact reviewed statement
+subject clitic on the left. Disjoint person sets do not make the sentence
+ungrammatical: they mean an intentional subject switch may be present and
+context is required. Matching person sets only make same-subject continuation
+possible; antecedent identity is never inferred.
+
 No broader ``waa + clitic + -na`` paradigm is generated and no form is rewritten.
 """
 
@@ -29,6 +37,12 @@ CONNECTIVE_STATEMENT_CLITICS = {
     "wayna": ("way", ("3sg_f", "3pl")),
 }
 CONNECTIVE_STATEMENT_PARTICLES = {"waana": "waa"}
+STATEMENT_SUBJECT_CLITICS = {
+    "wuu": ("3sg_m",),
+    "way": ("3sg_f", "3pl"),
+    "wuuna": ("3sg_m",),
+    "wayna": ("3sg_f", "3pl"),
+}
 MAX_FINITE_GAP = 4
 
 
@@ -44,9 +58,51 @@ class ConnectiveStatementAnalysis:
     agreement_agrees: bool | None = None
     conjunction: str | None = None
     boundary: str | None = None
+    left_subject_clitic: str | None = None
+    left_subject_persons: tuple[str, ...] = ()
+    same_subject_continuity_agrees: bool | None = None
     evidence: str | None = None
     rule_id: str = "GRAM-CONNSTAT-001"
+    continuity_rule_id: str | None = None
     note: str = ""
+
+
+def _nearest_left_subject_context(text: str) -> tuple[str | None, tuple[str, ...]]:
+    """Return the nearest exact reviewed statement subject clitic on the left."""
+    tokens = TOKEN_RE.findall(text)
+    for token in reversed(tokens):
+        persons = STATEMENT_SUBJECT_CLITICS.get(token.casefold())
+        if persons is not None:
+            return token, persons
+    return None, ()
+
+
+def _continuity_value(
+    left_subject_persons: tuple[str, ...],
+    right_subject_persons: tuple[str, ...],
+) -> bool | None:
+    if not left_subject_persons or not right_subject_persons:
+        return None
+    return any(person in right_subject_persons for person in left_subject_persons)
+
+
+def _continuity_note(value: bool | None) -> str:
+    if value is True:
+        return (
+            "The nearest reviewed left statement subject clitic is compatible with the "
+            "right connective subject person set, so same-subject continuation is possible. "
+            "Antecedent identity is still not inferred."
+        )
+    if value is False:
+        return (
+            "The nearest reviewed left statement subject clitic has a disjoint person set. "
+            "A subject switch may be grammatical, but it is context-required and must not "
+            "be presented as a plain same-subject continuation."
+        )
+    return (
+        "No reviewed left statement subject clitic was available for a safe continuity "
+        "judgment; antecedent identity remains unjudged."
+    )
 
 
 def analyze_connective_statement(sentence: str) -> ConnectiveStatementAnalysis:
@@ -54,10 +110,12 @@ def analyze_connective_statement(sentence: str) -> ConnectiveStatementAnalysis:
 
     The connective form must be the first lexical token after an overt comma or
     semicolon. ``waana`` requires following predicate/clause material but does
-    not encode a subject person, so no finite-agreement judgment is derived from
-    it. For ``wuuna``/``wayna``, up to four intervening lexical tokens may
-    precede an exact reviewed finite verb; if none is found, the connective form
-    remains recognized but agreement is unjudged.
+    not encode a subject person, so no finite-agreement or subject-continuity
+    judgment is derived from the particle itself. For ``wuuna``/``wayna``, up to
+    four intervening lexical tokens may precede an exact reviewed finite verb;
+    if none is found, the connective form remains recognized and finite agreement
+    stays unjudged. Subject continuity is evaluated separately from right-clause
+    finite agreement.
     """
     for boundary_match in CLAUSE_BOUNDARY_RE.finditer(sentence):
         tail = sentence[boundary_match.end() :].strip()
@@ -65,6 +123,9 @@ def analyze_connective_statement(sentence: str) -> ConnectiveStatementAnalysis:
         if len(tokens) < 2:
             continue
 
+        left_subject_clitic, left_subject_persons = _nearest_left_subject_context(
+            sentence[: boundary_match.start()]
+        )
         particle = tokens[0]
         base_particle = CONNECTIVE_STATEMENT_PARTICLES.get(particle.casefold())
         if base_particle is not None:
@@ -76,13 +137,16 @@ def analyze_connective_statement(sentence: str) -> ConnectiveStatementAnalysis:
                 agreement_agrees=None,
                 conjunction="-na",
                 boundary=boundary_match.group(0),
+                left_subject_clitic=left_subject_clitic,
+                left_subject_persons=left_subject_persons,
+                same_subject_continuity_agrees=None,
                 evidence="source_backed_declarative_particle_plus_conjunction_na+person_neutral_surface",
                 rule_id="GRAM-CONNSTAT-005",
                 note=(
                     f"{particle} is the reviewed person-neutral connective declarative form "
                     f"{base_particle} + -na ('and/so'). The form contains no short subject "
-                    "pronoun, so no subject person, antecedent, or finite-verb agreement is "
-                    "inferred from it. No automatic rewrite."
+                    "pronoun, so no right-clause subject person, subject continuity, or "
+                    "finite-verb agreement is inferred from it. No automatic rewrite."
                 ),
             )
 
@@ -91,6 +155,8 @@ def analyze_connective_statement(sentence: str) -> ConnectiveStatementAnalysis:
             continue
 
         base_statement_clitic, subject_persons = profile
+        continuity = _continuity_value(left_subject_persons, subject_persons)
+        continuity_note = _continuity_note(continuity)
         verb_candidates = tokens[1 : 1 + MAX_FINITE_GAP + 1]
         if not verb_candidates:
             continue
@@ -112,14 +178,20 @@ def analyze_connective_statement(sentence: str) -> ConnectiveStatementAnalysis:
                 agreement_agrees=agrees,
                 conjunction="-na",
                 boundary=boundary_match.group(0),
-                evidence="source_backed_statement_subject_clitic_plus_conjunction_na+exact_reviewed_finite_morphology",
+                left_subject_clitic=left_subject_clitic,
+                left_subject_persons=left_subject_persons,
+                same_subject_continuity_agrees=continuity,
+                evidence=(
+                    "source_backed_statement_subject_clitic_plus_conjunction_na"
+                    "+exact_reviewed_finite_morphology+reviewed_left_statement_clitic_continuity"
+                ),
                 rule_id="GRAM-CONNSTAT-003",
+                continuity_rule_id="GRAM-CONNSTAT-006",
                 note=(
                     f"{particle} is a reviewed connective statement form based on "
                     f"{base_statement_clitic} plus connective -na ('and'). Agreement is checked "
                     "only between the subject person(s) encoded by that exact form and an exact "
-                    "reviewed finite verb. The antecedent is not inferred and no automatic "
-                    "rewrite is used."
+                    f"reviewed finite verb. {continuity_note} No automatic rewrite is used."
                 ),
             )
 
@@ -132,12 +204,19 @@ def analyze_connective_statement(sentence: str) -> ConnectiveStatementAnalysis:
             agreement_agrees=None,
             conjunction="-na",
             boundary=boundary_match.group(0),
-            evidence="source_backed_statement_subject_clitic_plus_conjunction_na+unreviewed_predicate",
+            left_subject_clitic=left_subject_clitic,
+            left_subject_persons=left_subject_persons,
+            same_subject_continuity_agrees=continuity,
+            evidence=(
+                "source_backed_statement_subject_clitic_plus_conjunction_na"
+                "+unreviewed_predicate+reviewed_left_statement_clitic_continuity"
+            ),
             rule_id="GRAM-CONNSTAT-001",
+            continuity_rule_id="GRAM-CONNSTAT-006",
             note=(
                 f"{particle} is a reviewed connective statement form, but no exact reviewed "
-                "finite verb was found in the local predicate window. Agreement remains "
-                "unjudged; no verb form or antecedent is guessed."
+                "finite verb was found in the local predicate window. Finite agreement remains "
+                f"unjudged. {continuity_note} No verb form or antecedent is guessed."
             ),
         )
 
