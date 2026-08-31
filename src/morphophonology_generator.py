@@ -1,8 +1,8 @@
 """Finite reviewed morphophonology generation for explicitly authorized profiles.
 
 This module is deliberately separate from the broader concatenative morphology
-generator.  It handles only reviewed, non-concatenative development profiles and
-builds a finite forward index.  It never performs reverse suffix stripping and
+generator. It handles only reviewed, non-concatenative development profiles and
+builds finite forward indexes. It never performs reverse suffix stripping and
 never grants correction authority.
 """
 
@@ -14,10 +14,11 @@ from pathlib import Path
 
 from .morphology_generator import GeneratedMorphology
 
-RULE_PATH = Path("rules/morphology/reviewed_class_i_morphophonology.json")
+CLASS_I_RULE_PATH = Path("rules/morphology/reviewed_class_i_morphophonology.json")
+CONJ2_RULE_PATH = Path("rules/morphology/reviewed_conjugation_2_morphophonology.json")
 
 
-def _load_rule(path: Path = RULE_PATH) -> dict:
+def _load_rule(path: Path = CLASS_I_RULE_PATH) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
@@ -27,11 +28,7 @@ def _apply_processes(
     tam: str,
     processes: set[str],
 ) -> tuple[str, str]:
-    """Return one reviewed surface plus a short process label.
-
-    The caller supplies only finite profile data from the reviewed rule file.
-    No attempt is made to infer a lemma from an input surface.
-    """
+    """Return one reviewed Class-I surface plus a short process label."""
     if agreement == "t" and lemma.endswith("l") and "l_t_assibilation" in processes:
         return lemma[:-1] + "sh" + tam, "l_t_assibilation"
     if agreement == "n" and lemma.endswith("l") and "l_n_assimilation" in processes:
@@ -40,6 +37,18 @@ def _apply_processes(
         return lemma + "r" + tam, "r_n_assimilation"
     if agreement == "t" and lemma.endswith("dh") and "dh_t_assimilation" in processes:
         return lemma + "dh" + tam, "dh_t_assimilation"
+    return lemma + agreement + tam, "concatenative_elsewhere"
+
+
+def _apply_conj2_processes(
+    lemma: str,
+    agreement: str,
+    tam: str,
+    processes: set[str],
+) -> tuple[str, str]:
+    """Return one reviewed Conjugation-2 surface plus a process label."""
+    if agreement == "t" and lemma.endswith("i") and "i_t_assibilation" in processes:
+        return lemma + "s" + tam, "i_t_assibilation"
     return lemma + agreement + tam, "concatenative_elsewhere"
 
 
@@ -58,7 +67,7 @@ def _evidence_summary(rule: dict, profile: dict, process: str) -> tuple[str, ...
 
 
 def generate_profile_past(lemma: str, person: str) -> GeneratedMorphology | None:
-    rule = _load_rule()
+    rule = _load_rule(CLASS_I_RULE_PATH)
     profile = rule.get("profiles", {}).get(lemma)
     if not isinstance(profile, dict):
         return None
@@ -88,9 +97,41 @@ def generate_profile_past(lemma: str, person: str) -> GeneratedMorphology | None
     )
 
 
+def generate_conj2_present(lemma: str, person: str) -> GeneratedMorphology | None:
+    """Generate one finite reviewed Conjugation-2 present candidate."""
+    rule = _load_rule(CONJ2_RULE_PATH)
+    profile = rule.get("profiles", {}).get(lemma)
+    if not isinstance(profile, dict):
+        return None
+    authorized = {str(value) for value in profile.get("authorized_persons", [])}
+    if person not in authorized:
+        return None
+    morphology = rule.get("present_morphology", {}).get(person)
+    if not isinstance(morphology, dict):
+        return None
+    agreement = str(morphology.get("agreement", ""))
+    tam = str(morphology.get("tam", ""))
+    processes = {str(value) for value in profile.get("processes", [])}
+    surface, process = _apply_conj2_processes(lemma, agreement, tam, processes)
+    return GeneratedMorphology(
+        surface=surface,
+        lemma=lemma,
+        part_of_speech=str(rule["part_of_speech"]),
+        conjugation_class=str(rule["conjugation_class"]),
+        tense_aspect="present",
+        mood="indicative",
+        person=person,
+        form=None,
+        status=str(rule["status"]),
+        rule_id=f"{rule['id']}:{process}",
+        evidence_summary=_evidence_summary(rule, profile, process),
+        correction_allowed=False,
+    )
+
+
 @lru_cache(maxsize=1)
 def _surface_index() -> dict[str, tuple[GeneratedMorphology, ...]]:
-    rule = _load_rule()
+    rule = _load_rule(CLASS_I_RULE_PATH)
     index: dict[str, list[GeneratedMorphology]] = {}
     for lemma, profile in rule.get("profiles", {}).items():
         if not isinstance(profile, dict):
@@ -103,11 +144,33 @@ def _surface_index() -> dict[str, tuple[GeneratedMorphology, ...]]:
     return {key: tuple(values) for key, values in index.items()}
 
 
+@lru_cache(maxsize=1)
+def _conj2_surface_index() -> dict[str, tuple[GeneratedMorphology, ...]]:
+    rule = _load_rule(CONJ2_RULE_PATH)
+    index: dict[str, list[GeneratedMorphology]] = {}
+    for lemma, profile in rule.get("profiles", {}).items():
+        if not isinstance(profile, dict):
+            continue
+        for person in profile.get("authorized_persons", []):
+            candidate = generate_conj2_present(str(lemma), str(person))
+            if candidate is None:
+                continue
+            index.setdefault(candidate.surface.casefold(), []).append(candidate)
+    return {key: tuple(values) for key, values in index.items()}
+
+
 def analyze_morphophonological_surface(form: str) -> tuple[GeneratedMorphology, ...]:
     """Return exact forward-generated candidates from finite reviewed profiles."""
-    return _surface_index().get(form.strip().casefold(), ())
+    key = form.strip().casefold()
+    return _surface_index().get(key, ()) + _conj2_surface_index().get(key, ())
 
 
 def eligible_profile_lemmas() -> tuple[str, ...]:
-    rule = _load_rule()
+    """Return the existing Class-I development-profile lemmas."""
+    rule = _load_rule(CLASS_I_RULE_PATH)
+    return tuple(sorted(str(value) for value in rule.get("profiles", {})))
+
+
+def eligible_conj2_profile_lemmas() -> tuple[str, ...]:
+    rule = _load_rule(CONJ2_RULE_PATH)
     return tuple(sorted(str(value) for value in rule.get("profiles", {})))
