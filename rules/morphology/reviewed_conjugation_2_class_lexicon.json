@@ -1,0 +1,63 @@
+{
+  "id": "MORPH-CONJ-IIA-CLASS-LEX-001",
+  "status": "reviewed_class_only",
+  "part_of_speech": "verb",
+  "conjugation_class": "2A",
+  "generation_enabled": false,
+  "correction_authority": false,
+  "source": {
+    "work": "Somali-English Dictionary",
+    "author": "R. David Zorc",
+    "revision": "2019-06-05",
+    "url": "https://zorc.net/RDZorc/SOMALI/SOMALI-ENGLISH=DICTIONARY.pdf",
+    "selection_policy": "Contiguous B/C dictionary slice. Entries are admitted only when the dictionary explicitly labels the verb v2a; no inflected paradigm surface is taken from this source.",
+    "benchmark_independence_note": "This is a distinct 2019 dictionary source, not the Zorc & Issa 1990 v7 textbook. It shares an author with v7, so it is not claimed author-independent; no v7 benchmark lemma or answer row is used here."
+  },
+  "entries": {
+    "bushi": {
+      "source_page": 61,
+      "source_label": "v2a=tr",
+      "gloss": "cause someone to become sick; make someone sad / throw doubt on something"
+    },
+    "butaaci": {
+      "source_page": 61,
+      "source_label": "v2a=tr",
+      "gloss": "cause to emit; cause to gush out"
+    },
+    "buubi": {
+      "source_page": 62,
+      "source_label": "v2a=",
+      "gloss": "chase away; speed; make run or fly; spray water on"
+    },
+    "buufi": {
+      "source_page": 62,
+      "source_label": "v2a=tr",
+      "gloss": "blow into; inflate; spray"
+    },
+    "buuxi": {
+      "source_page": 63,
+      "source_label": "v2a=",
+      "gloss": "fill up or out; wind a watch; charge a battery"
+    },
+    "caafi": {
+      "source_page": 64,
+      "source_label": "v2a=tr",
+      "gloss": "cure; heal someone"
+    },
+    "caajisi": {
+      "source_page": 64,
+      "source_label": "v2a=tr",
+      "gloss": "debilitate; weaken; tire someone out"
+    }
+  },
+  "benchmark_isolation": {
+    "v5_answers_used_as_class_evidence": false,
+    "v6_answers_used_as_class_evidence": false,
+    "v7_answers_used_as_class_evidence": false,
+    "v8_answers_used_as_class_evidence": false,
+    "v9_answers_used_as_class_evidence": false,
+    "v10_answers_used_as_class_evidence": false,
+    "class_only_entries_may_generate_before_a_future_freeze": false
+  },
+  "notes": "This file records reviewed lemma-to-class knowledge only. It intentionally does not authorize tense, person, mood, surface generation, reverse analysis, or correction. A later benchmark may test whether a separately reviewed class-level generator can generalize to these pre-authorized lemmas after benchmark answers are frozen."
+}
