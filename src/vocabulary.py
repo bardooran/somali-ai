@@ -1,12 +1,12 @@
-"""Small, source-backed Somali word lookup prototype.
+"""Small, source-backed Somali vocabulary lookup.
 
-Default lookup combines multiple reviewed Qaamuus lexical datasets, reviewed
+Default lookup combines reviewed Qaamuus vocabulary datasets, reviewed
 regional-variant metadata, and a conservative morphology-candidate layer.
 Homographs are preserved as multiple analyses.
 
 Inflected forms are only linked to lemmas when the exact surface form is stored
-in the reviewed morphology dataset. The module does not perform open-ended
-suffix stripping or guess unseen lemmas.
+in reviewed morphology data. The module does not perform open-ended suffix
+stripping or guess unseen lemmas.
 """
 
 from __future__ import annotations
@@ -18,20 +18,20 @@ from pathlib import Path
 from src.morphology_candidates import MorphologyCandidate, analyze_surface_form
 from src.regional_variants import RegionalVariantAnalysis, analyze_regional_form
 
-LEXICON_PATH = Path("data/lexical/qaamuus_2012_grammar_lexicon_seed.jsonl")
-EVERYDAY_LEXICON_PATH = Path("data/lexical/qaamuus_2012_everyday_lexicon_seed.jsonl")
-EVERYDAY_VERB_LEXICON_PATH = Path(
-    "data/lexical/qaamuus_2012_everyday_verb_lexicon_seed.jsonl"
+GRAMMAR_VOCABULARY_PATH = Path("data/vocabulary/qaamuus_2012_grammar_words.jsonl")
+EVERYDAY_VOCABULARY_PATH = Path("data/vocabulary/qaamuus_2012_everyday_words.jsonl")
+EVERYDAY_VERB_VOCABULARY_PATH = Path(
+    "data/vocabulary/qaamuus_2012_everyday_verbs.jsonl"
 )
-DEFAULT_LEXICON_PATHS = (
-    LEXICON_PATH,
-    EVERYDAY_LEXICON_PATH,
-    EVERYDAY_VERB_LEXICON_PATH,
+DEFAULT_VOCABULARY_PATHS = (
+    GRAMMAR_VOCABULARY_PATH,
+    EVERYDAY_VOCABULARY_PATH,
+    EVERYDAY_VERB_VOCABULARY_PATH,
 )
 
 
 @dataclass(frozen=True)
-class LexiconEntry:
+class VocabularyEntry:
     lemma: str
     homograph_index: int | None
     source_pos: str | None
@@ -46,7 +46,7 @@ class LexiconEntry:
 @dataclass(frozen=True)
 class WordLookup:
     query: str
-    exact_entries: tuple[LexiconEntry, ...]
+    exact_entries: tuple[VocabularyEntry, ...]
     morphology_candidates: tuple[MorphologyCandidate, ...]
     regional_analyses: tuple[RegionalVariantAnalysis, ...]
     known: bool
@@ -63,9 +63,9 @@ def _load_jsonl(path: str | Path) -> list[dict]:
     return records
 
 
-def _to_entry(record: dict) -> LexiconEntry:
+def _to_entry(record: dict) -> VocabularyEntry:
     related = record.get("related_lemmas", [])
-    return LexiconEntry(
+    return VocabularyEntry(
         lemma=record["lemma"],
         homograph_index=record.get("homograph_index"),
         source_pos=record.get("source_pos"),
@@ -80,14 +80,14 @@ def _to_entry(record: dict) -> LexiconEntry:
 
 def _default_records() -> list[dict]:
     records: list[dict] = []
-    for path in DEFAULT_LEXICON_PATHS:
+    for path in DEFAULT_VOCABULARY_PATHS:
         records.extend(_load_jsonl(path))
     return records
 
 
 def lookup_word(
     form: str,
-    lexicon_path: str | Path | None = None,
+    vocabulary_path: str | Path | None = None,
 ) -> WordLookup:
     """Look up a Somali surface form across reviewed evidence layers.
 
@@ -95,13 +95,17 @@ def lookup_word(
     regional-variant metadata are returned independently. Multiple analyses are
     deliberately retained so callers can resolve them using sentence context.
 
-    ``lexicon_path`` can restrict only the dictionary dataset for tests or
+    ``vocabulary_path`` can restrict only the dictionary dataset for tests or
     specialized callers; reviewed morphology and regional evidence still use
     their normal project datasets.
     """
     query = form.strip()
     folded = query.casefold()
-    records = _load_jsonl(lexicon_path) if lexicon_path is not None else _default_records()
+    records = (
+        _load_jsonl(vocabulary_path)
+        if vocabulary_path is not None
+        else _default_records()
+    )
     entries = tuple(
         _to_entry(record)
         for record in records
@@ -122,9 +126,9 @@ def lookup_word(
     elif morphology:
         note = "Reviewed morphology mapping found; lemma is linked from stored evidence rather than guessed by suffix stripping."
     elif regional:
-        note = "No exact seed-dictionary or morphology entry yet, but reviewed regional-variant evidence exists."
+        note = "No exact vocabulary or morphology entry yet, but reviewed regional-variant evidence exists."
     else:
-        note = "Word is outside the current reviewed lexical and morphology datasets; no analysis is guessed."
+        note = "Word is outside the current reviewed vocabulary and morphology datasets; no analysis is guessed."
 
     return WordLookup(
         query=query,

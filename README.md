@@ -2,79 +2,93 @@
 
 An evidence-based Somali language foundation for grammar checking, linguistic analysis, and future Somali-first AI evaluation.
 
-The project currently focuses on building a conservative grammar engine: rules are added from reviewed linguistic evidence, tested against real Somali examples, and kept context-sensitive when the evidence does not support a safe automatic judgment.
+The project is building a conservative grammar engine: rules come from reviewed evidence, are tested against real Somali, and remain unknown or context-dependent when the evidence does not support a safe judgment.
 
 ## Project goals
 
 1. Help Somali speakers improve written Somali.
 2. Help learners understand Somali grammar through clear explanations and examples.
-3. Build reviewed Somali morphology, syntax, lexical evidence, and QA datasets.
-4. Create a strong language foundation that can later help train and evaluate Somali-first AI systems.
+3. Build reviewed Somali grammar, morphology, vocabulary, real-text corpora, and QA datasets.
+4. Create a strong Somali language foundation that can later help train and evaluate Somali-first AI systems.
 
-This repository does **not** train a large language model. The current work is the linguistic and rule-based foundation that can later support model training and evaluation.
+This repository does **not** train a large language model yet. It builds the language knowledge and evaluation foundation first.
 
 ## Current status
 
-The repository is no longer only a planning project. It contains:
+The repository contains:
 
-- an executable command-line checker in `check.py`;
-- grammar analyzers under `src/`;
-- machine-readable grammar, morphology, orthography, and variant rules under `rules/`;
-- reviewed linguistic evidence and holdout QA datasets under `data/`;
-- automated regression and generalization tests under `tests/`;
-- documented project decisions and linguistic analysis under `docs/`;
-- source notes under `sources/`.
+- an executable checker in `check.py`;
+- grammar and analysis code under `src/`;
+- machine-readable rules under `rules/`;
+- reviewed evidence under `data/`;
+- vocabulary data under `data/vocabulary/`;
+- real Somali text collections under `data/corpus/`;
+- automated tests under `tests/`;
+- project decisions and status documentation under `docs/`;
+- human-readable source notes under `sources/`.
 
-See [`docs/STATUS.md`](docs/STATUS.md) for the current coverage dashboard and [`docs/REPO_MAP.md`](docs/REPO_MAP.md) for a map of the repository.
+See [`docs/STATUS.md`](docs/STATUS.md) for **where the project is now** and [`docs/REPO_MAP.md`](docs/REPO_MAP.md) for **what every folder means**.
 
 ## Core safety principle
 
-**Do not invent Somali grammar or morphology.**
+**Do not invent Somali grammar or word forms.**
 
-A predicted word form is not accepted simply because it looks regular. The project prefers:
+The project prefers:
 
 - source-backed forms over guessed forms;
 - exact reviewed morphology over blind suffix generation;
 - `context_required` or unknown results over unsafe corrections;
-- recognition of supported regional variants instead of falsely marking them wrong.
+- supported regional variants over falsely marking a valid form wrong.
 
-## Evidence flow
+## How knowledge moves through the project
 
 ```text
-linguistic source / native review
-            ↓
-      reviewed evidence
-            ↓
-     grammar/morphology rule
-            ↓
-        analyzer code
-            ↓
-          checker
-            ↓
-   tests + independent QA
+source / native review / real Somali text
+                 ↓
+          reviewed evidence
+                 ↓
+        grammar or morphology rule
+                 ↓
+           analyzer code
+                 ↓
+              checker
+                 ↓
+       tests + independent QA
 ```
 
-Evidence and executable behavior are deliberately separated. A source-backed observation does not automatically become an autocorrection rule.
+Evidence does not automatically become a correction rule.
 
 ## Repository layout
 
 ```text
 somali-grammar/
-├── check.py          # main command-line checker
-├── src/              # executable grammar/analyzer code
-├── rules/            # machine-readable linguistic rules
-├── data/             # reviewed evidence and QA datasets
-├── tests/            # automated behavior and regression tests
-├── sources/          # human-readable external source notes
-├── docs/             # project decisions, status, architecture notes
-└── lexicon/          # small legacy/sample lexical area under audit
+├── README.md
+├── check.py                 # main checker
+│
+├── src/                     # executable Python analysis code
+│   └── vocabulary.py        # reviewed word lookup
+│
+├── rules/
+│   ├── grammar/             # sentence grammar rules
+│   ├── morphology/          # word-form patterns
+│   ├── orthography/         # spelling/writing rules
+│   └── variants/            # supported regional variants
+│
+├── data/
+│   ├── vocabulary/          # reviewed word information
+│   ├── morphology/          # reviewed word forms/paradigms
+│   ├── corpus/              # real Somali text collections
+│   ├── qa/                  # independent/holdout test data
+│   └── sources/             # structured source evidence
+│
+├── tests/                   # automated tests
+├── sources/                 # human-readable source notes
+└── docs/                    # status, decisions, repo map, schemas
 ```
-
-For detailed folder responsibilities, see [`docs/REPO_MAP.md`](docs/REPO_MAP.md).
 
 ## Current linguistic coverage
 
-Current implemented or reviewed areas include:
+Implemented or reviewed areas include:
 
 - personal pronouns and subject clitics;
 - subject–verb agreement;
@@ -85,20 +99,22 @@ Current implemented or reviewed areas include:
 - statement clitics such as `wuu`, `way`, `waan`, and `waad`;
 - connective forms such as `wuuna`, `wayna`, and reviewed `wuxuuna` constructions;
 - negation and negative agreement;
-- future and negative-future auxiliary agreement;
+- future and negative-future auxiliaries;
 - past, habitual, imperative, jussive, dependent, and conditional patterns;
 - possession with `leeyahay`-type constructions;
 - predicate/copula agreement;
-- reviewed verb classes and irregular verb families;
-- regional-variant handling with a Jigjiga-first preferred output profile.
+- reviewed regular and irregular verb families;
+- Jigjiga-first regional preference handling;
+- source-backed vocabulary lookup;
+- a Somali proverb corpus for research and stress-testing.
 
-Coverage is still incomplete. Unknown or insufficiently supported forms should remain unjudged rather than being guessed.
+Coverage is still incomplete. Unsupported forms should remain unjudged rather than being guessed.
 
 ## Preferred Somali output profile
 
-The current preferred generation/teaching profile is **Jigjiga Somali**, with strong compatibility with Northwestern/Hargeisa usage. Other supported Somali regional forms should remain recognized and should not be marked wrong solely because they differ regionally.
+The preferred generation/teaching profile is **Jigjiga Somali**, with strong compatibility with Northwestern/Hargeisa usage. Other supported Somali regional forms remain valid and should not be marked wrong solely because they differ regionally.
 
-See [`docs/DECISIONS.md`](docs/DECISIONS.md) for the full decision history.
+See [`docs/DECISIONS.md`](docs/DECISIONS.md) for the decision history.
 
 ## Running the checker
 
@@ -106,15 +122,13 @@ See [`docs/DECISIONS.md`](docs/DECISIONS.md) for the full decision history.
 python check.py "Somali text here"
 ```
 
-The checker combines safe orthography corrections with conservative grammar analysis. Context-sensitive findings should be surfaced for review instead of automatically rewritten.
-
 ## Development rule
 
-Before promoting a new grammar behavior:
+Before promoting new grammar behavior:
 
 1. collect trustworthy evidence;
 2. record provenance;
-3. separate morphology facts from sentence-context claims;
+3. keep word-form facts separate from sentence-context claims;
 4. implement only what the evidence supports;
 5. add positive, negative, ambiguous, and unknown tests;
 6. test examples that were not used to create the rule;
@@ -122,10 +136,9 @@ Before promoting a new grammar behavior:
 
 ## Documentation
 
-- [`docs/STATUS.md`](docs/STATUS.md) — current project and coverage dashboard
-- [`docs/REPO_MAP.md`](docs/REPO_MAP.md) — what every major folder is for
+- [`docs/STATUS.md`](docs/STATUS.md) — current project dashboard
+- [`docs/REPO_MAP.md`](docs/REPO_MAP.md) — what every major folder/file is for
 - [`docs/DECISIONS.md`](docs/DECISIONS.md) — project decisions and reviewed language judgments
 - [`docs/GRAMMAR_ANALYSIS.md`](docs/GRAMMAR_ANALYSIS.md) — grammar analysis notes
-- [`docs/LEXICON_SCHEMA.md`](docs/LEXICON_SCHEMA.md) — lexical data schema
-- [`rules/grammar/README.md`](rules/grammar/README.md) — grammar evidence-layer principles
-- [`rules/morphology/README.md`](rules/morphology/README.md) — morphology evidence-layer principles
+- [`docs/VOCABULARY_SCHEMA.md`](docs/VOCABULARY_SCHEMA.md) — vocabulary-data structure
+- [`docs/CLEANUP_AUDIT.md`](docs/CLEANUP_AUDIT.md) — structural cleanup history

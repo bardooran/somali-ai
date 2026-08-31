@@ -1,4 +1,4 @@
-from src.lexicon import lookup_word
+from src.vocabulary import lookup_word
 
 
 def test_ka_preserves_three_dictionary_analyses():
@@ -36,14 +36,14 @@ def test_beed_has_source_definition_and_co_preferred_status():
     assert any(item.preference == "co_preferred" for item in result.regional_analyses)
 
 
-def test_ukun_can_be_known_from_reviewed_variant_layer_before_exact_seed_entry():
+def test_ukun_can_be_known_from_reviewed_variant_layer_before_exact_vocabulary_entry():
     result = lookup_word("ukun")
     assert result.known
     assert result.exact_entries == ()
     assert any(item.preference == "co_preferred" for item in result.regional_analyses)
 
 
-def test_everyday_seed_preserves_inan_gender_homographs():
+def test_everyday_vocabulary_preserves_inan_gender_homographs():
     result = lookup_word("inan")
     assert result.known
     assert len(result.exact_entries) == 2
@@ -51,7 +51,7 @@ def test_everyday_seed_preserves_inan_gender_homographs():
     assert {entry.source_pos for entry in result.exact_entries} == {"m.l", "m.dh"}
 
 
-def test_everyday_seed_preserves_kor_noun_and_verb_analyses():
+def test_everyday_vocabulary_preserves_kor_noun_and_verb_analyses():
     result = lookup_word("kor")
     assert len(result.exact_entries) == 2
     assert {entry.source_pos for entry in result.exact_entries} == {"m.l", "f.mg1"}

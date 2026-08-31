@@ -1,32 +1,26 @@
-# Source Code
+# Source code
 
-Executable Python code for the Somali grammar engine.
+Executable Python code for the Somali grammar foundation.
 
-This directory contains analyzers and shared logic that turn reviewed rules/evidence into conservative grammar behavior.
+## Main responsibilities
 
-## Responsibilities
+- sentence agreement analysis;
+- focus and connective analysis;
+- negation, tense, aspect, and mood analysis;
+- noun gender/number/case analysis;
+- object and clitic-role analysis;
+- conservative morphology lookup;
+- `vocabulary.py` for reviewed word lookup;
+- regional-variant analysis.
 
-Modules here may:
+## Separation rule
 
-- load reviewed linguistic records;
-- analyze agreement, focus, clitics, negation, moods, noun forms, and clause constructions;
-- return structured known/unknown/context-required results;
-- support the main `check.py` command-line checker.
+`src/` contains **code**, not raw linguistic source material.
 
-## What does not belong here
+Reviewed evidence belongs under `data/` or `rules/`. Human-readable source notes belong under `sources/` or `docs/`.
 
-Do not store raw linguistic source notes, large copied paradigms, or unreviewed word lists directly in Python when they can be represented as data under `rules/` or `data/`.
+## Safety rule
 
-The preferred flow is:
+Analyzer code should only make judgments that the reviewed evidence supports. Unsupported word forms or sentence interpretations should remain unknown or context-dependent rather than being guessed.
 
-```text
-reviewed evidence → machine-readable rule/data → analyzer code → tests
-```
-
-## Conservative analyzer rule
-
-An analyzer should not claim a form is valid merely because a suffix pattern could produce it. If the project has not reviewed enough evidence to generalize, return unknown or context-required.
-
-## Future structure
-
-The current flat module layout is active and should remain stable during rapid grammar development. A later behavior-neutral refactor may create an installable package such as `src/somali_grammar/` and group modules by grammar domain.
+Long term this code may move into an installable `src/somali_grammar/` package, but that should be a dedicated behavior-neutral refactor.
