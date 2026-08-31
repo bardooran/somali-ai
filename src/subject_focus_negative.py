@@ -346,7 +346,7 @@ def analyze_subject_focus_negative(sentence: str) -> SubjectFocusNegativeAnalysi
 
         expected_marker = _expected_negative_marker(marker)
         marker_agrees = marker_is_negative
-        rule_id = "GRAM-SUBJFOCUS-NEG-001" if marker_agrees else "GRAM-SUBJFOCUS-NEG-004"
+        rule_id = "GRAM-SUBJFOCUS-NEG-001" if marker_agrees else "GRAM-SUBJFOCUS-NEG-006"
         context_label = "+negative_context_" + "_".join(negative_context) if negative_context else ""
         return SubjectFocusNegativeAnalysis(
             recognized=True,
