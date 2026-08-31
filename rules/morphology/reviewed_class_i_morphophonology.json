@@ -1,0 +1,53 @@
+{
+  "id": "MORPH-CLASS-I-MPH-001",
+  "status": "reviewed_rule_derived",
+  "part_of_speech": "verb",
+  "conjugation_class": "I",
+  "scope": "finite_past_only",
+  "open_class_generation": false,
+  "correction_authority": false,
+  "past_morphology": {
+    "1sg": {"agreement": "", "tam": "ay"},
+    "2sg": {"agreement": "t", "tam": "ay"},
+    "3sg_m": {"agreement": "", "tam": "ay"},
+    "3sg_f": {"agreement": "t", "tam": "ay"},
+    "1pl": {"agreement": "n", "tam": "ay"},
+    "2pl": {"agreement": "t", "tam": "een"},
+    "3pl": {"agreement": "", "tam": "een"}
+  },
+  "processes": {
+    "l_t_assibilation": {
+      "description": "Stem-final l plus t-agreement surfaces as sh.",
+      "source": "Green & Morrison (2018), On the morphophonology of domains in Somali verbs and nouns, pp. 23-24 of accepted manuscript: dil+t+ay -> dishay; discussion states the same t agreement marker after stem-final l assibilates to sh."
+    },
+    "l_n_assimilation": {
+      "description": "Stem-final l plus 1pl n-agreement surfaces as ll.",
+      "source": "Green & Morrison (2018), p. 24 of accepted manuscript: dil+n+ay -> dillay."
+    },
+    "dh_t_assimilation": {
+      "description": "Stem-final dh progressively assimilates a following t-agreement marker to dh.",
+      "source": "Green & Morrison (2018), p. 24 of accepted manuscript: xidh+t+ay -> xidhdhay; discussion states this affects t-agreement affixes."
+    }
+  },
+  "profiles": {
+    "dil": {
+      "authorized_persons": ["1sg", "2sg", "3sg_m", "3sg_f", "1pl", "2pl", "3pl"],
+      "processes": ["l_t_assibilation", "l_n_assimilation"],
+      "class_evidence": "GiellaLT lang-som commit 4897468178509c4bf1cb49a172a979ead36de189, src/fst/morphology/stems/verbs.lexc: dil V1_VerbMorf ;",
+      "development_evidence": "Green & Morrison (2018) explicitly uses dil for l+t assibilation and l+n assimilation."
+    },
+    "xidh": {
+      "authorized_persons": ["2sg", "3sg_f", "2pl"],
+      "processes": ["dh_t_assimilation"],
+      "class_evidence": "GiellaLT lang-som commit 4897468178509c4bf1cb49a172a979ead36de189, src/fst/morphology/stems/verbs.lexc: xidh V1_VerbMorf ;",
+      "development_evidence": "Green & Morrison (2018) explicitly uses xidh+t+ay -> xidhdhay and states that stem-final dh affects t-agreement affixes."
+    }
+  },
+  "benchmark_isolation": {
+    "v6_answers_used_as_runtime_evidence": false,
+    "v7_answers_used_as_runtime_evidence": false,
+    "v6_or_v7_profile_lemmas_allowed": false,
+    "note": "These development profiles use lemmas and processes attested outside the frozen v6/v7 benchmark manifests. Frozen benchmark rows remain evaluation-only."
+  },
+  "notes": "Finite reviewed development slice only. The runtime indexes explicitly authorized lemma/person combinations; it never reverse-strips suffixes, never generates open-class forms, and never grants correction authority."
+}
