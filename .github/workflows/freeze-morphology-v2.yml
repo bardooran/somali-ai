@@ -1,0 +1,52 @@
+name: Freeze Morphology Challenge v2
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "src/morphology_challenge_v2_freeze.py"
+      - "tests/test_morphology_challenge_v2_freeze.py"
+      - "docs/MORPHOLOGY_CHALLENGE_V2.md"
+      - ".github/workflows/freeze-morphology-v2.yml"
+  workflow_dispatch:
+
+jobs:
+  freeze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out Somali AI
+        uses: actions/checkout@v4
+
+      - name: Check out pinned Qaamuus source
+        uses: actions/checkout@v4
+        with:
+          repository: bardooran/goobolabs
+          ref: 737cf848bfa8291d5580f5c34db04daef858c955
+          path: external/goobolabs
+
+      - name: Generate analyzer-blind v2 manifest
+        run: |
+          mkdir -p benchmark_results
+          python -m src.morphology_challenge_v2_freeze \
+            --source-root external/goobolabs/resources/qaamuus \
+            --output benchmark_results/morphology_challenge_v2.jsonl \
+            --metadata benchmark_results/morphology_challenge_v2.meta.json
+          sha256sum benchmark_results/morphology_challenge_v2.jsonl
+
+      - name: Prove freeze workflow contains no analyzer evaluation
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          text = Path('.github/workflows/freeze-morphology-v2.yml').read_text(encoding='utf-8')
+          forbidden = ('hfst-lookup', 'morphology_candidates', 'giellalt_runtime_benchmark')
+          assert not any(token in text for token in forbidden)
+          PY
+
+      - name: Upload frozen v2 candidate manifest
+        uses: actions/upload-artifact@v4
+        with:
+          name: morphology-challenge-v2-freeze
+          path: benchmark_results/
+          if-no-files-found: error
+          retention-days: 30
