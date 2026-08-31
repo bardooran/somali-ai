@@ -211,8 +211,18 @@ class KnowledgeIndex:
             searchable_folded = record.searchable.casefold()
             if folded_query and folded_query in searchable_folded:
                 score += 1.25
+
+            # Strongest relevance: the complete query itself is an identity field.
             if folded_query and folded_query in record.exact_terms:
                 score += 1.00
+
+            # Normal conversational queries are longer than one word. Reward
+            # records whose actual lemma/form appears as a token inside the user
+            # sentence, rather than only being mentioned incidentally in prose.
+            identity_token_matches = query_tokens & record.exact_terms
+            if identity_token_matches:
+                score += 0.85 * len(identity_token_matches)
+
             if record.trust == "reviewed":
                 score += 0.20
             elif record.trust == "external_candidate":
