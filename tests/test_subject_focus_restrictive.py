@@ -28,7 +28,7 @@ def test_imow_restrictive_past_reinterprets_exact_full_surfaces_contextually():
     assert "3pl" in plural_reduced.contextual_persons
     assert plural_reduced.full_surface_persons == ("3sg_m",)
 
-    plural_full = analyze_subject_focus_restrictive("yimaadeen", "3pl")
+    plural_full = analyze_subject_focus_restrictive("yimaaddeen", "3pl")
     assert plural_full.recognized is True
     assert plural_full.covered is True
     assert plural_full.agrees is False
@@ -62,13 +62,15 @@ def test_focused_plural_common_noun_now_uses_restrictive_imow_past():
     assert reduced.recognized is True
     assert reduced.expected_person == "3pl"
     assert reduced.predicate == "yimid"
+    assert reduced.predicate_persons == ("3sg_m",)
     assert reduced.agrees is True
     assert "restrictive_simple_past" in (reduced.evidence or "")
 
-    full = analyze_subject_focus_agreement("Carruurta ayaa yimaadeen.")
+    full = analyze_subject_focus_agreement("Carruurta ayaa yimaaddeen.")
     assert full.recognized is True
     assert full.expected_person == "3pl"
-    assert full.predicate == "yimaadeen"
+    assert full.predicate == "yimaaddeen"
+    assert full.predicate_persons == ("3pl",)
     assert full.agrees is False
 
 
@@ -112,7 +114,7 @@ def test_unmodeled_present_focus_is_not_judged_from_full_paradigm():
 
 
 def test_restrictive_person_values_do_not_leak_into_ordinary_plural_agreement():
-    ordinary_full = analyze_noun_number_verb_agreement("Carruurtu way yimaadeen.")
+    ordinary_full = analyze_noun_number_verb_agreement("Carruurtu way yimaaddeen.")
     assert ordinary_full.recognized is True
     assert ordinary_full.agrees is True
 
@@ -135,14 +137,14 @@ def test_cli_accepts_restrictive_plural_and_reports_full_plural_in_subject_focus
     assert _run_checker("Carruurta ayaa yimid.") == NO_FINDINGS
     assert _run_checker("Carruurta ayaa muus cunay.") == NO_FINDINGS
 
-    output = _run_checker("Carruurta ayaa yimaadeen.")
+    output = _run_checker("Carruurta ayaa yimaaddeen.")
     assert "possible subject-verb agreement conflict" in output
-    assert "restrictive focused-subject simple-past form licensed for 3pl" in output
-    assert "Safe corrected text:\nCarruurta ayaa yimaadeen." in output
+    assert "a reviewed 3pl predicate under restrictive focused-subject simple-past agreement" in output
+    assert "Safe corrected text:\nCarruurta ayaa yimaaddeen." in output
 
     output = _run_checker("Carruurta ayaa muus cuneen.")
     assert "possible subject-verb agreement conflict" in output
-    assert "restrictive focused-subject simple-past form licensed for 3pl" in output
+    assert "a reviewed 3pl predicate under restrictive focused-subject simple-past agreement" in output
     assert "Safe corrected text:\nCarruurta ayaa muus cuneen." in output
 
 
