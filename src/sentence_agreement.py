@@ -2,9 +2,10 @@
 
 The scanner is intentionally narrow. It considers reviewed independent subject
 pronouns in a short local window, subject clitics only in anchored
-``baa/ayaa/waa + clitic`` contexts, and reviewed true subject-focus
-``SUBJECT + baa/ayaa + ... + predicate`` frames. Unknown verbs are ignored or
-left unjudged rather than treated as errors.
+``baa/ayaa/waa + clitic`` contexts, reviewed true subject-focus
+``SUBJECT + baa/ayaa + ... + predicate`` frames, and overt second-clause
+connective focus ``SUBJECT + baana/ayaana + ... + predicate`` frames. Unknown
+verbs are ignored or left unjudged rather than treated as errors.
 """
 
 from __future__ import annotations
@@ -22,6 +23,7 @@ CLITIC_VERB_GAP = 2
 SUBJECT_FOCUS_WINDOW = 7
 CLITIC_ANCHORS = {"baa", "ayaa", "waa"}
 SUBJECT_FOCUS_PARTICLES = {"baa", "ayaa"}
+CONNECTIVE_SUBJECT_FOCUS_PARTICLES = {"ayaana": "ayaa", "baana": "baa"}
 
 
 @dataclass(frozen=True)
@@ -82,70 +84,122 @@ def _append_mismatch(
     )
 
 
+def _subject_focus_expected_forms(result) -> tuple[str, ...]:
+    expected = result.expected_person or "reviewed subject person"
+    evidence = result.evidence or ""
+    if "restrictive_simple_past" in evidence:
+        return (
+            f"a reviewed {expected} predicate under restrictive focused-subject simple-past agreement",
+        )
+    if "restrictive_past_progressive" in evidence:
+        return (
+            f"a reviewed {expected} predicate under restrictive focused-subject past-progressive agreement",
+        )
+    if "restrictive_simple_present" in evidence:
+        return (
+            f"a reviewed {expected} predicate under restrictive focused-subject simple-present agreement",
+        )
+    if "restrictive_present_progressive" in evidence:
+        return (
+            f"a reviewed {expected} predicate under restrictive focused-subject present-progressive agreement",
+        )
+    if "restrictive_copular_present" in evidence:
+        return (f"the reviewed reduced copular present form for focused-subject {expected}",)
+    return (f"a reviewed {expected} predicate",)
+
+
+def _append_subject_focus_result(
+    findings: list[SentenceAgreementFinding],
+    tokens: list[re.Match[str]],
+    index: int,
+    upper: int,
+    result,
+    note_prefix: str = "",
+) -> None:
+    if not result.recognized or result.agrees is not False or not result.predicate:
+        return
+    predicate_match = next(
+        (
+            match
+            for match in tokens[index + 2 : upper]
+            if match.group(0).casefold() == result.predicate.casefold()
+        ),
+        None,
+    )
+    if predicate_match is None:
+        return
+    findings.append(
+        SentenceAgreementFinding(
+            pronoun=tokens[index].group(0),
+            verb=predicate_match.group(0),
+            pronoun_start=tokens[index].start(),
+            verb_start=predicate_match.start(),
+            agrees=False,
+            expected_forms=_subject_focus_expected_forms(result),
+            note=note_prefix + result.note,
+        )
+    )
+
+
 def _append_subject_focus_mismatches(
     findings: list[SentenceAgreementFinding],
     tokens: list[re.Match[str]],
 ) -> None:
-    """Append reviewed subject-focus conflicts from a short local clause window."""
+    """Append reviewed bare baa/ayaa subject-focus conflicts."""
     for index in range(len(tokens) - 2):
-        subject_match = tokens[index]
         particle_match = tokens[index + 1]
         if particle_match.group(0).casefold() not in SUBJECT_FOCUS_PARTICLES:
             continue
+        upper = min(len(tokens), index + SUBJECT_FOCUS_WINDOW)
+        candidate = " ".join(match.group(0) for match in tokens[index:upper])
+        result = analyze_subject_focus_agreement(candidate)
+        _append_subject_focus_result(findings, tokens, index, upper, result)
+
+
+def _has_overt_clause_boundary(
+    text: str,
+    tokens: list[re.Match[str]],
+    subject_index: int,
+) -> bool:
+    if subject_index == 0:
+        return False
+    between = text[tokens[subject_index - 1].end() : tokens[subject_index].start()]
+    return "," in between or ";" in between
+
+
+def _append_connective_subject_focus_mismatches(
+    findings: list[SentenceAgreementFinding],
+    text: str,
+    tokens: list[re.Match[str]],
+) -> None:
+    """Append overt second-clause baana/ayaana subject-focus conflicts.
+
+    ``-na`` is removed only for internal analysis. The first stage deliberately
+    requires comma/semicolon evidence for the preceding clause instead of
+    treating every standalone ayaana/baana as a complete connective clause.
+    """
+    for index in range(len(tokens) - 2):
+        particle_surface = tokens[index + 1].group(0)
+        base_particle = CONNECTIVE_SUBJECT_FOCUS_PARTICLES.get(
+            particle_surface.casefold()
+        )
+        if base_particle is None or not _has_overt_clause_boundary(text, tokens, index):
+            continue
 
         upper = min(len(tokens), index + SUBJECT_FOCUS_WINDOW)
-        window = tokens[index:upper]
-        candidate = " ".join(match.group(0) for match in window)
-        result = analyze_subject_focus_agreement(candidate)
-        if not result.recognized or result.agrees is not False or not result.predicate:
-            continue
-
-        predicate_match = next(
-            (
-                match
-                for match in tokens[index + 2 : upper]
-                if match.group(0).casefold() == result.predicate.casefold()
+        normalized_tokens = [tokens[index].group(0), base_particle]
+        normalized_tokens.extend(match.group(0) for match in tokens[index + 2 : upper])
+        result = analyze_subject_focus_agreement(" ".join(normalized_tokens))
+        _append_subject_focus_result(
+            findings,
+            tokens,
+            index,
+            upper,
+            result,
+            note_prefix=(
+                f"{particle_surface} is analyzed as {base_particle} + connective -na ('and') "
+                "in an overt second clause. "
             ),
-            None,
-        )
-        if predicate_match is None:
-            continue
-
-        expected = result.expected_person or "reviewed subject person"
-        evidence = result.evidence or ""
-        if "restrictive_simple_past" in evidence:
-            expected_forms = (
-                f"a reviewed {expected} predicate under restrictive focused-subject simple-past agreement",
-            )
-        elif "restrictive_past_progressive" in evidence:
-            expected_forms = (
-                f"a reviewed {expected} predicate under restrictive focused-subject past-progressive agreement",
-            )
-        elif "restrictive_simple_present" in evidence:
-            expected_forms = (
-                f"a reviewed {expected} predicate under restrictive focused-subject simple-present agreement",
-            )
-        elif "restrictive_present_progressive" in evidence:
-            expected_forms = (
-                f"a reviewed {expected} predicate under restrictive focused-subject present-progressive agreement",
-            )
-        elif "restrictive_copular_present" in evidence:
-            expected_forms = (
-                f"the reviewed reduced copular present form for focused-subject {expected}",
-            )
-        else:
-            expected_forms = (f"a reviewed {expected} predicate",)
-
-        findings.append(
-            SentenceAgreementFinding(
-                pronoun=subject_match.group(0),
-                verb=predicate_match.group(0),
-                pronoun_start=subject_match.start(),
-                verb_start=predicate_match.start(),
-                agrees=False,
-                expected_forms=expected_forms,
-                note=result.note,
-            )
         )
 
 
@@ -157,11 +211,11 @@ def scan_sentence_agreement(text: str) -> list[SentenceAgreementFinding]:
     ``waa``. A clitic check is skipped when an independent subject pronoun is
     already present in the nearby left context, preventing duplicate reports.
 
-    Reviewed true subject-focus frames are also checked. Bare ``baa`` or bare
-    ``ayaa`` is licensed because the noun before it is the focused subject;
-    predicate agreement is delegated to the dedicated subject-focus analyzer,
-    including its modeled restrictive past/present modes and a short window for
-    intervening object/adverbial material. Unknown/unmodeled forms stay silent.
+    Reviewed true subject-focus frames are also checked. Bare ``baa``/``ayaa``
+    is licensed because the noun before it is the focused subject. In an overt
+    second clause, ``baana``/``ayaana`` is normalized only to its base focus
+    particle for the same restrictive agreement check. Unknown/unmodeled forms
+    stay silent, and standalone connective forms remain context-dependent.
     """
     tokens = list(TOKEN_RE.finditer(text))
     pronouns = _known_subject_pronouns()
@@ -201,4 +255,5 @@ def scan_sentence_agreement(text: str) -> list[SentenceAgreementFinding]:
             break
 
     _append_subject_focus_mismatches(findings, tokens)
+    _append_connective_subject_focus_mismatches(findings, text, tokens)
     return findings
