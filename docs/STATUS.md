@@ -34,6 +34,7 @@ The project has an executable, evidence-backed grammar engine. The main remainin
 | Irregular verbs (`dheh`, `aqaan`, `aal/yaal`, `ahaw`) | Reviewed / Growing | More tense/mood and sentence validation |
 | `arag` aspect contrasts | Reviewed | Broader cross-source validation |
 | `maydh` Jigjiga forms | Reviewed / Conservative | Independent evidence and more forms |
+| Somali cardinal numbers | Active / Reviewed | Extend carefully beyond 0–100 and exact reviewed large-number expressions |
 | Regional variants | Active / Growing | Larger pair-by-pair inventory |
 | Vocabulary data | Active / Growing | Expand reviewed everyday words and verbs |
 | Word lookup (`src/vocabulary.py`) | Active / Conservative | More reviewed word coverage without guessing |
@@ -41,10 +42,23 @@ The project has an executable, evidence-backed grammar engine. The main remainin
 | Independent QA / holdouts | Growing | Much larger unseen-example dataset |
 | LLM training | Not started | Later, after stronger language foundation |
 
+## Number-system coverage
+
+`data/vocabulary/somali_numbers.json` and `src/numbers.py` currently provide:
+
+- reviewed cardinal bases from `eber` through `toban`;
+- reviewed tens through `sagaashan` and `boqol`;
+- evidence-constrained generation/recognition of the finite 11–99 composition system;
+- both documented 11–99 orders, while keeping order variants separate from automatic correction;
+- usage-sensitive handling of `kow` and `hal`;
+- exact reviewed expressions including `kun`, `laba kun`, `afar kun`, `toban kun`, `boqol kun`, and million forms;
+- conservative weaker-evidence recognition of `bilyan` without promoting it to correction authority;
+- unknown/unjudged treatment for submitted spellings or large compositions that have not yet been independently supported.
+
 ## Current data organization
 
 ```text
-data/vocabulary/  = information about words
+data/vocabulary/  = information about words and reviewed numerals
 data/morphology/  = reviewed word forms/paradigms
 data/corpus/      = real Somali text collections
 data/qa/          = independent test material
@@ -66,7 +80,7 @@ data/sources/     = structured source evidence
 1. Expand high-frequency Somali grammar in larger evidence-backed batches.
 2. Use the maahmaahyo corpus as a source of new research and stress-test candidates, not as automatic grammar authority.
 3. Increase independent QA and holdout examples.
-4. Expand reviewed vocabulary, verbs, and nouns without open-ended guessing.
+4. Expand reviewed vocabulary, verbs, nouns, numbers, time/date words, and other high-frequency language areas without open-ended guessing.
 5. Improve ambiguity and rule-conflict handling.
 
 Update this dashboard whenever a meaningful language area or major data layer changes.
