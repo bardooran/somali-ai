@@ -8,6 +8,7 @@ on:
       - "tools/importers/giellalt_extract.py"
       - "tools/importers/giellalt_grammar_extract.py"
       - "tools/importers/sls_extract.py"
+      - "tests/test_external_candidate_data.py"
 
 permissions:
   contents: write
