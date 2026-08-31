@@ -1,0 +1,63 @@
+{
+  "benchmark_version": "v11",
+  "benchmark_name": "Preauthorized Conjugation-2A cross-lemma generalization challenge v11",
+  "manifest_path": "data/qa/morphology_paradigm_benchmark_v11.jsonl",
+  "manifest_git_blob_sha": "f42514b710558fd37a2e73a17c7625686ca77296",
+  "freeze_commit": "pending_merge",
+  "pre_freeze_class_authorization_commit": "b7c57eeadc02282d3830bbf80399ea418917d6ea",
+  "pre_freeze_runtime_commit": "b7c57eeadc02282d3830bbf80399ea418917d6ea",
+  "pre_freeze_blob_identities": {
+    "rules/morphology/reviewed_conjugation_2_class_lexicon.json": "55e1fff0cfa593a9e4df118b4be56d3e715fbbc5",
+    "rules/morphology/reviewed_conjugation_2_morphophonology.json": "eaaeca1a40a87b894820e98ca17f3f5254615449",
+    "src/morphophonology_generator.py": "c0844c0473e6a7205c29458dc4b238038062a3b2"
+  },
+  "class_authorization_source": {
+    "source_family": "Zorc 2019 Somali-English Dictionary",
+    "target_lemma": "buubi",
+    "target_class": "2A",
+    "source_page": 62,
+    "source_label": "v2a=",
+    "authorization_scope": "lemma_and_conjugation_class_only",
+    "surface_generation_enabled_before_freeze": false
+  },
+  "answer_source": {
+    "source_family": "Green 2021 Somali Grammar",
+    "publisher": "De Gruyter Mouton",
+    "publication_year": 2021,
+    "source_url": "https://doi.org/10.1515/9781501503610",
+    "source_chapter": "7 Verbs and verbal morphology",
+    "source_section": "7.5.1.1 Simple Present",
+    "source_page": 166,
+    "source_table": "48"
+  },
+  "positive_case_count": 7,
+  "positive_unique_surface_count": 5,
+  "syncretic_surface_count": 2,
+  "unknown_case_count": 8,
+  "total_case_count": 15,
+  "pre_freeze_overlap_status": "class_known_surfaces_unavailable",
+  "measurement_status": "pending_measurement",
+  "benchmark_policy": {
+    "answers_are_evaluation_only": true,
+    "runtime_rule_learning_from_v11_allowed": false,
+    "explicit_source_forms_only": true,
+    "inferred_unattested_forms_included": false,
+    "synthetic_unknowns_are_claimed_somali_forms": false,
+    "pre_freeze_class_authorization_allowed": true,
+    "pre_freeze_surface_generation_for_target_enabled": false,
+    "post_freeze_activation_of_preexisting_general_rules_allowed": true,
+    "v11_answer_rows_may_authorize_special_case_runtime_forms": false
+  },
+  "experimental_design": {
+    "class_authorization_source_distinct_from_answer_source": true,
+    "class_authorization_predates_answer_freeze": true,
+    "target_was_not_a_finite_runtime_profile_before_freeze": true,
+    "purpose": "Test whether previously reviewed C2A class knowledge can benefit from already reviewed class-level morphology after benchmark answers are frozen, without copying the answer rows into runtime profiles."
+  },
+  "independence_limits": {
+    "fully_independent_of_all_runtime_source_authors": false,
+    "reason": "Green 2021 also contributes previously reviewed weak-causative process evidence, including the 1PL manner alternation. v11 therefore tests cross-lemma generalization from preauthorized class knowledge, not discovery of unseen morphophonological processes.",
+    "answer_source_independent_of_class_authorization_source": true
+  },
+  "notes": "v11 is intentionally different from v10. Before any v11 answer file existed, main already contained a reviewed class-only entry buubi -> C2A from Zorc 2019, with generation disabled. Green 2021 Table 48 then supplies the frozen five unique Simple Present surfaces across seven person rows. After freeze and baseline measurement, runtime may activate previously reviewed general C2A rules for the preauthorized class lexicon, but v11 answer rows themselves remain evaluation-only and may never be used to special-case buubi."
+}
