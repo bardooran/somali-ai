@@ -22,3 +22,6 @@ jobs:
 
       - name: Run tests
         run: python -m pytest -q
+
+      - name: Print competitive morphology scoreboard
+        run: python -m src.morphology_competition

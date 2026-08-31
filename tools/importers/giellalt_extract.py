@@ -23,6 +23,7 @@ AUDITED_SOURCE_PATHS = {
     "src/fst/morphology/stems/nouns.lexc": "noun",
     "src/fst/morphology/stems/verbs.lexc": "verb",
     "src/fst/morphology/stems/numerals.lexc": "numeral",
+    "src/fst/morphology/stems/adjectives.lexc": "adjective",
 }
 
 # These markers indicate that an entry should not become a clean lexical
@@ -102,8 +103,9 @@ def parse_lexc_candidates(
         # the lemma is the lexical side before that alternation.
         lemma_token = raw_token.split(":", 1)[0]
 
-        # The first importer only accepts plain lexical lemmas. More complex
-        # tagged/fused entries get their own reviewed parser later.
+        # This importer accepts plain lexical lemmas only. Tagged/fused entries
+        # belong in separately reviewed parsers. This is particularly important
+        # for the adjective file, whose irregular section contains explicit tags.
         if not lemma_token or "+" in lemma_token or lemma_token.startswith(("@", "%")):
             continue
 

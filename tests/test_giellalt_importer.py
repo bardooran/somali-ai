@@ -85,6 +85,31 @@ LEXICON ordinal
     assert all(r.promotion_allowed is False for r in records)
 
 
+def test_extracts_plain_adjective_candidates_but_skips_tagged_irregular_rows():
+    text = """
+LEXICON IrregularAdjective
+xun+A:xun Clitics ;
+badan+A+Attr:bad%^an StatePerson ;
+LEXICON Attr
+badan AdjBase ;
+caato AdjBase ;
+cagaar AdjBase ;
+"""
+
+    records = list(
+        parse_lexc_candidates(
+            text,
+            source_path="src/fst/morphology/stems/adjectives.lexc",
+            source_commit=MIRROR_COMMIT,
+        )
+    )
+
+    assert [record.lemma for record in records] == ["badan", "caato", "cagaar"]
+    assert all(record.record_type == "adjective" for record in records)
+    assert all(record.promotion_allowed is False for record in records)
+    assert all(record.source_path.endswith("adjectives.lexc") for record in records)
+
+
 def test_rejects_non_allowlisted_files_and_missing_commit():
     with pytest.raises(ValueError, match="not allowlisted"):
         list(
@@ -117,6 +142,22 @@ def test_checkout_extraction_is_limited_to_requested_kind(tmp_path: Path):
     )
 
     assert [r.lemma for r in records] == ["jidh"]
+
+
+def test_checkout_can_extract_adjectives_as_a_separate_review_kind(tmp_path: Path):
+    path = tmp_path / "src/fst/morphology/stems/adjectives.lexc"
+    path.parent.mkdir(parents=True)
+    path.write_text("cagaar AdjBase ;\n", encoding="utf-8")
+
+    records = extract_checkout(
+        tmp_path,
+        source_commit=MIRROR_COMMIT,
+        kinds=["adjective"],
+    )
+
+    assert [(record.lemma, record.record_type) for record in records] == [
+        ("cagaar", "adjective")
+    ]
 
 
 def test_jsonl_writer_creates_candidate_output(tmp_path: Path):

@@ -30,6 +30,9 @@ Promotion path:
 - `src/fst/morphology/stems/verbs.lexc`
   - large Somali verb inventory
   - useful class/transitivity assignments
+- `src/fst/morphology/stems/adjectives.lexc`
+  - adjective/state-word inventory and continuation classes
+  - plain lexical rows are collected as non-promoting candidates; tagged irregular rows remain excluded from the simple importer
 - `src/fst/morphology/affixes/verbs.lexc`
   - person, number, gender, tense, progressive, reduced and relative morphology
 - `src/fst/morphology/affixes/irregularverbs.lexc`
@@ -101,14 +104,17 @@ The real Somali morphology is valuable but unfinished. The source contains expli
 
 Therefore absence from GiellaLT does not prove a form is wrong, and presence does not automatically prove a form is project-approved.
 
-## Initial importer scope
+## Current lexical importer scope
 
-The first project importer intentionally supports only clean lexical candidates from:
+The conservative lexical importer supports clean candidate extraction from:
 
 - `src/fst/morphology/stems/nouns.lexc`
 - `src/fst/morphology/stems/verbs.lexc`
 - `src/fst/morphology/stems/numerals.lexc`
+- `src/fst/morphology/stems/adjectives.lexc`
 
-It skips entries carrying markers such as `Err/Orth`, `Use/NG`, or `TODO`. It does not generate inflected forms and does not write into reviewed vocabulary/morphology directories.
+It skips entries carrying markers such as `Err/Orth`, `Use/NG`, or `TODO`, and its simple parser also excludes tagged/fused lexical rows. It does not generate inflected forms and does not write into reviewed vocabulary/morphology directories.
 
-Future import stages may add structured extraction for affix paradigms, irregular verbs, pronouns, clitics and syntax only after separate parser/tests are designed for those formats.
+The imported inventory feeds `src.morphology_competition`, which measures reviewed Somali AI morphology against the broader candidate inventory and builds a cross-source review backlog. Candidate breadth is never treated as reviewed coverage.
+
+Future import stages may add structured extraction for affix paradigms, irregular verbs, clitics and other syntax only after separate parser/tests are designed for those formats.
