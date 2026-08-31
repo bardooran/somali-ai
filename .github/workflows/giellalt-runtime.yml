@@ -14,6 +14,9 @@ on:
       - "src/morphology_challenge_v3_comparison.py"
       - "src/morphology_challenge_v3_gap_audit.py"
       - "src/giellalt_challenge_v3.py"
+      - "src/morphology_challenge_v4.py"
+      - "src/morphology_challenge_v4_comparison.py"
+      - "src/giellalt_challenge_v4.py"
       - "src/master_recognition.py"
       - "tests/test_morphology_comparison.py"
       - "tests/test_giellalt_runtime_benchmark.py"
@@ -21,11 +24,14 @@ on:
       - "tests/test_morphology_challenge_v2_scoring.py"
       - "tests/test_morphology_challenge_v3_scoring.py"
       - "tests/test_morphology_challenge_v3_diagnostics.py"
+      - "tests/test_morphology_challenge_v4_scoring.py"
       - "data/qa/morphology_benchmark_v1.jsonl"
       - "data/qa/morphology_challenge_v2.jsonl"
       - "data/qa/morphology_challenge_v2.meta.json"
       - "data/qa/morphology_challenge_v3.jsonl"
       - "data/qa/morphology_challenge_v3.meta.json"
+      - "data/qa/morphology_challenge_v4.jsonl"
+      - "data/qa/morphology_challenge_v4.meta.json"
       - "data/master/recognition_index.jsonl"
       - "data/master/recognition_index.meta.json"
       - "data/imported/giellalt/lexical_candidates.jsonl"
@@ -120,24 +126,10 @@ jobs:
           cat morphology-comparison-v2.json
 
       - name: Run Somali AI frozen challenge v3
-        run: |
-          python -m src.morphology_challenge_v3 > somali-ai-challenge-v3.json
-          cat somali-ai-challenge-v3.json
+        run: python -m src.morphology_challenge_v3 > somali-ai-challenge-v3.json
 
       - name: Build diagnostic-only v3 gap audit
-        run: |
-          python -m src.morphology_challenge_v3_gap_audit > morphology-v3-gap-audit.json
-          python - <<'PY'
-          import json
-          from pathlib import Path
-          value = json.loads(Path("morphology-v3-gap-audit.json").read_text(encoding="utf-8"))
-          print(json.dumps({
-              "positive_case_count": value["positive_case_count"],
-              "diagnostic_state_counts": value["diagnostic_state_counts"],
-              "per_pos_state_counts": value["per_pos_state_counts"],
-              "safety": value["safety"],
-          }, indent=2, sort_keys=True))
-          PY
+        run: python -m src.morphology_challenge_v3_gap_audit > morphology-v3-gap-audit.json
 
       - name: Run frozen challenge v3 against compiled GiellaLT FST
         run: |
@@ -154,10 +146,39 @@ jobs:
             > morphology-comparison-v3.json
           cat morphology-comparison-v3.json
 
+      - name: Run Somali AI frozen challenge v4 baseline
+        run: |
+          python -m src.morphology_challenge_v4 > somali-ai-challenge-v4.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          value = json.loads(Path('somali-ai-challenge-v4.json').read_text(encoding='utf-8'))
+          print(json.dumps({
+              'reviewed': value['reviewed']['score'],
+              'master': value['master']['score'],
+              'master_per_pos': value['master']['per_pos'],
+          }, indent=2, sort_keys=True))
+          PY
+
+      - name: Run frozen challenge v4 against compiled GiellaLT FST
+        run: |
+          python -m src.giellalt_challenge_v4 \
+            --analyzer "${{ steps.analyzer.outputs.path }}" \
+            --giellalt-commit 5278929712e9c0c67f254f1a1dc64c80ea7b2b8d \
+            > giellalt-challenge-v4.json
+
+      - name: Build v4 three-way baseline comparison
+        run: |
+          python -m src.morphology_challenge_v4_comparison \
+            --somali-ai somali-ai-challenge-v4.json \
+            --giellalt giellalt-challenge-v4.json \
+            > morphology-comparison-v4.json
+          cat morphology-comparison-v4.json
+
       - name: Upload reproducible benchmark results
         uses: actions/upload-artifact@v4
         with:
-          name: morphology-benchmark-v1-v2-v3
+          name: morphology-benchmark-v1-v2-v3-v4
           path: |
             somali-ai-benchmark-v1.json
             giellalt-runtime-benchmark-v1.json
@@ -169,3 +190,6 @@ jobs:
             morphology-v3-gap-audit.json
             giellalt-challenge-v3.json
             morphology-comparison-v3.json
+            somali-ai-challenge-v4.json
+            giellalt-challenge-v4.json
+            morphology-comparison-v4.json
