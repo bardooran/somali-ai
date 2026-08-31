@@ -1,15 +1,18 @@
-"""Conservative Somali connective statement-clitic analysis.
+"""Conservative Somali connective statement analysis.
 
 This module is deliberately separate from connective focus. Source evidence
-supports two exact declarative/statement forms with connective ``-na``:
+supports three exact declarative/statement forms with connective ``-na``:
 
 - ``wuuna = waa + uu + -na`` -> encoded 3sg masculine subject
 - ``wayna = way + -na`` -> reviewed ``way`` person compatibility (3sg feminine/3pl)
+- ``waana = waa + -na`` -> declarative particle plus connective, with no subject
+  person encoded in the form itself
 
-The first executable stage recognizes only clause-initial ``wuuna``/``wayna``
-after an overt comma or semicolon. It checks the encoded subject person(s)
-against exact reviewed finite morphology. It does not infer an antecedent,
-generate a broader ``waa + clitic + -na`` paradigm, or rewrite text.
+The executable stage recognizes only clause-initial exact forms after an overt
+comma or semicolon. ``wuuna``/``wayna`` may check their encoded subject person(s)
+against exact reviewed finite morphology. ``waana`` is person-neutral: it is
+recognized without inventing a hidden short subject pronoun or agreement value.
+No broader ``waa + clitic + -na`` paradigm is generated and no form is rewritten.
 """
 
 from __future__ import annotations
@@ -25,6 +28,7 @@ CONNECTIVE_STATEMENT_CLITICS = {
     "wuuna": ("wuu", ("3sg_m",)),
     "wayna": ("way", ("3sg_f", "3pl")),
 }
+CONNECTIVE_STATEMENT_PARTICLES = {"waana": "waa"}
 MAX_FINITE_GAP = 4
 
 
@@ -46,12 +50,14 @@ class ConnectiveStatementAnalysis:
 
 
 def analyze_connective_statement(sentence: str) -> ConnectiveStatementAnalysis:
-    """Analyze reviewed second-clause ``wuuna/wayna + ... + FINITE_VERB``.
+    """Analyze reviewed second-clause connective statement forms.
 
     The connective form must be the first lexical token after an overt comma or
-    semicolon. Up to four intervening lexical tokens may precede the exact
-    reviewed finite verb. If no reviewed finite verb is found, the connective
-    form is recognized but agreement remains unjudged.
+    semicolon. ``waana`` requires following predicate/clause material but does
+    not encode a subject person, so no finite-agreement judgment is derived from
+    it. For ``wuuna``/``wayna``, up to four intervening lexical tokens may
+    precede an exact reviewed finite verb; if none is found, the connective form
+    remains recognized but agreement is unjudged.
     """
     for boundary_match in CLAUSE_BOUNDARY_RE.finditer(sentence):
         tail = sentence[boundary_match.end() :].strip()
@@ -60,6 +66,26 @@ def analyze_connective_statement(sentence: str) -> ConnectiveStatementAnalysis:
             continue
 
         particle = tokens[0]
+        base_particle = CONNECTIVE_STATEMENT_PARTICLES.get(particle.casefold())
+        if base_particle is not None:
+            return ConnectiveStatementAnalysis(
+                recognized=True,
+                particle=particle,
+                base_statement_clitic=base_particle,
+                subject_persons=(),
+                agreement_agrees=None,
+                conjunction="-na",
+                boundary=boundary_match.group(0),
+                evidence="source_backed_declarative_particle_plus_conjunction_na+person_neutral_surface",
+                rule_id="GRAM-CONNSTAT-005",
+                note=(
+                    f"{particle} is the reviewed person-neutral connective declarative form "
+                    f"{base_particle} + -na ('and/so'). The form contains no short subject "
+                    "pronoun, so no subject person, antecedent, or finite-verb agreement is "
+                    "inferred from it. No automatic rewrite."
+                ),
+            )
+
         profile = CONNECTIVE_STATEMENT_CLITICS.get(particle.casefold())
         if profile is None:
             continue
@@ -118,8 +144,8 @@ def analyze_connective_statement(sentence: str) -> ConnectiveStatementAnalysis:
     return ConnectiveStatementAnalysis(
         recognized=False,
         note=(
-            "No overt second-clause clause-initial reviewed wuuna/wayna statement frame was "
-            "found. Standalone forms and predicted waa+clitic+na combinations remain "
+            "No overt second-clause clause-initial reviewed wuuna/wayna/waana statement frame "
+            "was found. Standalone forms and predicted waa+clitic+na combinations remain "
             "context-dependent."
         ),
     )
