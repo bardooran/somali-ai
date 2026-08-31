@@ -1,7 +1,7 @@
 import subprocess
 import sys
 
-from src.lexicon import lookup_word
+from src.vocabulary import lookup_word
 from src.morphology_candidates import analyze_surface_form
 from src.noun_subject_case import analyze_noun_subject_case
 
@@ -16,7 +16,7 @@ NEW_SUBJECT_FORMS = (
 )
 
 
-def test_new_subject_forms_remain_outside_exact_lexicon_but_work_in_grammar_context():
+def test_new_subject_forms_remain_outside_exact_vocabulary_but_work_in_grammar_context():
     """Grammar can generalize sentence role without inventing dictionary lemmas."""
     sentences = (
         "Dugsigu wuu weyn yahay.",
