@@ -6,14 +6,21 @@ embedded/subjunctive negative ``aan`` fuses with ``baa/ayaa`` and is written
 in other focus constructions, so this module never interprets the marker alone.
 A negative-subject-focus reading requires an exact reviewed negative predicate.
 
-Executable coverage is intentionally narrow:
-- the exact published ``Cali baan bixin`` example (with source-supported
-  ``ayaan`` particle equivalence);
-- exact reviewed person-neutral negative simple-past and past-progressive verb
-  surfaces already present in project morphology.
+When negation co-occurs with focus, Somali uses the reduced subjunctive. In the
+simple and progressive aspects these reduced forms do not distinguish present
+from past and do not distinguish person/number. The project therefore reuses
+only exact person-neutral negative morphology already independently reviewed:
 
-No negative surface is generated from suffixes and no present/future negative
-focus paradigm is inferred.
+- simple reduced subjunctive: exact surfaces such as ``cunin`` and
+  ``iman/imanin``;
+- progressive reduced subjunctive: exact surfaces such as ``cunayn(in)`` and
+  ``imanayn(in)``.
+
+The underlying Qaamuus records are tagged as past negative morphology because
+that is the paradigm in which the exact spellings were reviewed. Inside the
+negative-focus construction, Gothenburg grammar evidence licenses the broader
+present-or-past reduced-subjunctive interpretation. No suffix derivation is
+performed. Habitual and future reduced subjunctives remain separate stages.
 """
 
 from __future__ import annotations
@@ -28,7 +35,11 @@ from src.morphology_candidates import DEFAULT_MORPHOLOGY_PATHS
 
 TOKEN_RE = re.compile(r"[^\W\d_]+(?:['’][^\W\d_]+)*", flags=re.UNICODE)
 NEGATIVE_FOCUS_MARKERS = {"baan", "ayaan"}
-COVERED_TENSE_ASPECTS = {"tagto", "tagto_socota"}
+COVERED_SOURCE_TENSE_ASPECTS = {"tagto", "tagto_socota"}
+REDUCED_LABELS = {
+    "tagto": "reduced_subjunctive_simple",
+    "tagto_socota": "reduced_subjunctive_progressive",
+}
 MAX_PREDICATE_GAP = 4
 SUBJECT_FOCUS_RULE_PATH = Path("rules/grammar/subject_focus_agreement.jsonl")
 REVIEWED_NOUN_RULE_PATH = Path("rules/grammar/noun_subject_gender_agreement.jsonl")
@@ -58,6 +69,7 @@ class SubjectFocusNegativeAnalysis:
     marker: str | None = None
     predicate: str | None = None
     tense_aspect: str | None = None
+    temporal_scope: tuple[str, ...] = ()
     expected_subject_form: str | None = None
     case_agrees: bool | None = None
     evidence: str | None = None
@@ -152,7 +164,7 @@ def _record_is_covered_negative(record: dict) -> bool:
         features.get("part_of_speech") == "verb"
         and features.get("polarity") == "negative"
         and features.get("person_neutralized") is True
-        and features.get("tense_aspect") in COVERED_TENSE_ASPECTS
+        and features.get("tense_aspect") in COVERED_SOURCE_TENSE_ASPECTS
     )
 
 
@@ -174,23 +186,30 @@ def _covered_negative_index() -> dict[str, tuple[dict, ...]]:
     return {key: tuple(records) for key, records in index.items()}
 
 
-def _negative_predicate(surface: str) -> tuple[str, str] | None:
+def _negative_predicate(surface: str) -> tuple[str, tuple[str, ...], str] | None:
+    """Return reduced-subjunctive label, temporal scope, and lemma evidence."""
     records = _covered_negative_index().get(surface.casefold(), ())
     if not records:
         return None
-    tenses: list[str] = []
+
+    source_tenses: list[str] = []
     lemmas: list[str] = []
     for record in records:
         features = record.get("features", {})
         tense = features.get("tense_aspect")
         lemma = record.get("lemma")
-        if isinstance(tense, str) and tense not in tenses:
-            tenses.append(tense)
+        if isinstance(tense, str) and tense not in source_tenses:
+            source_tenses.append(tense)
         if isinstance(lemma, str) and lemma not in lemmas:
             lemmas.append(lemma)
-    tense_label = tenses[0] if len(tenses) == 1 else "reviewed_past_negative"
+
+    reduced_labels = {REDUCED_LABELS[tense] for tense in source_tenses if tense in REDUCED_LABELS}
+    if len(reduced_labels) == 1:
+        reduced_label = next(iter(reduced_labels))
+    else:
+        reduced_label = "reduced_subjunctive_negative"
     lemma_label = "/".join(lemmas) if lemmas else "reviewed verb"
-    return tense_label, lemma_label
+    return reduced_label, ("present", "past"), lemma_label
 
 
 def analyze_subject_focus_negative(sentence: str) -> SubjectFocusNegativeAnalysis:
@@ -226,6 +245,7 @@ def analyze_subject_focus_negative(sentence: str) -> SubjectFocusNegativeAnalysi
                 marker=marker,
                 predicate=predicate,
                 tense_aspect="source_exact_negative",
+                temporal_scope=("past",),
                 expected_subject_form=expected_surface,
                 case_agrees=case_agrees,
                 evidence=f"{subject_evidence}+{exact_evidence}",
@@ -239,20 +259,23 @@ def analyze_subject_focus_negative(sentence: str) -> SubjectFocusNegativeAnalysi
         negative = _negative_predicate(predicate)
         if negative is None:
             continue
-        tense, lemma = negative
+        reduced_label, temporal_scope, lemma = negative
         return SubjectFocusNegativeAnalysis(
             recognized=True,
             covered=True,
             subject=subject,
             marker=marker,
             predicate=predicate,
-            tense_aspect=tense,
+            tense_aspect=reduced_label,
+            temporal_scope=temporal_scope,
             expected_subject_form=expected_surface,
             case_agrees=case_agrees,
-            evidence=f"{subject_evidence}+exact_person_neutral_negative_{tense}",
+            evidence=f"{subject_evidence}+exact_person_neutral_{reduced_label}",
             note=(
-                f"The predicate is an exact reviewed person-neutral negative {tense} surface "
-                f"for {lemma}. This independently disambiguates {marker} as negative subject "
+                f"The predicate is an exact reviewed person-neutral {reduced_label} surface "
+                f"for {lemma}. Under negation plus focus, the reduced subjunctive does not "
+                "distinguish present from past or person/number; temporal interpretation comes "
+                f"from context. This independently disambiguates {marker} as negative subject "
                 "focus. Common-noun focused subjects use the absolute case. No automatic rewrite."
             ),
         )
