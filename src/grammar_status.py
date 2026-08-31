@@ -20,6 +20,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Iterable
 
+from src.connective_statement import ConnectiveStatementAnalysis
 from src.connective_waxaa_focus import ConnectiveWaxaaFocusAnalysis
 
 
@@ -101,6 +102,51 @@ def classify_connective_waxaa_focus(
     elif result.subject_persons and result.verb and result.focus_structure_agrees is None:
         status = "unjudged"
         reasons.append("focus_structure_unjudged")
+    else:
+        status = "supported"
+        reasons.append("reviewed_construction_supported")
+
+    return GrammarDecision(
+        status=status,
+        reasons=_unique(reasons),
+        rule_ids=_unique(rule_ids),
+    )
+
+
+def classify_connective_statement(
+    result: ConnectiveStatementAnalysis,
+) -> GrammarDecision:
+    """Convert a reviewed wuuna/wayna/waana analysis into a shared decision.
+
+    Local right-clause finite disagreement is a ``review`` condition. A disjoint
+    nearest-left/right statement subject person set is instead
+    ``context_required`` because an intentional subject switch can be grammatical.
+    Unknown finite morphology remains ``unjudged`` unless the stronger discourse
+    context requirement is already present.
+    """
+    if not result.recognized:
+        return GrammarDecision(
+            status="unjudged",
+            reasons=("construction_not_recognized",),
+        )
+
+    reasons: list[str] = []
+    rule_ids: list[str | None] = [result.rule_id]
+
+    if result.agreement_agrees is False:
+        reasons.append("local_subject_verb_agreement_conflict")
+
+    if result.same_subject_continuity_agrees is False:
+        reasons.append("possible_subject_switch")
+        rule_ids.append(result.continuity_rule_id)
+
+    if "local_subject_verb_agreement_conflict" in reasons:
+        status = "review"
+    elif "possible_subject_switch" in reasons:
+        status = "context_required"
+    elif result.subject_persons and result.agreement_agrees is None:
+        status = "unjudged"
+        reasons.append("finite_morphology_unjudged")
     else:
         status = "supported"
         reasons.append("reviewed_construction_supported")
