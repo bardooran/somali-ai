@@ -23,7 +23,13 @@ The ``waxa/waxaa`` construction is a final-focus construction: focused lexical
 material follows the verb. For clitic-bearing connectives, when an exact
 reviewed finite verb is found, this analyzer records whether lexical material
 actually follows that verb. A missing final-focus tail is a review condition,
-not an automatic rewrite. Unknown predicates remain unjudged, antecedents are
+not an automatic rewrite.
+
+A separate discourse-safety signal compares the right connective subject clitic
+with the nearest reviewed statement subject clitic in the preceding text. A
+disjoint person set does not make the sentence ungrammatical: it means that a
+subject change requires context and therefore must not be presented as a plain
+same-subject continuation. Unknown predicates remain unjudged, antecedents are
 not inferred, and no automatic correction is performed.
 """
 
@@ -40,6 +46,11 @@ CONNECTIVE_WAXAA_CLITICS = {
     "wuxuuna": ("wuxuu", "uu", ("3sg_m",)),
     "waxayna": ("waxay", "ay", ("3sg_f", "3pl")),
     "waxaadna": ("waxaad", "aad", ("2sg", "2pl")),
+}
+STATEMENT_SUBJECT_CLITICS = {
+    "wuu": ("3sg_m",),
+    "way": ("3sg_f", "3pl"),
+    "waad": ("2sg", "2pl"),
 }
 REVIEWED_CONNECTIVE_SURFACES = {"waxaana", *CONNECTIVE_WAXAA_CLITICS}
 INPUT_START_CONNECTIVE_SURFACES = {"waxaana", "waxayna", "waxaadna"}
@@ -65,22 +76,65 @@ class ConnectiveWaxaaFocusAnalysis:
     agreement_agrees: bool | None = None
     focus_material: tuple[str, ...] = ()
     focus_structure_agrees: bool | None = None
+    left_subject_clitic: str | None = None
+    left_subject_persons: tuple[str, ...] = ()
+    same_subject_continuity_agrees: bool | None = None
     evidence: str | None = None
     rule_id: str = "GRAM-CONNWAXAA-001"
     focus_rule_id: str | None = None
+    continuity_rule_id: str | None = None
     note: str = ""
+
+
+def _nearest_left_subject_context(text: str) -> tuple[str | None, tuple[str, ...]]:
+    """Return the nearest exact reviewed statement subject clitic on the left."""
+    tokens = TOKEN_RE.findall(text)
+    for token in reversed(tokens):
+        persons = STATEMENT_SUBJECT_CLITICS.get(token.casefold())
+        if persons is not None:
+            return token, persons
+    return None, ()
+
+
+def _continuity_value(
+    left_subject_persons: tuple[str, ...],
+    right_subject_persons: tuple[str, ...],
+) -> bool | None:
+    if not left_subject_persons or not right_subject_persons:
+        return None
+    return any(person in right_subject_persons for person in left_subject_persons)
 
 
 def _analyze_clitic_connective(
     particle: str,
     tokens: list[str],
     boundary: str,
+    left_subject_clitic: str | None = None,
+    left_subject_persons: tuple[str, ...] = (),
 ) -> ConnectiveWaxaaFocusAnalysis | None:
     profile = CONNECTIVE_WAXAA_CLITICS.get(particle.casefold())
     if profile is None or len(tokens) < 2:
         return None
 
     base_focus_subject_form, subject_clitic, subject_persons = profile
+    continuity = _continuity_value(left_subject_persons, subject_persons)
+    if continuity is True:
+        continuity_note = (
+            "The nearest reviewed left statement subject clitic is compatible with the "
+            "right connective subject person set, so same-subject continuation is possible."
+        )
+    elif continuity is False:
+        continuity_note = (
+            "The nearest reviewed left statement subject clitic has a disjoint person set. "
+            "A subject switch may be grammatical, but it is context-required and must not "
+            "be presented as a plain same-subject continuation."
+        )
+    else:
+        continuity_note = (
+            "No reviewed left statement subject clitic was available for a safe continuity "
+            "judgment; antecedent identity remains unjudged."
+        )
+
     verb_candidates = tokens[1 : 1 + MAX_FINITE_GAP + 1]
 
     for verb_offset, verb in enumerate(verb_candidates, start=1):
@@ -122,6 +176,9 @@ def _analyze_clitic_connective(
             agreement_agrees=agrees,
             focus_material=focus_material,
             focus_structure_agrees=focus_structure_agrees,
+            left_subject_clitic=left_subject_clitic,
+            left_subject_persons=left_subject_persons,
+            same_subject_continuity_agrees=continuity,
             evidence=(
                 "source_backed_waxaa_focus_subject_clitic_plus_conjunction_na"
                 "+sentence_or_clause_initial_distribution"
@@ -130,13 +187,14 @@ def _analyze_clitic_connective(
             ),
             rule_id="GRAM-CONNWAXAA-006",
             focus_rule_id="GRAM-CONNWAXAA-009",
+            continuity_rule_id="GRAM-CONNWAXAA-010",
             note=(
                 f"{particle} is an independently reviewed waxaa-family connective focus "
                 f"form based on {base_focus_subject_form}, carrying subject clitic "
                 f"{subject_clitic}, plus connective -na ('and'). Agreement is checked only "
                 "between its encoded reviewed subject person(s) and an exact reviewed "
-                f"finite verb. {focus_note} No prior discourse antecedent, unseen verb "
-                "form, punctuation rewrite, or automatic correction is inferred."
+                f"finite verb. {focus_note} {continuity_note} No unseen verb form, "
+                "punctuation rewrite, or automatic correction is inferred."
             ),
         )
 
@@ -153,6 +211,9 @@ def _analyze_clitic_connective(
         verb=verb_candidates[0] if verb_candidates else None,
         agreement_agrees=None,
         focus_structure_agrees=None,
+        left_subject_clitic=left_subject_clitic,
+        left_subject_persons=left_subject_persons,
+        same_subject_continuity_agrees=continuity,
         evidence=(
             "source_backed_waxaa_focus_subject_clitic_plus_conjunction_na"
             "+sentence_or_clause_initial_distribution"
@@ -160,12 +221,12 @@ def _analyze_clitic_connective(
         ),
         rule_id="GRAM-CONNWAXAA-005",
         focus_rule_id="GRAM-CONNWAXAA-009",
+        continuity_rule_id="GRAM-CONNWAXAA-010",
         note=(
             f"{particle} is an independently reviewed waxaa-family connective focus form "
             "in a licensed clause-initial position, but no exact reviewed finite verb was "
-            "found in the local predicate window. Agreement and final-focus structure remain "
-            "unjudged; no prior discourse antecedent, punctuation repair, or verb form is "
-            "guessed."
+            f"found in the local predicate window. Agreement and final-focus structure remain "
+            f"unjudged. {continuity_note} No punctuation repair or verb form is guessed."
         ),
     )
 
@@ -173,6 +234,8 @@ def _analyze_clitic_connective(
 def _analyze_boundary_tokens(
     tokens: list[str],
     boundary: str,
+    left_subject_clitic: str | None = None,
+    left_subject_persons: tuple[str, ...] = (),
 ) -> ConnectiveWaxaaFocusAnalysis | None:
     if not tokens:
         return None
@@ -189,6 +252,9 @@ def _analyze_boundary_tokens(
             subject_persons=(),
             agreement_agrees=None,
             focus_structure_agrees=None,
+            left_subject_clitic=left_subject_clitic,
+            left_subject_persons=left_subject_persons,
+            same_subject_continuity_agrees=None,
             evidence=(
                 "source_backed_waxaa_focus_particle_plus_conjunction_na"
                 "+sentence_or_clause_initial_distribution"
@@ -204,7 +270,13 @@ def _analyze_boundary_tokens(
             ),
         )
 
-    return _analyze_clitic_connective(particle, tokens, boundary)
+    return _analyze_clitic_connective(
+        particle,
+        tokens,
+        boundary,
+        left_subject_clitic=left_subject_clitic,
+        left_subject_persons=left_subject_persons,
+    )
 
 
 def _analyze_unpunctuated_after_reviewed_finite(
@@ -232,10 +304,15 @@ def _analyze_unpunctuated_after_reviewed_finite(
         if not left_finite.recognized:
             continue
 
+        left_subject_clitic, left_subject_persons = _nearest_left_subject_context(
+            sentence[: particle_match.start()]
+        )
         tail_tokens = [match.group(0) for match in token_matches[index:]]
         return _analyze_boundary_tokens(
             tail_tokens,
             REVIEWED_LEFT_FINITE_BOUNDARY,
+            left_subject_clitic=left_subject_clitic,
+            left_subject_persons=left_subject_persons,
         )
 
     return None
@@ -255,7 +332,10 @@ def analyze_connective_waxaa_focus(sentence: str) -> ConnectiveWaxaaFocusAnalysi
     stripped = sentence.lstrip()
     if stripped:
         first_match = TOKEN_RE.match(stripped)
-        if first_match is not None and first_match.group(0).casefold() in INPUT_START_CONNECTIVE_SURFACES:
+        if (
+            first_match is not None
+            and first_match.group(0).casefold() in INPUT_START_CONNECTIVE_SURFACES
+        ):
             start_tokens = TOKEN_RE.findall(stripped)
             start_result = _analyze_boundary_tokens(
                 start_tokens,
@@ -267,7 +347,15 @@ def analyze_connective_waxaa_focus(sentence: str) -> ConnectiveWaxaaFocusAnalysi
     for boundary_match in CLAUSE_BOUNDARY_RE.finditer(sentence):
         tail = sentence[boundary_match.end() :].strip()
         tokens = TOKEN_RE.findall(tail)
-        result = _analyze_boundary_tokens(tokens, boundary_match.group(0))
+        left_subject_clitic, left_subject_persons = _nearest_left_subject_context(
+            sentence[: boundary_match.start()]
+        )
+        result = _analyze_boundary_tokens(
+            tokens,
+            boundary_match.group(0),
+            left_subject_clitic=left_subject_clitic,
+            left_subject_persons=left_subject_persons,
+        )
         if result is not None:
             return result
 
