@@ -97,18 +97,27 @@ def generate_profile_past(lemma: str, person: str) -> GeneratedMorphology | None
     )
 
 
-def generate_conj2_present(lemma: str, person: str) -> GeneratedMorphology | None:
-    """Generate one finite reviewed Conjugation-2 present candidate."""
+def _generate_conj2_finite(
+    lemma: str,
+    person: str,
+    tense_aspect: str,
+) -> GeneratedMorphology | None:
+    """Generate one explicitly authorized finite Conjugation-2 candidate."""
     rule = _load_rule(CONJ2_RULE_PATH)
     profile = rule.get("profiles", {}).get(lemma)
     if not isinstance(profile, dict):
         return None
-    authorized = {str(value) for value in profile.get("authorized_persons", [])}
+
+    authorized_key = f"authorized_{tense_aspect}_persons"
+    authorized = {str(value) for value in profile.get(authorized_key, [])}
     if person not in authorized:
         return None
-    morphology = rule.get("present_morphology", {}).get(person)
+
+    morphology_table = rule.get(f"{tense_aspect}_morphology", {})
+    morphology = morphology_table.get(person) if isinstance(morphology_table, dict) else None
     if not isinstance(morphology, dict):
         return None
+
     agreement = str(morphology.get("agreement", ""))
     tam = str(morphology.get("tam", ""))
     processes = {str(value) for value in profile.get("processes", [])}
@@ -118,7 +127,7 @@ def generate_conj2_present(lemma: str, person: str) -> GeneratedMorphology | Non
         lemma=lemma,
         part_of_speech=str(rule["part_of_speech"]),
         conjugation_class=str(rule["conjugation_class"]),
-        tense_aspect="present",
+        tense_aspect=tense_aspect,
         mood="indicative",
         person=person,
         form=None,
@@ -127,6 +136,16 @@ def generate_conj2_present(lemma: str, person: str) -> GeneratedMorphology | Non
         evidence_summary=_evidence_summary(rule, profile, process),
         correction_allowed=False,
     )
+
+
+def generate_conj2_present(lemma: str, person: str) -> GeneratedMorphology | None:
+    """Generate one finite reviewed Conjugation-2 present candidate."""
+    return _generate_conj2_finite(lemma, person, "present")
+
+
+def generate_conj2_past(lemma: str, person: str) -> GeneratedMorphology | None:
+    """Generate one finite reviewed Conjugation-2 past candidate."""
+    return _generate_conj2_finite(lemma, person, "past")
 
 
 @lru_cache(maxsize=1)
@@ -151,11 +170,15 @@ def _conj2_surface_index() -> dict[str, tuple[GeneratedMorphology, ...]]:
     for lemma, profile in rule.get("profiles", {}).items():
         if not isinstance(profile, dict):
             continue
-        for person in profile.get("authorized_persons", []):
-            candidate = generate_conj2_present(str(lemma), str(person))
-            if candidate is None:
-                continue
-            index.setdefault(candidate.surface.casefold(), []).append(candidate)
+        for tense_aspect in ("present", "past"):
+            authorized_key = f"authorized_{tense_aspect}_persons"
+            for person in profile.get(authorized_key, []):
+                candidate = _generate_conj2_finite(
+                    str(lemma), str(person), tense_aspect
+                )
+                if candidate is None:
+                    continue
+                index.setdefault(candidate.surface.casefold(), []).append(candidate)
     return {key: tuple(values) for key, values in index.items()}
 
 
