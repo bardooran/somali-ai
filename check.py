@@ -9,6 +9,7 @@ from pathlib import Path
 
 from src.checker import check_file
 from src.conditional_agreement import analyze_conditional_agreement
+from src.connective_waxaa_focus import analyze_connective_waxaa_focus
 from src.dependent_mood import analyze_dependent_mood
 from src.focus_particle import scan_focus_particle_clitics
 from src.focused_object_agreement import analyze_focused_object_agreement
@@ -69,6 +70,15 @@ def main() -> None:
     findings, corrected = check_file(args.text, args.rules)
     agreement_findings = scan_sentence_agreement(args.text)
     focus_findings = scan_focus_particle_clitics(args.text)
+    connective_waxaa_focus = analyze_connective_waxaa_focus(args.text)
+    connective_waxaa_focus_structure_review = (
+        connective_waxaa_focus.recognized
+        and connective_waxaa_focus.focus_structure_agrees is False
+    )
+    connective_waxaa_subject_switch_review = (
+        connective_waxaa_focus.recognized
+        and connective_waxaa_focus.same_subject_continuity_agrees is False
+    )
     object_agreement = analyze_object_agreement(args.text)
     object_agreement_conflict = object_agreement.recognized and object_agreement.agrees is False
     role_aware = analyze_role_aware_sentence(args.text)
@@ -206,6 +216,8 @@ def main() -> None:
         not findings
         and not agreement_findings
         and not focus_findings
+        and not connective_waxaa_focus_structure_review
+        and not connective_waxaa_subject_switch_review
         and not object_agreement_conflict
         and not role_aware_conflict
         and not possession_focus_conflict
@@ -243,6 +255,8 @@ def main() -> None:
     if (
         agreement_findings
         or focus_findings
+        or connective_waxaa_focus_structure_review
+        or connective_waxaa_subject_switch_review
         or object_agreement_conflict
         or role_aware_conflict
         or possession_focus_conflict
@@ -281,6 +295,30 @@ def main() -> None:
                 f"- [REVIEW] {finding.subject!r} ... {finding.particle!r}: "
                 f"possible missing subject clitic in a baa/ayaa focus construction "
                 f"({finding.rule_id})"
+            )
+
+        if connective_waxaa_focus_structure_review:
+            print(
+                f"- [REVIEW] {connective_waxaa_focus.particle!r} + "
+                f"{connective_waxaa_focus.verb!r}: possible incomplete waxa/waxaa final-focus "
+                "construction; the reviewed finite verb has no following lexical focus material. "
+                "Review whether a neutral waa-family connective statement is intended instead. "
+                "No automatic rewrite. "
+                f"({connective_waxaa_focus.focus_rule_id})"
+            )
+
+        if connective_waxaa_subject_switch_review:
+            left_persons = "/".join(connective_waxaa_focus.left_subject_persons)
+            right_persons = "/".join(connective_waxaa_focus.subject_persons)
+            print(
+                f"- [REVIEW] {connective_waxaa_focus.left_subject_clitic!r} ... "
+                f"{connective_waxaa_focus.particle!r}: possible subject switch; the preceding "
+                f"reviewed statement clitic supports {left_persons or 'unknown'} while the "
+                f"waxa-connective subject clitic supports {right_persons or 'unknown'}. "
+                "This can be grammatical when the subject change is intentional, but context "
+                "is required; do not treat it as a plain same-subject continuation. "
+                "No automatic rewrite. "
+                f"({connective_waxaa_focus.continuity_rule_id})"
             )
 
         if subject_focus_negative_marker_conflict:
