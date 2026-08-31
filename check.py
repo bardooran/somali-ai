@@ -31,6 +31,7 @@ from src.predicate_sentence import scan_predicate_agreement
 from src.reviewed_sentence_agreement import analyze_reviewed_sentence_agreement
 from src.role_aware_sentences import analyze_role_aware_sentence
 from src.sentence_agreement import scan_sentence_agreement
+from src.subject_focus_negative import analyze_subject_focus_negative
 
 
 DEFAULT_RULES = Path("rules/orthography")
@@ -81,6 +82,11 @@ def main() -> None:
     focused_object_conflict = (
         focused_object_agreement.recognized
         and focused_object_agreement.agrees is False
+    )
+    subject_focus_negative = analyze_subject_focus_negative(args.text)
+    subject_focus_negative_marker_conflict = (
+        subject_focus_negative.recognized
+        and subject_focus_negative.marker_agrees is False
     )
     negation_conflicts = _scan_negation_conflicts(args.text)
 
@@ -204,6 +210,7 @@ def main() -> None:
         and not role_aware_conflict
         and not possession_focus_conflict
         and not focused_object_conflict
+        and not subject_focus_negative_marker_conflict
         and not negation_conflicts
         and not predicate_conflicts
         and not reviewed_sentence_conflict
@@ -240,6 +247,7 @@ def main() -> None:
         or role_aware_conflict
         or possession_focus_conflict
         or focused_object_conflict
+        or subject_focus_negative_marker_conflict
         or negation_conflicts
         or predicate_conflicts
         or reviewed_sentence_conflict
@@ -273,6 +281,18 @@ def main() -> None:
                 f"- [REVIEW] {finding.subject!r} ... {finding.particle!r}: "
                 f"possible missing subject clitic in a baa/ayaa focus construction "
                 f"({finding.rule_id})"
+            )
+
+        if subject_focus_negative_marker_conflict:
+            print(
+                f"- [REVIEW] {subject_focus_negative.subject!r} + "
+                f"{subject_focus_negative.marker!r} ... {subject_focus_negative.predicate!r}: "
+                "possible negative subject-focus marker conflict; the reviewed reduced negative "
+                f"predicate/context supports negative focus, where the marker is "
+                f"{subject_focus_negative.expected_marker!r}. Bare "
+                f"{subject_focus_negative.marker!r} does not contain negative aan. Written focus "
+                "forms can be ambiguous, so no automatic rewrite. "
+                "(GRAM-SUBJFOCUS-NEG-006)"
             )
 
         if possession_focus_conflict:
