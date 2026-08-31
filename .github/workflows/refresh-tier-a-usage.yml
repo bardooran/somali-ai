@@ -49,17 +49,17 @@ jobs:
           set -euo pipefail
           mkdir -p .tmp/tier-a
 
+          # SomNLP downloaders stream by default. Passing --stream is invalid;
+          # only --no-stream exists as an opt-out flag.
           ../SomNLP/target/release/download_wikipedia_so \
             --output .tmp/tier-a/wikipedia_raw.jsonl \
-            --limit 120 \
-            --stream
+            --limit 120
 
           ../SomNLP/target/release/download_xlsum_so \
             --output .tmp/tier-a/xlsum_raw.jsonl \
             --field summary \
             --splits train \
-            --limit 120 \
-            --stream
+            --limit 120
 
           test -s .tmp/tier-a/wikipedia_raw.jsonl
           test -s .tmp/tier-a/xlsum_raw.jsonl
