@@ -34,14 +34,12 @@ jobs:
             --metadata benchmark_results/morphology_challenge_v2.meta.json
           sha256sum benchmark_results/morphology_challenge_v2.jsonl
 
-      - name: Prove freeze workflow contains no analyzer evaluation
+      - name: Prove freeze generator has no analyzer dependency
         run: |
-          python - <<'PY'
-          from pathlib import Path
-          text = Path('.github/workflows/freeze-morphology-v2.yml').read_text(encoding='utf-8')
-          forbidden = ('hfst-lookup', 'morphology_candidates', 'giellalt_runtime_benchmark')
-          assert not any(token in text for token in forbidden)
-          PY
+          if grep -Eq 'hfst-lookup|morphology_candidates|giellalt_runtime_benchmark' src/morphology_challenge_v2_freeze.py; then
+            echo "Freeze generator unexpectedly references analyzer code" >&2
+            exit 1
+          fi
 
       - name: Upload frozen v2 candidate manifest
         uses: actions/upload-artifact@v4
