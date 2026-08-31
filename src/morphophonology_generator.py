@@ -41,6 +41,20 @@ def _apply_processes(
     return lemma + agreement + tam, "concatenative_elsewhere"
 
 
+def _evidence_summary(rule: dict, profile: dict, process: str) -> tuple[str, ...]:
+    result: list[str] = []
+    class_evidence = profile.get("class_evidence")
+    if class_evidence:
+        result.append(str(class_evidence))
+    development_evidence = profile.get("development_evidence")
+    if development_evidence:
+        result.append(str(development_evidence))
+    process_record = rule.get("processes", {}).get(process)
+    if isinstance(process_record, dict) and process_record.get("source"):
+        result.append(str(process_record["source"]))
+    return tuple(result)
+
+
 def generate_profile_past(lemma: str, person: str) -> GeneratedMorphology | None:
     rule = _load_rule()
     profile = rule.get("profiles", {}).get(lemma)
@@ -67,7 +81,7 @@ def generate_profile_past(lemma: str, person: str) -> GeneratedMorphology | None
         form=None,
         status=str(rule["status"]),
         rule_id=f"{rule['id']}:{process}",
-        evidence_id=f"{rule['id']}:{lemma}",
+        evidence_summary=_evidence_summary(rule, profile, process),
         correction_allowed=False,
     )
 
