@@ -46,3 +46,6 @@ jobs:
 
       - name: Print frozen Conjugation-2 morphology paradigm v9 baseline
         run: python -m src.morphology_paradigm_v9
+
+      - name: Print frozen Conjugation-2A finite present morphology paradigm v10 baseline
+        run: python -m src.morphology_paradigm_v10
