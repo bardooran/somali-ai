@@ -1,0 +1,37 @@
+{
+  "adjective_quota_policy": "zero: v2 and v3 exhausted all 22 eligible adjectives in the pinned source",
+  "available_after_prior_exclusions_type_counts": {
+    "adjective": 0,
+    "noun": 33722,
+    "numeral": 62,
+    "verb": 11117
+  },
+  "benchmark_version": "v4",
+  "candidate_pool_type_counts": {
+    "adjective": 22,
+    "noun": 33853,
+    "numeral": 78,
+    "verb": 11227
+  },
+  "case_count": 160,
+  "definitions_copied": false,
+  "excluded_benchmarks": [
+    "v2",
+    "v3"
+  ],
+  "excluded_prior_positive_surface_count": 230,
+  "manifest_sha256": "6a61900ea57a2c0f77121eb133195c4cae1246a518624b361d37d924e33cb3ce",
+  "positive_case_count": 144,
+  "prior_positive_overlap_count": 0,
+  "quotas": {
+    "noun": 64,
+    "numeral": 16,
+    "verb": 64
+  },
+  "selected_pair_count": 144,
+  "selection_is_analyzer_blind": true,
+  "selection_seed": "somali-ai-morphology-challenge-v4-2026-08-31",
+  "source_commit": "737cf848bfa8291d5580f5c34db04daef858c955",
+  "source_repository": "bardooran/goobolabs",
+  "unknown_probe_count": 16
+}
