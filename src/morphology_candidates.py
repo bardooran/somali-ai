@@ -24,6 +24,9 @@ REVIEWED_VERB_FORMS_PATH = Path(
 REVIEWED_VERB_LEMMAS_PATH = Path(
     "data/morphology/qaamuus_2012_reviewed_verb_lemmas.jsonl"
 )
+REVIEWED_HEADWORD_MORPHOLOGY_PATH = Path(
+    "data/morphology/qaamuus_2012_reviewed_headword_morphology.jsonl"
+)
 REVIEWED_DHEH_EXPANSION_FORMS_PATH = Path(
     "data/morphology/qaamuus_2012_reviewed_dheh_expansion_forms.jsonl"
 )
@@ -86,6 +89,7 @@ DEFAULT_MORPHOLOGY_PATHS = (
     REVIEWED_PLURAL_DEFINITE_FORMS_PATH,
     REVIEWED_VERB_FORMS_PATH,
     REVIEWED_VERB_LEMMAS_PATH,
+    REVIEWED_HEADWORD_MORPHOLOGY_PATH,
     REVIEWED_DHEH_EXPANSION_FORMS_PATH,
     REVIEWED_IMOW_FORMS_PATH,
     REVIEWED_AQAAN_FORMS_PATH,
