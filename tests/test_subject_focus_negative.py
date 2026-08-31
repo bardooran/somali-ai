@@ -30,41 +30,55 @@ def test_exact_published_cali_negative_focus_example_is_recognized_without_bax_p
         assert result.marker == marker
         assert result.predicate == "bixin"
         assert result.case_agrees is True
+        assert result.temporal_scope == ("past",)
         assert "source_exact_cali_bixin" in (result.evidence or "")
 
     # A single source sentence does not license unseen BAX morphology.
     assert analyze_subject_focus_negative("Cali baan baxXYZ.").recognized is False
 
 
-def test_person_neutral_simple_past_negative_morphology_generalizes_under_focus():
+def test_person_neutral_simple_negative_is_reduced_subjunctive_present_or_past_under_focus():
     examples = (
-        ("Carruurta baan cunin.", "cunin", "tagto"),
-        ("Gabadha ayaan iman.", "iman", "tagto"),
-        ("Wiilka baan imanin.", "imanin", "tagto"),
-        ("Gabadha baan aqoon.", "aqoon", "tagto"),
+        ("Carruurta baan cunin.", "cunin"),
+        ("Gabadha ayaan iman.", "iman"),
+        ("Wiilka baan imanin.", "imanin"),
+        ("Gabadha baan aqoon.", "aqoon"),
     )
-    for sentence, predicate, tense in examples:
+    for sentence, predicate in examples:
         result = analyze_subject_focus_negative(sentence)
         assert result.recognized is True
         assert result.covered is True
         assert result.predicate == predicate
-        assert result.tense_aspect == tense
+        assert result.tense_aspect == "reduced_subjunctive_simple"
+        assert result.temporal_scope == ("present", "past")
         assert result.case_agrees is True
-        assert "exact_person_neutral_negative" in (result.evidence or "")
+        assert "exact_person_neutral_reduced_subjunctive_simple" in (result.evidence or "")
 
 
-def test_person_neutral_past_progressive_negative_allows_intervening_material():
+def test_temporal_context_does_not_change_the_reduced_simple_surface():
+    present_context = analyze_subject_focus_negative("Carruurta baan maanta cunin.")
+    past_context = analyze_subject_focus_negative("Carruurta baan shalay cunin.")
+
+    for result in (present_context, past_context):
+        assert result.recognized is True
+        assert result.predicate == "cunin"
+        assert result.tense_aspect == "reduced_subjunctive_simple"
+        assert result.temporal_scope == ("present", "past")
+
+
+def test_person_neutral_progressive_negative_is_reduced_subjunctive_present_or_past():
     for sentence, predicate in (
         ("Carruurta baan muus cunayn.", "cunayn"),
         ("Carruurta ayaan muus cunaynin.", "cunaynin"),
         ("Gabadha baan maanta imanayn.", "imanayn"),
-        ("Gabadha ayaan maanta imanaynin.", "imanaynin"),
+        ("Gabadha ayaan shalay imanaynin.", "imanaynin"),
     ):
         result = analyze_subject_focus_negative(sentence)
         assert result.recognized is True
         assert result.covered is True
         assert result.predicate == predicate
-        assert result.tense_aspect == "tagto_socota"
+        assert result.tense_aspect == "reduced_subjunctive_progressive"
+        assert result.temporal_scope == ("present", "past")
         assert result.case_agrees is True
 
 
@@ -111,13 +125,21 @@ def test_baan_ayaan_are_not_globally_reinterpreted_as_negative():
         assert analyze_subject_focus_negative(sentence).recognized is False
 
 
-def test_present_and_future_negative_focus_remain_unmodeled():
-    # These surfaces are not person-neutral covered past negatives.  The negative
-    # focus analyzer deliberately declines to reinterpret them.
+def test_full_present_negative_forms_are_not_substituted_for_reduced_focus_forms():
+    # Present meaning under focus still uses the reduced subjunctive; ordinary
+    # full ma-negative forms do not become valid merely because baan/ayaan occurs.
     for sentence in (
         "Carruurta baan cuno.",
+        "Carruurta baan cunayo.",
         "Carruurta baan cunaan.",
+    ):
+        assert analyze_subject_focus_negative(sentence).recognized is False
+
+
+def test_future_and_habitual_negative_focus_remain_separate_pending_stages():
+    for sentence in (
         "Carruurta baan cuni doonin.",
+        "Carruurta baan cuni jirin.",
     ):
         assert analyze_subject_focus_negative(sentence).recognized is False
 
@@ -125,6 +147,7 @@ def test_present_and_future_negative_focus_remain_unmodeled():
 def test_cli_accepts_reviewed_negative_focus_and_reports_only_safe_case_conflict():
     assert _run_checker("Cali baan bixin.") == NO_FINDINGS
     assert _run_checker("Carruurta baan cunin.") == NO_FINDINGS
+    assert _run_checker("Carruurta baan maanta cunin.") == NO_FINDINGS
     assert _run_checker("Gabadha ayaan imanayn.") == NO_FINDINGS
 
     output = _run_checker("Carruurtu baan cunin.")
