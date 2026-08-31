@@ -63,8 +63,8 @@ def test_connective_statement_reports_exact_finite_person_conflicts():
 
 def test_connective_statement_keeps_context_and_paradigm_safety_boundaries():
     for sentence in (
-        "wuuna cunay.",
-        "wayna cuntay.",
+        "Wuuna cunay.",
+        "Wayna cuntay.",
         "Cali wuu yimid, waana cunay.",
         "Cali wuu yimid, waadna cuntay.",
         "Cali wuu yimid, waanna cunnay.",
@@ -72,8 +72,8 @@ def test_connective_statement_keeps_context_and_paradigm_safety_boundaries():
     ):
         assert analyze_connective_statement(sentence).recognized is False
 
-    assert _run_checker("wuuna cunay.") == NO_FINDINGS
-    assert _run_checker("wayna cuntay.") == NO_FINDINGS
+    assert _run_checker("Wuuna cunay.") == NO_FINDINGS
+    assert _run_checker("Wayna cuntay.") == NO_FINDINGS
 
 
 def test_connective_statement_does_not_guess_unknown_predicates():
