@@ -11,6 +11,7 @@
     "2sg": {"agreement": "t", "tam": "aa"},
     "3sg_m": {"agreement": "", "tam": "aa"},
     "3sg_f": {"agreement": "t", "tam": "aa"},
+    "1pl": {"agreement": "n", "tam": "aa"},
     "2pl": {"agreement": "t", "tam": "aan"},
     "3pl": {"agreement": "", "tam": "aan"}
   },
@@ -25,15 +26,19 @@
     "i_vowel_glide": {
       "description": "For the explicitly authorized i-final Conjugation-2 profile, y surfaces between the stem-final i and a vowel-initial present ending.",
       "source": "Ahmed Mohamed (2013), An Overview of the Interface between Aspects of Somali Phonology and Morphology, p. 90 of the thesis (PDF p. 102), explicitly prints kari + <-aa> as kariyaa and kari + <-aan> as kariyaan. Green & Jones (2016), A first look at the morphophonology of Marka (Af-Ashraaf) and a comparison to its neighbors, table 24, independently prints the Northern/Benaadir Somali weak-causative present forms kariyaa and kariyaan."
+    },
+    "i_n_weak_causative_manner_alternation": {
+      "description": "In the explicitly authorized weak-causative 1pl cell, the i-final weak-causative extension is realized with n before the nasal person marker, yielding orthographic -inn- before -aa.",
+      "source": "Christopher R. Green, Somali Grammar, section 7.1.5 states that the weak causative extension is realized as -in before a nasal; section 7.5.1.1 table 48 prints weak-causative 1pl buubinnaa and notes weak-causative manner alternation in 1pl. Green & Jones (2016), table 24, independently prints the Northern/Benaadir Somali weak-causative 1pl surface karinnaa."
     }
   },
   "profiles": {
     "kari": {
-      "authorized_present_persons": ["1sg", "2sg", "3sg_m", "3sg_f", "2pl", "3pl"],
+      "authorized_present_persons": ["1sg", "2sg", "3sg_m", "3sg_f", "1pl", "2pl", "3pl"],
       "authorized_past_persons": [],
-      "processes": ["i_t_assibilation", "i_vowel_glide"],
+      "processes": ["i_t_assibilation", "i_vowel_glide", "i_n_weak_causative_manner_alternation"],
       "class_evidence": "Saeed (1999), Somali, uses kari as the Conjugation 2A example verb; Green & Morrison (2018) also treats kari as an i-final stem in its explicit assibilation example; Ahmed Mohamed (2013) independently labels kari as C2A in the present-tense table.",
-      "development_evidence": "The original Green & Morrison slice authorizes present 2sg/3sg feminine karisaa. Ahmed Mohamed (2013), thesis p. 90 (PDF p. 102), additionally prints kariyaa for 1sg and 3sg masculine, karisaan for 2pl, and kariyaan for 3pl; Green & Jones (2016), table 24, corroborates those standard Somali weak-causative surfaces. The Mohamed 1pl cell is not used because the available source rendering reads kainnaa, so 1pl karinnaa remains deliberately unauthorized until cleaner independent evidence is reviewed."
+      "development_evidence": "The original Green & Morrison slice authorizes present 2sg/3sg feminine karisaa. Ahmed Mohamed (2013), thesis p. 90 (PDF p. 102), additionally prints kariyaa for 1sg and 3sg masculine, karisaan for 2pl, and kariyaan for 3pl; Green & Jones (2016), table 24, corroborates those standard Somali weak-causative surfaces and explicitly prints 1pl karinnaa. Christopher R. Green's Somali Grammar independently supplies the structural weak-causative evidence for the missing 1pl cell: -i is realized as -in before a nasal, and table 48 prints the analogous weak-causative 1pl buubinnaa. This completes only kari's reviewed present paradigm; no kari past cell is inferred."
     },
     "joogi": {
       "authorized_present_persons": [],
@@ -53,5 +58,5 @@
     "frozen_benchmark_profile_lemmas_allowed": false,
     "note": "Runtime profiles are authorized from independent development sources, not frozen benchmark answers. Generation is finite, lemma-specific, tense-specific, and person-specific. Fayruus v9 and Hersi v10 remain evaluation-only."
   },
-  "notes": "Finite Conjugation-2A morphophonology only. kari has reviewed present 1sg/2sg/3sg-m/3sg-f/2pl/3pl cells but still no 1pl or past generation; joogi is past 2sg only. The runtime does not infer other i-final lemmas, does not reverse-strip endings, does not fill unreviewed paradigm cells, and grants no correction authority."
+  "notes": "Finite Conjugation-2A morphophonology only. kari now has all seven reviewed present person cells but still no past generation; joogi is past 2sg only. The runtime does not infer other i-final lemmas, does not reverse-strip endings, does not fill unreviewed tense cells, and grants no correction authority."
 }
