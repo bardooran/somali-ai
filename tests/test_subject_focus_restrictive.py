@@ -101,16 +101,16 @@ def test_exact_native_subject_focus_surface_still_outranks_general_paradigm():
     assert result.evidence == "exact_native_reviewed_sentence_surface"
 
 
-def test_unmodeled_past_progressive_focus_is_not_judged_from_full_paradigm():
-    plural = analyze_subject_focus_agreement("Carruurta ayaa imanayeen.")
-    assert plural.recognized is True
-    assert plural.agrees is None
-    assert "not_yet_modeled" in (plural.evidence or "")
+def test_past_progressive_focus_now_uses_restrictive_paradigm():
+    plural_full = analyze_subject_focus_agreement("Carruurta ayaa imanayeen.")
+    assert plural_full.recognized is True
+    assert plural_full.agrees is False
+    assert "restrictive_past_progressive" in (plural_full.evidence or "")
 
-    singular = analyze_subject_focus_agreement("Wiilka ayaa imanayay.")
-    assert singular.recognized is True
-    assert singular.agrees is None
-    assert "not_yet_modeled" in (singular.evidence or "")
+    singular_default = analyze_subject_focus_agreement("Wiilka ayaa imanayay.")
+    assert singular_default.recognized is True
+    assert singular_default.agrees is True
+    assert "restrictive_past_progressive" in (singular_default.evidence or "")
 
 
 def test_restrictive_person_values_do_not_leak_into_ordinary_plural_agreement():
