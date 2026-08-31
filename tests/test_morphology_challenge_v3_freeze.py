@@ -12,20 +12,22 @@ from src.morphology_challenge_v3_freeze import (
 def _write_source(root: Path) -> None:
     root.mkdir(parents=True)
     rows = ["# source"]
-    for i in range(1, 8):
+    # Use alphabetic-only fake headwords because the production Qaamuus parser
+    # deliberately rejects tokens containing digits.
+    for suffix in "abcdefg":
         rows.extend(
             [
-                f"- **noun{i}** m.l fake definition",
-                f"- **verb{i}** f.g1 fake definition",
-                f"- **adj{i}** s fake definition",
-                f"- **num{i}** m.l.t fake definition",
+                f"- **noun{suffix}** m.l fake definition",
+                f"- **verb{suffix}** f.g1 fake definition",
+                f"- **adj{suffix}** s fake definition",
+                f"- **num{suffix}** m.l.t fake definition",
             ]
         )
     (root / "01-b.md").write_text("\n".join(rows) + "\n", encoding="utf-8")
 
 
 def _write_v2(path: Path) -> set[str]:
-    excluded = {"noun1", "verb1", "adj1", "num1"}
+    excluded = {"nouna", "verba", "adja", "numa"}
     cases = []
     for index, surface in enumerate(sorted(excluded), start=1):
         cases.append(
