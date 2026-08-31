@@ -112,9 +112,22 @@ def _append_subject_focus_mismatches(
             continue
 
         expected = result.expected_person or "reviewed subject person"
-        if result.evidence and "restrictive_simple_past" in result.evidence:
+        evidence = result.evidence or ""
+        if "restrictive_simple_past" in evidence:
             expected_forms = (
                 f"a reviewed {expected} predicate under restrictive focused-subject simple-past agreement",
+            )
+        elif "restrictive_simple_present" in evidence:
+            expected_forms = (
+                f"a reviewed {expected} predicate under restrictive focused-subject simple-present agreement",
+            )
+        elif "restrictive_present_progressive" in evidence:
+            expected_forms = (
+                f"a reviewed {expected} predicate under restrictive focused-subject present-progressive agreement",
+            )
+        elif "restrictive_copular_present" in evidence:
+            expected_forms = (
+                f"the reviewed reduced copular present form for focused-subject {expected}",
             )
         else:
             expected_forms = (f"a reviewed {expected} predicate",)
@@ -143,8 +156,8 @@ def scan_sentence_agreement(text: str) -> list[SentenceAgreementFinding]:
     Reviewed true subject-focus frames are also checked. Bare ``baa`` or bare
     ``ayaa`` is licensed because the noun before it is the focused subject;
     predicate agreement is delegated to the dedicated subject-focus analyzer,
-    including its restrictive simple-past mode and a short window for intervening
-    object/adverbial material. Unknown/unmodeled forms stay silent.
+    including its modeled restrictive past/present modes and a short window for
+    intervening object/adverbial material. Unknown/unmodeled forms stay silent.
     """
     tokens = list(TOKEN_RE.finditer(text))
     pronouns = _known_subject_pronouns()
