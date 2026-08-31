@@ -35,6 +35,8 @@ The project has an executable, evidence-backed grammar engine. The main remainin
 | `arag` aspect contrasts | Reviewed | Broader cross-source validation |
 | `maydh` Jigjiga forms | Reviewed / Conservative | Independent evidence and more forms |
 | Somali cardinal numbers | Active / Reviewed | Extend carefully beyond 0–100 and exact reviewed large-number expressions |
+| Gregorian month names | Active / Reviewed | Add date phrases, ordinals, and sentence-level time constructions |
+| Somali traditional seasons | Active / Region-sensitive | More Jigjiga/Northwestern evidence and seasonal sentence QA |
 | Regional variants | Active / Growing | Larger pair-by-pair inventory |
 | Vocabulary data | Active / Growing | Expand reviewed everyday words and verbs |
 | Word lookup (`src/vocabulary.py`) | Active / Conservative | More reviewed word coverage without guessing |
@@ -55,10 +57,22 @@ The project has an executable, evidence-backed grammar engine. The main remainin
 - conservative weaker-evidence recognition of `bilyan` without promoting it to correction authority;
 - unknown/unjudged treatment for submitted spellings or large compositions that have not yet been independently supported.
 
+## Calendar coverage
+
+`data/vocabulary/somali_calendar_terms.jsonl` and `src/calendar_terms.py` currently provide:
+
+- the 12 Gregorian month names;
+- documented month-name variation, including `Jannaayo` / `Janaayo` and `Luulyo` / `Luuliyo`;
+- reviewed Somali season terms `Gu'`, `Xagaa`, `Dayr`, and `Jiilaal`;
+- recognized variants including `Gu`, `Hagaa`, `Deyr`, and `Jilaal`;
+- approximate common month alignment: `Jiilaal` Jan–Mar, `Gu'` Apr–Jun, `Xagaa` Jul–Sep, `Dayr` Oct–Dec;
+- explicit region-sensitivity: boundaries vary by year/region, and Northwestern/Ethiopian Somali systems may include additional seasonal distinctions such as Karan;
+- no automatic equation of Somali seasons with Western spring/summer/autumn/winter.
+
 ## Current data organization
 
 ```text
-data/vocabulary/  = information about words and reviewed numerals
+data/vocabulary/  = information about words, reviewed numerals, months, and season terms
 data/morphology/  = reviewed word forms/paradigms
 data/corpus/      = real Somali text collections
 data/qa/          = independent test material
@@ -72,6 +86,7 @@ data/sources/     = structured source evidence
 - Prefer unknown/context-required over unsafe correction.
 - Test with examples not used to create the rule.
 - Keep regional variation separate from grammatical correctness.
+- Treat Somali traditional seasons as region-sensitive language/cultural categories, not fixed Western-season translations.
 - Preserve provenance.
 - Keep repository names understandable and documentation synchronized with the implementation.
 
@@ -80,7 +95,7 @@ data/sources/     = structured source evidence
 1. Expand high-frequency Somali grammar in larger evidence-backed batches.
 2. Use the maahmaahyo corpus as a source of new research and stress-test candidates, not as automatic grammar authority.
 3. Increase independent QA and holdout examples.
-4. Expand reviewed vocabulary, verbs, nouns, numbers, time/date words, and other high-frequency language areas without open-ended guessing.
+4. Expand reviewed vocabulary, verbs, nouns, numbers, dates, time words, and other high-frequency language areas without open-ended guessing.
 5. Improve ambiguity and rule-conflict handling.
 
 Update this dashboard whenever a meaningful language area or major data layer changes.
