@@ -8,12 +8,15 @@ Three exact connective surfaces currently have independent source support:
 - ``waxaadna = waxaad + -na``: cleft focus carrying reviewed ``aad`` subject
   compatibility (2sg / 2pl) plus connective.
 
-These forms are not generated from one another. Source evidence also supports
-sentence-initial/discourse-linking use, so the executable layer recognizes an
-exact reviewed form either at the left edge of the analyzed input or immediately
-after overt clause/sentence punctuation. For clitic-bearing forms, agreement is
-checked only against an exact reviewed finite verb. Unknown predicates remain
-unjudged, antecedents are not inferred, and no automatic rewrite is performed.
+These forms are not generated from one another. Source evidence supports
+sentence-initial/discourse-linking use and describes ``-na`` as a conjunction
+between main clauses attached to the first phrase of the second clause. The
+executable layer therefore recognizes an exact reviewed form at input start,
+after overt clause/sentence punctuation, or in one narrowly licensed
+unpunctuated configuration: immediately after an exact reviewed finite verb.
+For clitic-bearing forms, agreement is checked only against an exact reviewed
+finite verb on the right. Unknown predicates remain unjudged, antecedents are
+not inferred, and no automatic rewrite is performed.
 """
 
 from __future__ import annotations
@@ -29,8 +32,10 @@ CONNECTIVE_WAXAA_CLITICS = {
     "waxayna": ("waxay", "ay", ("3sg_f", "3pl")),
     "waxaadna": ("waxaad", "aad", ("2sg", "2pl")),
 }
+REVIEWED_CONNECTIVE_SURFACES = {"waxaana", *CONNECTIVE_WAXAA_CLITICS}
 MAX_FINITE_GAP = 4
 INPUT_START_BOUNDARY = "input_start"
+REVIEWED_LEFT_FINITE_BOUNDARY = "reviewed_left_finite"
 
 
 @dataclass(frozen=True)
@@ -94,10 +99,11 @@ def _analyze_clitic_connective(
             note=(
                 f"{particle} is an independently reviewed waxaa-family connective focus "
                 f"form based on {base_focus_subject_form}, carrying subject clitic "
-                f"{subject_clitic}, plus connective -na ('and'). Its sentence/clause-initial "
+                f"{subject_clitic}, plus connective -na ('and'). Its clause-initial "
                 "position is source-backed. Agreement is checked only between its encoded "
                 "reviewed subject person(s) and an exact reviewed finite verb. No prior "
-                "discourse antecedent, unseen verb form, or automatic rewrite is inferred."
+                "discourse antecedent, unseen verb form, punctuation rewrite, or automatic "
+                "correction is inferred."
             ),
         )
 
@@ -121,9 +127,9 @@ def _analyze_clitic_connective(
         rule_id="GRAM-CONNWAXAA-005",
         note=(
             f"{particle} is an independently reviewed waxaa-family connective focus form "
-            "in a licensed sentence/clause-initial position, but no exact reviewed finite "
-            "verb was found in the local predicate window. Agreement remains unjudged; "
-            "no prior discourse antecedent or verb form is guessed."
+            "in a licensed clause-initial position, but no exact reviewed finite verb was "
+            "found in the local predicate window. Agreement remains unjudged; no prior "
+            "discourse antecedent, punctuation repair, or verb form is guessed."
         ),
     )
 
@@ -154,25 +160,60 @@ def _analyze_boundary_tokens(
             rule_id="GRAM-CONNWAXAA-001",
             note=(
                 "waxaana is analyzed only as the reviewed focus particle waxaa plus "
-                "connective -na ('and'). Its sentence/clause-initial position is "
-                "source-backed, but the particle itself does not encode a subject person. "
-                "No hidden uu/ay/aad, prior discourse antecedent, verb agreement, or "
-                "automatic rewrite is inferred."
+                "connective -na ('and'). Its clause-initial position is source-backed, "
+                "but the particle itself does not encode a subject person. No hidden "
+                "uu/ay/aad, prior discourse antecedent, verb agreement, punctuation "
+                "rewrite, or automatic correction is inferred."
             ),
         )
 
     return _analyze_clitic_connective(particle, tokens, boundary)
 
 
+def _analyze_unpunctuated_after_reviewed_finite(
+    sentence: str,
+) -> ConnectiveWaxaaFocusAnalysis | None:
+    """License one narrow punctuation-free main-clause boundary.
+
+    The connective must be an exact reviewed surface and must be the lexical
+    token immediately after an exact reviewed finite verb. Only whitespace may
+    intervene. The left verb is used solely as a conservative clause-boundary
+    anchor; its subject, tense, and relation to the connective are not inferred.
+    """
+    token_matches = list(TOKEN_RE.finditer(sentence))
+    for index in range(1, len(token_matches)):
+        particle_match = token_matches[index]
+        if particle_match.group(0).casefold() not in REVIEWED_CONNECTIVE_SURFACES:
+            continue
+
+        previous_match = token_matches[index - 1]
+        between = sentence[previous_match.end() : particle_match.start()]
+        if between.strip():
+            continue
+
+        left_finite = analyze_reviewed_finite_verb(previous_match.group(0))
+        if not left_finite.recognized:
+            continue
+
+        tail_tokens = [match.group(0) for match in token_matches[index:]]
+        return _analyze_boundary_tokens(
+            tail_tokens,
+            REVIEWED_LEFT_FINITE_BOUNDARY,
+        )
+
+    return None
+
+
 def analyze_connective_waxaa_focus(sentence: str) -> ConnectiveWaxaaFocusAnalysis:
-    """Analyze exact reviewed sentence/clause-initial waxaa-family connectives.
+    """Analyze exact reviewed clause-initial waxaa-family connectives.
 
     ``waxaana`` is person-neutral. ``waxayna`` and ``waxaadna`` carry exact
     reviewed subject-clitic person sets and may therefore be checked against
     exact reviewed finite morphology. Exact reviewed forms may occur at input
-    start or immediately after explicit comma, semicolon, period, question mark,
-    or exclamation mark. This function does not reconstruct preceding discourse
-    and is not a productive morphology generator.
+    start, immediately after explicit comma/semicolon/sentence punctuation, or
+    immediately after an exact reviewed finite verb in the narrow unpunctuated
+    configuration. This function does not reconstruct preceding discourse and
+    is not a productive morphology or punctuation generator.
     """
     stripped = sentence.lstrip()
     if stripped:
@@ -193,11 +234,16 @@ def analyze_connective_waxaa_focus(sentence: str) -> ConnectiveWaxaaFocusAnalysi
         if result is not None:
             return result
 
+    unpunctuated_result = _analyze_unpunctuated_after_reviewed_finite(sentence)
+    if unpunctuated_result is not None:
+        return unpunctuated_result
+
     return ConnectiveWaxaaFocusAnalysis(
         recognized=False,
         note=(
-            "No sentence/clause-initial exact reviewed waxaa-family connective was found. "
-            "Only independently reviewed surfaces are executable; predicted related forms "
-            "remain unjudged."
+            "No licensed clause-initial exact reviewed waxaa-family connective was found. "
+            "Unpunctuated mid-sentence recognition additionally requires lexical adjacency "
+            "to an exact reviewed finite left predicate. Unknown left predicates and "
+            "predicted related connective surfaces remain unjudged."
         ),
     )
