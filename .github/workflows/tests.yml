@@ -25,3 +25,6 @@ jobs:
 
       - name: Print competitive morphology scoreboard
         run: python -m src.morphology_competition
+
+      - name: Print morphology benchmark v1
+        run: python -m src.morphology_benchmark
