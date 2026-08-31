@@ -201,10 +201,50 @@ def test_full_sentence_punctuation_can_supply_the_connective_boundary():
     assert question.agreement_agrees is True
 
 
-def test_unpunctuated_mid_sentence_connective_remains_outside_this_stage():
+def test_unpunctuated_exact_connective_can_use_reviewed_left_finite_anchor():
+    feminine = analyze_connective_waxaa_focus("Cali wuu cunay waxayna cuntay muus.")
+    second = analyze_connective_waxaa_focus("Cali wuu cunay waxaadna cunteen muus.")
+    neutral = analyze_connective_waxaa_focus("Cali wuu cunay waxaana la xiray albaabka.")
+
+    assert feminine.recognized is True
+    assert feminine.boundary == "reviewed_left_finite"
+    assert feminine.subject_persons == ("3sg_f", "3pl")
+    assert feminine.agreement_agrees is True
+
+    assert second.recognized is True
+    assert second.boundary == "reviewed_left_finite"
+    assert second.subject_persons == ("2sg", "2pl")
+    assert second.agreement_agrees is True
+
+    assert neutral.recognized is True
+    assert neutral.boundary == "reviewed_left_finite"
+    assert neutral.subject_persons == ()
+    assert neutral.agreement_agrees is None
+
+
+def test_unpunctuated_reviewed_boundary_still_reports_right_person_conflicts():
+    feminine = analyze_connective_waxaa_focus("Cali wuu cunay waxayna cunay muus.")
+    second = analyze_connective_waxaa_focus("Cali wuu cunay waxaadna cunay muus.")
+    assert feminine.agreement_agrees is False
+    assert second.agreement_agrees is False
+
+    feminine_findings = scan_sentence_agreement("Cali wuu cunay waxayna cunay muus.")
+    second_findings = scan_sentence_agreement("Cali wuu cunay waxaadna cunay muus.")
+    assert len(feminine_findings) == 1
+    assert feminine_findings[0].pronoun == "waxayna"
+    assert feminine_findings[0].verb == "cunay"
+    assert len(second_findings) == 1
+    assert second_findings[0].pronoun == "waxaadna"
+    assert second_findings[0].verb == "cunay"
+
+
+def test_unpunctuated_mid_sentence_requires_exact_reviewed_left_finite_adjacency():
     for sentence in (
-        "Cali wuu yimid waxayna cuntay muus.",
-        "Cali wuu yimid waxaadna cuntay muus.",
+        "Cali wuu cunXYZ waxayna cuntay muus.",
+        "Cali wuu cuni waxayna cuntay muus.",
+        "Cali wuu cunay rooti waxayna cuntay muus.",
+        "Cali wuu cunXYZ waxaadna cuntay muus.",
+        "Cali wuu cuni waxaana la xiray albaabka.",
     ):
         assert analyze_connective_waxaa_focus(sentence).recognized is False
 
@@ -217,6 +257,7 @@ def test_independent_promotions_do_not_create_a_productive_connective_paradigm()
         "Waxana la xiray albaabka.",
         "Waxaanan cunay muus.",
         "WaxXYZna cunay muus.",
+        "Cali wuu cunay waxXYZna cunay muus.",
     ):
         assert analyze_connective_waxaa_focus(sentence).recognized is False
 
@@ -228,6 +269,7 @@ def test_waxaa_connectives_remain_separate_from_connective_statement_family():
         "Cali wuu yimid, waxaadna cuntay muus.",
         "Waxayna cuntay muus.",
         "Waxaadna cuntay muus.",
+        "Cali wuu cunay waxayna cuntay muus.",
     ):
         assert analyze_connective_waxaa_focus(sentence).recognized is True
         assert analyze_connective_statement(sentence).recognized is False
@@ -245,16 +287,20 @@ def test_cli_accepts_valid_exact_waxaa_connectives_and_reports_only_real_mismatc
         "Waxayna cuneen muus.",
         "Waxaadna cuntay muus.",
         "Waxaadna cunteen muus.",
+        "Cali wuu cunay waxayna cuntay muus.",
+        "Cali wuu cunay waxaadna cunteen muus.",
+        "Cali wuu cunay waxaana la xiray albaabka.",
     ):
         assert _run_checker(sentence) == NO_FINDINGS
 
-    feminine_output = _run_checker("Waxayna cunay muus.")
+    feminine_output = _run_checker("Cali wuu cunay waxayna cunay muus.")
     assert "possible subject-verb agreement conflict" in feminine_output
-    assert "Waxayna" in feminine_output
+    assert "waxayna" in feminine_output
     assert "cunay" in feminine_output
-    assert "Safe corrected text:\nWaxayna cunay muus." in feminine_output
+    assert "Safe corrected text:\nCali wuu cunay waxayna cunay muus." in feminine_output
 
-    second_output = _run_checker("Waxaadna cunay muus.")
+    second_output = _run_checker("Cali wuu cunay waxaadna cunay muus.")
     assert "possible subject-verb agreement conflict" in second_output
-    assert "Waxaadna" in second_output
+    assert "waxaadna" in second_output
     assert "cunay" in second_output
+    assert "Safe corrected text:\nCali wuu cunay waxaadna cunay muus." in second_output
