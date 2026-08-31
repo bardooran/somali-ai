@@ -1,0 +1,140 @@
+name: GiellaLT Paradigm Benchmark v5
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "src/morphology_paradigm_v5.py"
+      - "src/giellalt_paradigm_v5.py"
+      - "src/morphology_paradigm_v5_comparison.py"
+      - "src/master_recognition.py"
+      - "src/morphology_candidates.py"
+      - "data/qa/morphology_paradigm_benchmark_v5.jsonl"
+      - "data/qa/morphology_paradigm_benchmark_v5.meta.json"
+      - "data/master/recognition_index.jsonl"
+      - "data/morphology/**"
+      - "tests/test_morphology_paradigm_benchmark_v5.py"
+      - "tests/test_morphology_paradigm_v5_scoring.py"
+      - ".github/workflows/giellalt-paradigm-v5.yml"
+  workflow_dispatch:
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out Somali AI
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install test dependency
+        run: python -m pip install pytest
+
+      - name: Verify frozen v5 identity and baseline tests
+        run: |
+          python -m pytest -q \
+            tests/test_morphology_paradigm_benchmark_v5.py \
+            tests/test_morphology_paradigm_v5_scoring.py
+          python -m src.morphology_paradigm_v5 > somali-ai-paradigm-v5.json
+          cat somali-ai-paradigm-v5.json
+
+      - name: Check out pinned GiellaLT Somali source
+        uses: actions/checkout@v4
+        with:
+          repository: bardooran/GiellaLT
+          ref: 5278929712e9c0c67f254f1a1dc64c80ea7b2b8d
+          path: external/lang-som
+
+      - name: Install GiellaLT build dependencies
+        run: |
+          wget https://apertium.projectjj.com/apt/install-nightly.sh -O - | sudo bash
+          sudo apt-get install -y cg3 hfst
+          pipx install git+https://github.com/divvun/GiellaLTGramTools/
+          pipx inject giellaltgramtools click
+          pipx install git+https://github.com/divvun/GiellaLTLexTools/
+          pipx install git+https://github.com/divvun/morph-test
+
+      - name: Build GiellaLT analyzer and generator
+        working-directory: external/lang-som
+        run: |
+          ./autogen.sh
+          ./configure
+          make -j2
+
+      - name: Locate compiled analyzer and generator
+        id: fst
+        shell: bash
+        run: |
+          analyzer=""
+          for candidate in \
+            external/lang-som/src/fst/analyser-gt-norm.hfstol \
+            external/lang-som/src/fst/analyser-gt-desc.hfstol \
+            external/lang-som/src/fst/analyser-gt-norm.hfst \
+            external/lang-som/src/fst/analyser-gt-desc.hfst; do
+            if test -f "$candidate"; then analyzer="$candidate"; break; fi
+          done
+          if test -z "$analyzer"; then
+            echo "No compiled GiellaLT analyzer found" >&2
+            exit 1
+          fi
+          generator=""
+          for candidate in \
+            external/lang-som/src/fst/generator-gt-norm.hfstol \
+            external/lang-som/src/fst/generator-gt-desc.hfstol \
+            external/lang-som/src/fst/generator-gt-norm.hfst \
+            external/lang-som/src/fst/generator-gt-desc.hfst; do
+            if test -f "$candidate"; then generator="$candidate"; break; fi
+          done
+          if test -z "$generator"; then
+            echo "No compiled GiellaLT generator found" >&2
+            exit 1
+          fi
+          echo "analyzer=$analyzer" >> "$GITHUB_OUTPUT"
+          echo "generator=$generator" >> "$GITHUB_OUTPUT"
+          echo "Using analyzer: $analyzer"
+          echo "Using generator: $generator"
+
+      - name: Run frozen v5 against compiled GiellaLT
+        run: |
+          python -m src.giellalt_paradigm_v5 \
+            --analyzer "${{ steps.fst.outputs.analyzer }}" \
+            --generator "${{ steps.fst.outputs.generator }}" \
+            --giellalt-commit 5278929712e9c0c67f254f1a1dc64c80ea7b2b8d \
+            > giellalt-paradigm-v5.json
+
+      - name: Build v5 comparison
+        run: |
+          python -m src.morphology_paradigm_v5_comparison \
+            --somali-ai somali-ai-paradigm-v5.json \
+            --giellalt giellalt-paradigm-v5.json \
+            > morphology-paradigm-comparison-v5.json
+          cat morphology-paradigm-comparison-v5.json
+
+      - name: Print GiellaLT v5 score and generation diagnostic
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          value = json.loads(Path('giellalt-paradigm-v5.json').read_text(encoding='utf-8'))
+          print(json.dumps({
+              'score': value['score'],
+              'generation': {
+                  key: value['generation'][key]
+                  for key in ('evaluated', 'eligible_row_count', 'matched_row_count', 'match_rate')
+              },
+              'unrecognized_positive_surfaces': value['unrecognized_positive_surfaces'],
+          }, indent=2, ensure_ascii=False, sort_keys=True))
+          PY
+
+      - name: Upload reproducible v5 results
+        uses: actions/upload-artifact@v4
+        with:
+          name: morphology-paradigm-benchmark-v5
+          path: |
+            somali-ai-paradigm-v5.json
+            giellalt-paradigm-v5.json
+            morphology-paradigm-comparison-v5.json
