@@ -10,13 +10,22 @@ on:
       - "src/morphology_challenge_v2.py"
       - "src/morphology_challenge_v2_comparison.py"
       - "src/giellalt_challenge_v2.py"
+      - "src/morphology_challenge_v3.py"
+      - "src/morphology_challenge_v3_comparison.py"
+      - "src/giellalt_challenge_v3.py"
+      - "src/master_recognition.py"
       - "tests/test_morphology_comparison.py"
       - "tests/test_giellalt_runtime_benchmark.py"
       - "tests/test_morphology_challenge_v2_frozen.py"
       - "tests/test_morphology_challenge_v2_scoring.py"
+      - "tests/test_morphology_challenge_v3_scoring.py"
       - "data/qa/morphology_benchmark_v1.jsonl"
       - "data/qa/morphology_challenge_v2.jsonl"
       - "data/qa/morphology_challenge_v2.meta.json"
+      - "data/qa/morphology_challenge_v3.jsonl"
+      - "data/qa/morphology_challenge_v3.meta.json"
+      - "data/master/recognition_index.jsonl"
+      - "data/master/recognition_index.meta.json"
       - ".github/workflows/giellalt-runtime.yml"
   workflow_dispatch:
 
@@ -105,10 +114,30 @@ jobs:
             > morphology-comparison-v2.json
           cat morphology-comparison-v2.json
 
+      - name: Run Somali AI frozen challenge v3
+        run: |
+          python -m src.morphology_challenge_v3 > somali-ai-challenge-v3.json
+          cat somali-ai-challenge-v3.json
+
+      - name: Run frozen challenge v3 against compiled GiellaLT FST
+        run: |
+          python -m src.giellalt_challenge_v3 \
+            --analyzer "${{ steps.analyzer.outputs.path }}" \
+            --giellalt-commit 5278929712e9c0c67f254f1a1dc64c80ea7b2b8d \
+            > giellalt-challenge-v3.json
+
+      - name: Build v3 three-way comparison
+        run: |
+          python -m src.morphology_challenge_v3_comparison \
+            --somali-ai somali-ai-challenge-v3.json \
+            --giellalt giellalt-challenge-v3.json \
+            > morphology-comparison-v3.json
+          cat morphology-comparison-v3.json
+
       - name: Upload reproducible benchmark results
         uses: actions/upload-artifact@v4
         with:
-          name: morphology-benchmark-v1-v2
+          name: morphology-benchmark-v1-v2-v3
           path: |
             somali-ai-benchmark-v1.json
             giellalt-runtime-benchmark-v1.json
@@ -116,3 +145,6 @@ jobs:
             somali-ai-challenge-v2.json
             giellalt-challenge-v2.json
             morphology-comparison-v2.json
+            somali-ai-challenge-v3.json
+            giellalt-challenge-v3.json
+            morphology-comparison-v3.json
