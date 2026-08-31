@@ -13,6 +13,7 @@ permissions:
 jobs:
   refresh-tier-a:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - name: Check out Somali AI
         uses: actions/checkout@v4
