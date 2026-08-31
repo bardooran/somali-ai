@@ -72,19 +72,31 @@ def test_v8_unknowns_do_not_overlap_positive_surfaces() -> None:
     assert positive_surfaces.isdisjoint(unknown_surfaces)
 
 
-def test_v8_answers_are_locked_evaluation_only() -> None:
+def test_v8_answers_and_measured_baseline_are_locked() -> None:
     metadata = json.loads(METADATA.read_text(encoding="utf-8"))
     policy = metadata["benchmark_policy"]
+    measured = metadata["measured_result"]
 
     assert policy["answers_are_evaluation_only"] is True
     assert policy["runtime_rule_learning_from_v8_allowed"] is False
     assert policy["explicit_source_forms_only"] is True
     assert policy["inferred_unattested_forms_included"] is False
     assert policy["synthetic_unknowns_are_claimed_somali_forms"] is False
-    assert metadata["pre_freeze_overlap_status"] == "pending_measurement"
+    assert metadata["pre_freeze_overlap_status"] == "measured"
     assert metadata["pre_freeze_runtime_commit"] == (
         "a48bb5d6e131b07e192f3effaea0d347d83dd46b"
     )
+    assert measured == {
+        "full_test_suite": "1033/1033 passed",
+        "somali_ai_combined_positive_surface_recognition": "0/7",
+        "somali_ai_combined_comparable_feature_rows": "0/7",
+        "somali_ai_master_positive_surface_recognition": "0/7",
+        "somali_ai_reviewed_exact_positive_surface_recognition": "0/7",
+        "somali_ai_reviewed_rule_derived_positive_surface_recognition": "0/7",
+        "unknown_safety": "8/8 for combined runtime and master exact",
+        "tested_head_commit": "89777000483e6c3e652484ce66501f5d8e706918",
+        "workflow_run_id": 33446813886,
+    }
     assert metadata["independence"] == {
         "independent_of_qaamuus_v2_v4": True,
         "independent_of_nilsson_v5": True,

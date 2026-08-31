@@ -40,3 +40,6 @@ jobs:
 
       - name: Print frozen morphology paradigm v7 baseline
         run: python -m src.morphology_paradigm_v7
+
+      - name: Print frozen Class-I morphology paradigm v8 baseline
+        run: python -m src.morphology_paradigm_v8
