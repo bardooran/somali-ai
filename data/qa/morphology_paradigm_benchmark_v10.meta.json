@@ -1,0 +1,39 @@
+{
+  "benchmark_version": "v10",
+  "benchmark_name": "Independent Conjugation-2A finite present morphology challenge v10",
+  "manifest_path": "data/qa/morphology_paradigm_benchmark_v10.jsonl",
+  "manifest_git_blob_sha": null,
+  "freeze_commit": null,
+  "pre_freeze_runtime_commit": "8ab922fa00f71367fe07394d9f40e2041bf08c40",
+  "source_family": "Hersi 2022 Waan ku salaamay 1 Key to Exercises",
+  "publisher": "Liban Ali Hersi / University of Helsinki-hosted teaching materials",
+  "source_url": "https://blogs.helsinki.fi/alihersi/files/2023/08/Waan_ku_salaamay_1_KeyToExercises_F2_Units_1-10.pdf",
+  "publication_year": 2022,
+  "source_pages": [26],
+  "source_exercise": "7.4",
+  "positive_case_count": 14,
+  "positive_unique_surface_count": 10,
+  "unknown_case_count": 8,
+  "total_case_count": 22,
+  "pre_freeze_overlap_status": "unmeasured",
+  "measured_result": null,
+  "benchmark_policy": {
+    "answers_are_evaluation_only": true,
+    "runtime_rule_learning_from_v10_allowed": false,
+    "explicit_source_forms_only": true,
+    "inferred_unattested_forms_included": false,
+    "synthetic_unknowns_are_claimed_somali_forms": false
+  },
+  "independence": {
+    "independent_of_qaamuus_v2_v4": true,
+    "independent_of_nilsson_v5": true,
+    "independent_of_orwin_v6": true,
+    "independent_of_zorc_issa_v7": true,
+    "independent_of_warner_v8": true,
+    "independent_of_fayruus_v9": true,
+    "independent_of_green_morrison_development": true,
+    "independent_of_saeed_development": true,
+    "independent_of_puglielli_mansuur_stage1h_development": true
+  },
+  "notes": "Frozen after Stage 1H merged. Positive rows are only the two full Conjugation-2A present paradigms explicitly printed in Hersi exercise 7.4: nadiifi and qurxi. The source prints seven person slots for each lemma; because 1sg=3sg masculine and 2sg=3sg feminine, the 14 positive rows occupy 10 unique surfaces. Hersi is evaluation-only for v10 answers and may not be used to authorize runtime rules targeting these forms after freeze."
+}
