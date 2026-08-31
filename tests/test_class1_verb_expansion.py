@@ -1,7 +1,7 @@
 import subprocess
 import sys
 
-from src.lexicon import lookup_word
+from src.vocabulary import lookup_word
 from src.morphology_candidates import analyze_surface_form
 from src.noun_number_verb_agreement import analyze_noun_number_verb_agreement
 
@@ -14,7 +14,7 @@ HEADWORDS = {
 }
 
 
-def test_everyday_class1_headwords_are_in_the_reviewed_lexicon():
+def test_everyday_class1_headwords_are_in_the_reviewed_vocabulary():
     for lemma, (homograph_index, source_pos) in HEADWORDS.items():
         result = lookup_word(lemma)
         assert result.known
