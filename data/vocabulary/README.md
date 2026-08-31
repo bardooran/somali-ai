@@ -19,9 +19,24 @@ Use this folder for dictionary-style facts such as:
 - `qaamuus_2012_everyday_verbs.jsonl` — reviewed everyday verb entries.
 - `qaamuus_2012_sample_entries.jsonl` — early Qaamuus/SLS sample records preserved from the old root `lexicon/` folder.
 - `somali_numbers.json` — reviewed Somali cardinal-number vocabulary, 11–99 composition rules, exact reviewed large-number expressions, source notes, and submitted candidates that are deliberately not promoted without enough evidence.
+- `somali_calendar_terms.jsonl` — reviewed Gregorian month names, documented spelling variants, Somali traditional season names, and conservative region-sensitive month alignment.
 
 The executable general word lookup is in `src/vocabulary.py`.
 The conservative numeral analyzer is in `src/numbers.py`.
+The calendar-term analyzer is in `src/calendar_terms.py`.
+
+## Calendar safety
+
+Somali traditional seasons are **not mechanically identical** to Western spring/summer/autumn/winter.
+
+The project currently stores the common approximate cycle:
+
+- `Jiilaal` — typically around January–March;
+- `Gu'` — typically around April–June;
+- `Xagaa` — typically around July–September;
+- `Dayr` — typically around October–December.
+
+These are descriptive alignments, not fixed date boundaries. Rainfall timing varies by year and region, and Northwestern/Ethiopian Somali systems can include additional distinctions such as Karan. Supported variants such as `Jilaal`, `Deyr`, `Hagaa`, `Janaayo`, and `Luuliyo` are preserved rather than automatically marked wrong.
 
 ## Important separation
 
@@ -35,4 +50,4 @@ Regional preferences stay separate under `rules/variants/` so a supported region
 
 ## Safety
 
-Do not guess missing gender, word class, conjugation, meaning, spelling status, or number composition from surface form alone. Preserve source evidence and leave unsupported information unknown.
+Do not guess missing gender, word class, conjugation, meaning, spelling status, number composition, or regional season meaning from surface form alone. Preserve source evidence and leave unsupported information unknown.
