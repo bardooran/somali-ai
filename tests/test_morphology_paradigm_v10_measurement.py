@@ -22,6 +22,32 @@ def test_v10_measurement_reports_frozen_dimensions_without_runtime_learning() ->
     assert integrity["runtime_rule_learning_from_v10_allowed"] is False
 
 
+def test_v10_live_state_matches_locked_zero_overlap_baseline() -> None:
+    result = report()
+    combined = result["combined"]
+    master = result["master"]
+    measured = result["benchmark"]["measured_result"]
+
+    assert combined["recognized_unique_surface_count"] == 0
+    assert combined["lemma_matched_unique_surface_count"] == 0
+    assert combined["pos_matched_unique_surface_count"] == 0
+    assert combined["conjugation_matched_unique_surface_count"] == 0
+    assert combined["tense_matched_unique_surface_count"] == 0
+    assert combined["deep_feature_matched_row_count"] == 0
+    assert combined["syncretic_surface_preserved_count"] == 0
+    assert combined["authority_diagnostics"]["reviewed_exact_surfaces"] == []
+    assert combined["authority_diagnostics"]["reviewed_rule_derived_surfaces"] == []
+    assert combined["unknown_rejected_count"] == 8
+    assert master["recognized_unique_surface_count"] == 0
+    assert master["unknown_rejected_count"] == 8
+
+    assert measured["somali_ai_combined_positive_surface_recognition"] == "0/10"
+    assert measured["somali_ai_master_positive_surface_recognition"] == "0/10"
+    assert measured["somali_ai_combined_deep_feature_rows"] == "0/14"
+    assert measured["somali_ai_syncretic_surfaces_preserved"] == "0/4"
+    assert measured["unknown_safety"] == "8/8 for combined runtime and master exact"
+
+
 def test_v10_measurement_counts_are_in_valid_ranges() -> None:
     result = report()
     combined = result["combined"]
