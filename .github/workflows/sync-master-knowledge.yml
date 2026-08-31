@@ -1,0 +1,118 @@
+name: Sync Master Knowledge Recognition
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 3 * * *"
+  push:
+    branches: [main]
+    paths:
+      - "tools/importers/master_data_sync.py"
+      - "src/master_recognition.py"
+      - "tests/test_master_recognition.py"
+      - ".github/workflows/sync-master-knowledge.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out Somali AI
+        uses: actions/checkout@v4
+        with:
+          path: somali-ai
+          fetch-depth: 1
+
+      - name: Check out Somali AI Data
+        uses: actions/checkout@v4
+        with:
+          repository: bardooran/somali-ai-data
+          ref: main
+          path: somali-ai-data
+          fetch-depth: 1
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build compact master recognition index
+        shell: bash
+        run: |
+          set -euo pipefail
+          DATA_SHA="$(git -C somali-ai-data rev-parse HEAD)"
+          python somali-ai/tools/importers/master_data_sync.py \
+            somali-ai-data \
+            --data-commit "$DATA_SHA" \
+            --output-root somali-ai
+
+      - name: Guard breadth and safety boundaries
+        working-directory: somali-ai
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          meta = json.loads(Path('data/master/recognition_index.meta.json').read_text(encoding='utf-8'))
+          assert meta['recognition_record_count'] >= 14000, meta
+          assert meta['unique_surface_count'] >= 11000, meta
+          assert meta['confidence_counts'].get('provisional', 0) >= 13000, meta
+          assert meta['evaluation_data_included'] is False
+
+          rows = [
+              json.loads(line)
+              for line in Path('data/master/recognition_index.jsonl').read_text(encoding='utf-8').splitlines()
+              if line.strip()
+          ]
+          assert all('/qa/' not in row['master_data_path'].casefold() for row in rows)
+          assert all('benchmark' not in row['master_data_path'].casefold() for row in rows)
+          assert all('holdout' not in row['master_data_path'].casefold() for row in rows)
+          assert all(row['confidence_tier'] in {'trusted', 'supported', 'provisional'} for row in rows)
+          assert all(not row['correction_authority'] for row in rows if row['confidence_tier'] == 'provisional')
+          print(meta)
+          PY
+
+      - name: Exercise exact recognition API
+        working-directory: somali-ai
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from src.master_recognition import recognize_form
+
+          rows = [
+              json.loads(line)
+              for line in Path('data/master/recognition_index.jsonl').read_text(encoding='utf-8').splitlines()
+              if line.strip()
+          ]
+          sample = next(row for row in rows if row['confidence_tier'] == 'provisional')
+          found = recognize_form(sample['surface'])
+          assert found
+          assert any(item.master_record_id == sample['master_record_id'] for item in found)
+          assert recognize_form('zzvppmasterunknown') == ()
+          PY
+
+      - name: Run full Somali AI tests with master index present
+        working-directory: somali-ai
+        run: |
+          python -m pip install pytest
+          python -m pytest -q
+
+      - name: Commit refreshed master recognition index
+        working-directory: somali-ai
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/master/recognition_index.jsonl data/master/recognition_index.meta.json
+          if git diff --cached --quiet; then
+            echo "Master recognition index is already current."
+            exit 0
+          fi
+          git commit -m "Sync Somali AI master recognition index"
+          git pull --rebase origin main
+          git push origin HEAD:main
