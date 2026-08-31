@@ -1,0 +1,55 @@
+{
+  "id": "MORPH-CLASS-I-PRODUCTIVE-001",
+  "status": "reviewed_rule_derived",
+  "part_of_speech": "verb",
+  "conjugation_class": "I",
+  "scope": "regular_consonant_final_reviewed_lemmas_only",
+  "eligible_lemmas": ["cun", "jab", "qor", "xir"],
+  "excluded_lemmas": {
+    "tag": "Qaamuus records a stem alternation (-gay, -gtay; -tegi), so generic concatenative generation is unsafe."
+  },
+  "forms": {
+    "present": {
+      "1sg": "{lemma}aa",
+      "2sg": "{lemma}taa",
+      "3sg_m": "{lemma}aa",
+      "3sg_f": "{lemma}taa",
+      "1pl": "{lemma}naa",
+      "2pl": "{lemma}taan",
+      "3pl": "{lemma}aan"
+    },
+    "past": {
+      "1sg": "{lemma}ay",
+      "2sg": "{lemma}tay",
+      "3sg_m": "{lemma}ay",
+      "3sg_f": "{lemma}tay",
+      "1pl": "{lemma}nay",
+      "2pl": "{lemma}teen",
+      "3pl": "{lemma}een"
+    },
+    "imperative": {
+      "2sg": "{lemma}",
+      "2pl": "{lemma}a"
+    },
+    "infinitive": {
+      "nonfinite": "{lemma}i"
+    }
+  },
+  "evidence": [
+    {
+      "source": "Qaamuuska Af-Soomaaliga (Puglielli & Mansuur, 2012)",
+      "detail": "CUN full Class-I paradigm, pp. 910, 921-922, explicitly supplies present, past, imperative and infinitive patterns across persons."
+    },
+    {
+      "source": "Qaamuuska Af-Soomaaliga (Puglielli & Mansuur, 2012)",
+      "detail": "Reviewed Class-I signatures independently support qor (qoray, qortay, qori), xir (-ray, -rtay), and jab (-bay, -btay); reviewed corpus-backed 3pl forms qoreen, xireen and jabeen confirm the zero+een plural path."
+    }
+  ],
+  "safety": {
+    "open_class_generation": false,
+    "requires_eligible_lemma": true,
+    "correction_authority": false,
+    "benchmark_sources_used_as_runtime_evidence": false,
+    "notes": "Generated outputs are recognition/analysis candidates derived from a reviewed class rule. They are not automatic correction authority and no suffix-stripping analyzer is permitted."
+  }
+}
