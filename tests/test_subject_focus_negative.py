@@ -35,18 +35,15 @@ def test_exact_published_cali_negative_focus_example_is_recognized_without_bax_p
         assert result.temporal_scope == ("past",)
         assert "source_exact_cali_bixin" in (result.evidence or "")
 
-    # A single source sentence does not license unseen BAX morphology.
     assert analyze_subject_focus_negative("Cali baan baxXYZ.").recognized is False
-    # Nor does it license a bare-positive-marker correction for unseen BAX morphology.
     assert analyze_subject_focus_negative("Cali baa bixin.").recognized is False
 
 
-def test_person_neutral_simple_negative_is_reduced_subjunctive_present_or_past_under_focus():
+def test_unambiguous_person_neutral_simple_negative_is_reduced_subjunctive_under_focus():
     examples = (
         ("Carruurta baan cunin.", "cunin"),
         ("Gabadha ayaan iman.", "iman"),
         ("Wiilka baan imanin.", "imanin"),
-        ("Gabadha baan aqoon.", "aqoon"),
     )
     for sentence, predicate in examples:
         result = analyze_subject_focus_negative(sentence)
@@ -59,6 +56,21 @@ def test_person_neutral_simple_negative_is_reduced_subjunctive_present_or_past_u
         assert result.marker_agrees is True
         assert result.predicate_has_nonnegative_analysis is False
         assert "exact_person_neutral_reduced_subjunctive_simple" in (result.evidence or "")
+
+
+def test_aqoon_surface_ambiguity_is_not_forced_without_negative_context():
+    ambiguous = analyze_subject_focus_negative("Gabadha baan aqoon.")
+    assert ambiguous.recognized is False
+    assert ambiguous.predicate == "aqoon"
+    assert ambiguous.predicate_has_nonnegative_analysis is True
+    assert ambiguous.orthographically_ambiguous is True
+
+    disambiguated = analyze_subject_focus_negative("Gabadha baan waxba aqoon.")
+    assert disambiguated.recognized is True
+    assert disambiguated.predicate == "aqoon"
+    assert disambiguated.marker_agrees is True
+    assert disambiguated.predicate_has_nonnegative_analysis is True
+    assert disambiguated.negative_context_evidence == ("waxba",)
 
 
 def test_temporal_context_does_not_change_the_reduced_simple_surface():
@@ -154,7 +166,6 @@ def test_main_noun_case_analyzer_reuses_negative_focus_evidence():
 
 
 def test_baan_ayaan_are_not_globally_reinterpreted_as_negative():
-    # Affirmative/full predicates do not prove a negative-subject-focus reading.
     for sentence in (
         "Carruurta baan cunay.",
         "Carruurta baan cunaan.",
@@ -188,12 +199,31 @@ def test_cli_accepts_reviewed_negative_focus_and_reports_only_safe_case_conflict
     assert _run_checker("Carruurta baan maanta cunin.") == NO_FINDINGS
     assert _run_checker("Carruurta baan maanta waxba cunin.") == NO_FINDINGS
     assert _run_checker("Gabadha ayaan imanayn.") == NO_FINDINGS
+    assert _run_checker("Gabadha baan aqoon.") == NO_FINDINGS
 
     output = _run_checker("Carruurtu baan cunin.")
     assert "possible definite-noun subject-case conflict" in output
     assert "reviewed subject-form candidate is 'Carruurta'" in output
     assert "GRAM-SUBJFOCUS-NEG-003" in output
     assert "Safe corrected text:\nCarruurtu baan cunin." in output
+
+
+def test_cli_reports_bare_positive_focus_marker_before_reduced_negative():
+    for sentence, marker, expected in (
+        ("Carruurta baa maanta cunin.", "baa", "baan"),
+        ("Carruurta ayaa maanta waxba cunin.", "ayaa", "ayaan"),
+    ):
+        output = _run_checker(sentence)
+        assert "possible negative subject-focus marker conflict" in output
+        assert repr(marker) in output
+        assert repr(expected) in output
+        assert "GRAM-SUBJFOCUS-NEG-006" in output
+        assert f"Safe corrected text:\n{sentence}" in output
+
+
+def test_cli_leaves_connective_and_markerless_negative_fragments_unjudged():
+    assert _run_checker("Carruurta ayaana maanta wax cunin.") == NO_FINDINGS
+    assert _run_checker("Carruurta maanta wax cunin.") == NO_FINDINGS
 
 
 def test_existing_affirmative_focus_and_ordinary_subject_case_stay_separate():
