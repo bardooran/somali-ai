@@ -1,0 +1,29 @@
+{"lemma":"waqooyi","source_pos":"direction","domain":"location","status":"reviewed","source":"Somali school vocabulary; project submission 2026-08-31","meaning":"north","related_lemmas":["woqooyi"]}
+{"lemma":"woqooyi","source_pos":"direction","domain":"location","status":"recognized_variant","source":"Somali school vocabulary translation evidence","meaning":"north","canonical_form":"waqooyi"}
+{"lemma":"koonfur","source_pos":"direction","domain":"location","status":"reviewed","source":"Somali school vocabulary; project submission 2026-08-31","meaning":"south"}
+{"lemma":"bari","source_pos":"direction","domain":"location","status":"reviewed_context_sensitive","source":"Somali school vocabulary; project submission 2026-08-31","meaning":"east; has other lexical senses in Somali context"}
+{"lemma":"galbeed","source_pos":"direction","domain":"location","status":"reviewed","source":"Somali school vocabulary; project submission 2026-08-31","meaning":"west"}
+{"lemma":"waqooyi-bari","source_pos":"direction","domain":"location","status":"reviewed_compositional","source":"Project submission 2026-08-31; transparent cardinal-direction compound","meaning":"northeast"}
+{"lemma":"waqooyi-galbeed","source_pos":"direction","domain":"location","status":"reviewed_compositional","source":"Project submission 2026-08-31; transparent cardinal-direction compound","meaning":"northwest"}
+{"lemma":"koonfur-bari","source_pos":"direction","domain":"location","status":"reviewed_compositional","source":"Project submission 2026-08-31; transparent cardinal-direction compound","meaning":"southeast"}
+{"lemma":"koonfur-galbeed","source_pos":"direction","domain":"location","status":"reviewed_compositional","source":"Project submission 2026-08-31; transparent cardinal-direction compound","meaning":"southwest"}
+{"lemma":"bidix","source_pos":"direction_side","domain":"location","status":"reviewed","source":"Qaamuus-linked dictionary evidence; Somali school vocabulary; project submission 2026-08-31","meaning":"left"}
+{"lemma":"midig","source_pos":"direction_side","domain":"location","status":"reviewed","source":"Qaamuuska Af-Soomaaliga via dictionary reference; Somali school vocabulary; project submission 2026-08-31","meaning":"right"}
+{"lemma":"toos","source_pos":"direction_manner","domain":"location","status":"reviewed","source":"Project submission 2026-08-31; Somali instructional usage","meaning":"straight"}
+{"lemma":"hore","source_pos":"relative_direction","domain":"location","status":"reviewed_context_sensitive","source":"Project submission 2026-08-31; common Somali usage","meaning":"front_or_forward_or_earlier_context_dependent"}
+{"lemma":"gadaal","source_pos":"relative_direction","domain":"location","status":"reviewed","source":"Project submission 2026-08-31; common Somali usage","meaning":"back_or_backward_context_dependent"}
+{"lemma":"kor","source_pos":"relative_direction","domain":"location","status":"reviewed_context_sensitive","source":"Project submission 2026-08-31; existing Qaamuus homograph evidence","meaning":"up_or_above_context_dependent"}
+{"lemma":"hoos","source_pos":"relative_direction","domain":"location","status":"reviewed","source":"Project submission 2026-08-31; common Somali usage","meaning":"down_or_below_context_dependent"}
+{"lemma":"gudaha","source_pos":"location_term","domain":"location","status":"reviewed","source":"Project submission 2026-08-31; common Somali usage","meaning":"inside"}
+{"lemma":"dibadda","source_pos":"location_term","domain":"location","status":"reviewed","source":"Project submission 2026-08-31; common Somali usage","meaning":"outside"}
+{"lemma":"dhow","source_pos":"distance_term","domain":"location","status":"reviewed_context_sensitive","source":"Project submission 2026-08-31; common Somali usage","meaning":"near_or_close"}
+{"lemma":"fog","source_pos":"distance_term","domain":"location","status":"reviewed","source":"Project submission 2026-08-31; common Somali usage","meaning":"far"}
+{"lemma":"halkan","source_pos":"deictic_location","domain":"location","status":"reviewed","source":"Morgan Nilsson Somali materials; project submission 2026-08-31","meaning":"here"}
+{"lemma":"halkaas","source_pos":"deictic_location","domain":"location","status":"reviewed","source":"Morgan Nilsson Somali materials; project submission 2026-08-31","meaning":"there"}
+{"lemma":"xaggee","source_pos":"location_question","domain":"location","status":"reviewed","source":"Morgan Nilsson Somali materials; project submission 2026-08-31","meaning":"where"}
+{"lemma":"korka","source_pos":"relative_location","domain":"location","status":"reviewed_context_sensitive","source":"Project submission 2026-08-31","meaning":"on_top_or_above_context_dependent"}
+{"lemma":"hoosta","source_pos":"relative_location","domain":"location","status":"reviewed_context_sensitive","source":"Project submission 2026-08-31","meaning":"under_or_below_context_dependent"}
+{"lemma":"agta","source_pos":"relative_location","domain":"location","status":"reviewed_context_sensitive","source":"Project submission 2026-08-31","meaning":"beside_or_near"}
+{"lemma":"dhexe","source_pos":"relative_location","domain":"location","status":"reviewed_context_sensitive","source":"Project submission 2026-08-31","meaning":"middle_or_between_requires_construction"}
+{"lemma":"gadaasha","source_pos":"relative_location","domain":"location","status":"reviewed","source":"Project submission 2026-08-31","meaning":"behind"}
+{"lemma":"horta","source_pos":"relative_location","domain":"location","status":"reviewed_context_sensitive","source":"Project submission 2026-08-31","meaning":"in_front_or_discourse_particle_context_dependent"}
