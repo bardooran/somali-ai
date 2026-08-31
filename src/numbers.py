@@ -59,11 +59,14 @@ def _build_index(data: dict) -> dict[str, NumberAnalysis]:
         )
 
     units: dict[int, str] = {}
+    ten_form: str | None = None
     for record in data["base_numbers"]:
         value = int(record["value"])
         canonical = record["canonical"]
         if 1 <= value <= 9:
             units[value] = canonical
+        elif value == 10:
+            ten_form = canonical
         add(
             canonical,
             value,
@@ -81,7 +84,10 @@ def _build_index(data: dict) -> dict[str, NumberAnalysis]:
                 note = "Reviewed standard/regional variant of the base numeral."
             add(variant, value, "base_number_variant", record["status"], note=note)
 
-    tens: dict[int, str] = {}
+    if ten_form is None:
+        raise ValueError("Reviewed number data is missing the base form for 10.")
+
+    tens: dict[int, str] = {10: ten_form}
     for record in data["tens"]:
         value = int(record["value"])
         form = record["form"]
