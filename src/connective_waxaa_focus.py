@@ -53,7 +53,7 @@ STATEMENT_SUBJECT_CLITICS = {
     "waad": ("2sg", "2pl"),
 }
 REVIEWED_CONNECTIVE_SURFACES = {"waxaana", *CONNECTIVE_WAXAA_CLITICS}
-INPUT_START_CONNECTIVE_SURFACES = {"waxaana", "waxayna", "waxaadna"}
+INPUT_START_CONNECTIVE_SURFACES = {"waxaana", "wuxuuna", "waxayna", "waxaadna"}
 MAX_FINITE_GAP = 4
 INPUT_START_BOUNDARY = "input_start"
 REVIEWED_LEFT_FINITE_BOUNDARY = "reviewed_left_finite"
