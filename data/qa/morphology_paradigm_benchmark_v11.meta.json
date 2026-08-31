@@ -2,6 +2,7 @@
   "benchmark_version": "v11",
   "benchmark_name": "Preauthorized Conjugation-2A cross-lemma generalization challenge v11",
   "manifest_path": "data/qa/morphology_paradigm_benchmark_v11.jsonl",
+  "manifest_git_blob_sha": "f42514b710558fd37a2e73a17c7625686ca77296",
   "freeze_commit": "pending_merge",
   "pre_freeze_class_authorization_commit": "b7c57eeadc02282d3830bbf80399ea418917d6ea",
   "pre_freeze_runtime_commit": "b7c57eeadc02282d3830bbf80399ea418917d6ea",
