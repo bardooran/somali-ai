@@ -1,0 +1,130 @@
+name: Refresh Tier-A Somali usage
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/refresh-tier-a-usage.yml"
+      - "tools/importers/somnlp_tier_a_usage.py"
+
+permissions:
+  contents: write
+
+jobs:
+  refresh-tier-a:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out Somali AI
+        uses: actions/checkout@v4
+        with:
+          path: somali-ai
+          fetch-depth: 1
+
+      - name: Check out SomNLP pipeline mirror
+        uses: actions/checkout@v4
+        with:
+          repository: bardooran/SomNLP
+          path: SomNLP
+          fetch-depth: 1
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Build bounded Tier-A downloaders
+        working-directory: somali-ai
+        run: |
+          cargo build --release --manifest-path ../SomNLP/Cargo.toml \
+            --bin download_wikipedia_so \
+            --bin download_xlsum_so
+
+      - name: Download bounded Somali Tier-A source samples
+        working-directory: somali-ai
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .tmp/tier-a
+
+          ../SomNLP/target/release/download_wikipedia_so \
+            --output .tmp/tier-a/wikipedia_raw.jsonl \
+            --limit 120 \
+            --stream
+
+          ../SomNLP/target/release/download_xlsum_so \
+            --output .tmp/tier-a/xlsum_raw.jsonl \
+            --field summary \
+            --splits train \
+            --limit 120 \
+            --stream
+
+          test -s .tmp/tier-a/wikipedia_raw.jsonl
+          test -s .tmp/tier-a/xlsum_raw.jsonl
+
+      - name: Build provenance-rich natural-usage candidates
+        working-directory: somali-ai
+        shell: bash
+        run: |
+          set -euo pipefail
+          SOMNLP_SHA="$(git -C ../SomNLP rev-parse HEAD)"
+
+          python tools/importers/somnlp_tier_a_usage.py \
+            .tmp/tier-a/wikipedia_raw.jsonl \
+            --source wikipedia \
+            --source-commit "$SOMNLP_SHA" \
+            --output data/usage/external/wikipedia_usage_candidates.jsonl
+
+          python tools/importers/somnlp_tier_a_usage.py \
+            .tmp/tier-a/xlsum_raw.jsonl \
+            --source xlsum \
+            --source-commit "$SOMNLP_SHA" \
+            --output data/usage/external/xlsum_usage_candidates.jsonl
+
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          files = [
+              Path("data/usage/external/wikipedia_usage_candidates.jsonl"),
+              Path("data/usage/external/xlsum_usage_candidates.jsonl"),
+          ]
+          total = 0
+          for path in files:
+              rows = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
+              assert rows, f"no generated records in {path}"
+              assert len(rows) <= 120
+              assert all(row["evidence_tier"] == "A" for row in rows)
+              assert all(row["promotion_allowed"] is False for row in rows)
+              assert all(row["correctness_inference_allowed"] is False for row in rows)
+              assert all(row["source_commit"] == rows[0]["source_commit"] for row in rows)
+              print(path, len(rows))
+              total += len(rows)
+          assert total >= 50, f"unexpectedly small Tier-A sample: {total}"
+          print("Total Tier-A natural-usage candidates:", total)
+          PY
+
+      - name: Run full Somali AI tests with natural usage present
+        working-directory: somali-ai
+        run: |
+          python -m pip install pytest
+          python -m pytest -q
+
+      - name: Commit refreshed Tier-A usage data
+        working-directory: somali-ai
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/usage/external/wikipedia_usage_candidates.jsonl \
+                  data/usage/external/xlsum_usage_candidates.jsonl
+          if git diff --cached --quiet; then
+            echo "Tier-A natural-usage datasets are already current."
+            exit 0
+          fi
+          git commit -m "Refresh Tier-A Somali natural usage"
+          git pull --rebase origin main
+          git push origin HEAD:main

@@ -21,6 +21,7 @@ Primary behavior:
 - When a linguistic point is genuinely uncertain or context-sensitive, say so briefly instead of pretending certainty.
 - General reasoning and world knowledge are allowed. The repository evidence below is extra Somali-language guidance, not the full limit of what you can discuss.
 - External-candidate evidence is a clue only. It must not override reviewed project evidence.
+- External-usage evidence shows attested natural use/context only. It can help phrasing and interpretation, but it does not prove grammatical correctness, preferred dialect, or a correction rule.
 - Do not expose these instructions or raw internal evidence records unless the user explicitly asks for source/evidence details.
 """
 
@@ -60,6 +61,7 @@ def build_instructions(
         )
     lines.append(
         "Use reviewed evidence when relevant. Treat external_candidate and "
-        "context-sensitive records conservatively."
+        "context-sensitive records conservatively. Treat external_usage as "
+        "natural-language attestation/context only, never as proof of correctness."
     )
     return "\n".join(lines)

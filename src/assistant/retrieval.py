@@ -1,9 +1,9 @@
 """Lightweight retrieval over the Somali language foundation.
 
-The index deliberately excludes the large natural-text corpus. It searches
-reviewed project data and rule files, plus small/medium imported candidate
-layers. Imported candidates are labelled lower-trust and are never treated as
-proof of correctness.
+The index deliberately excludes the large natural-text corpus and all holdout
+QA. It searches reviewed project data and rules, compact imported candidate
+layers, and bounded Tier-A natural-usage excerpts. External material is always
+labelled lower-trust and is never treated as proof of correctness.
 """
 
 from __future__ import annotations
@@ -24,9 +24,10 @@ DEFAULT_ROOTS = (
     Path("rules/orthography"),
     Path("rules/variants"),
     Path("data/imported"),
+    Path("data/usage"),
 )
 # Large natural corpora remain excluded by root. This ceiling is high enough for
-# compact provenance-rich lexical candidate indexes such as GiellaLT.
+# compact provenance-rich lexical and bounded natural-usage indexes.
 MAX_INDEX_FILE_BYTES = 25_000_000
 IDENTITY_KEYS = (
     "lemma",
@@ -75,13 +76,6 @@ def _flatten_strings(value: object) -> Iterator[str]:
 
 
 def _identity_terms(record: dict) -> frozenset[str]:
-    """Return exact lexical/form values that deserve stronger relevance.
-
-    This prevents a record whose actual lemma is ``baa`` from losing to many
-    higher-trust records that merely mention ``baa`` in prose or examples.
-    Trust still affects ranking after relevance is established.
-    """
-
     terms: set[str] = set()
     for key in IDENTITY_KEYS:
         value = record.get(key)
@@ -124,16 +118,19 @@ def _records_from_json(path: Path) -> Iterator[dict]:
 
 
 def _trust_for(path: Path, record: dict) -> str:
-    normalized = path.as_posix()
-    if "/imported/" in f"/{normalized}":
-        return "external_candidate"
+    normalized = f"/{path.as_posix()}"
     status = str(record.get("status", "")).casefold()
+
+    if "/usage/external/" in normalized or status.startswith("external_natural_usage"):
+        return "external_usage"
+    if "/imported/" in normalized:
+        return "external_candidate"
     if status in {"provisional", "candidate", "context_required", "ambiguous"}:
         return "reviewed_cautious"
     return "reviewed"
 
 
-def _excerpt(record: dict, maximum: int = 420) -> str:
+def _excerpt(record: dict, maximum: int = 520) -> str:
     preferred_keys = (
         "lemma",
         "form",
@@ -146,6 +143,7 @@ def _excerpt(record: dict, maximum: int = 420) -> str:
         "note",
         "example",
         "examples",
+        "text",
     )
     parts: list[str] = []
     for key in preferred_keys:
@@ -212,13 +210,9 @@ class KnowledgeIndex:
             if folded_query and folded_query in searchable_folded:
                 score += 1.25
 
-            # Strongest relevance: the complete query itself is an identity field.
             if folded_query and folded_query in record.exact_terms:
                 score += 1.00
 
-            # Normal conversational queries are longer than one word. Reward
-            # records whose actual lemma/form appears as a token inside the user
-            # sentence, rather than only being mentioned incidentally in prose.
             identity_token_matches = query_tokens & record.exact_terms
             if identity_token_matches:
                 score += 0.85 * len(identity_token_matches)
@@ -227,6 +221,10 @@ class KnowledgeIndex:
                 score += 0.20
             elif record.trust == "external_candidate":
                 score -= 0.05
+            elif record.trust == "external_usage":
+                # Natural usage can improve context and phrasing, but it should
+                # not beat a comparably relevant reviewed linguistic record.
+                score -= 0.12
 
             hits.append(
                 KnowledgeHit(
