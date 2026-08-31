@@ -1,0 +1,20 @@
+{
+  "benchmark_version": "v5",
+  "benchmark_name": "Independent morphology paradigm challenge v5",
+  "manifest_path": "data/qa/morphology_paradigm_benchmark_v5.jsonl",
+  "manifest_git_blob_sha": "75f5e3f7b2da98b5b6eef4d2c76a1249596bc1ec",
+  "freeze_commit": "a31cf5fb083870abdb94c0d2996963c2851664d9",
+  "pre_freeze_runtime_commit": "da24c0d11d9e538a92e6fbabd0c2ff7d19b39608",
+  "runtime_blob_identities": {
+    "data/master/recognition_index.jsonl": "39904c40cc84fade625f7af87f8848836e219638",
+    "src/master_recognition.py": "92f719bc5745aa9beea43bec5e96476c8a932906",
+    "src/morphology_candidates.py": "ebb535494e9e399992daee8c216448e4c740834f"
+  },
+  "source_family": "Nilsson 2025 Learner's Somali Grammar",
+  "source_url": "https://morgannilsson.se/LearnersSomaliGrammar.pdf",
+  "positive_case_count": 37,
+  "unknown_case_count": 8,
+  "total_case_count": 45,
+  "pre_freeze_overlap_status": "pending_measurement",
+  "notes": "Frozen before any v5-specific morphology expansion. Subsequent metadata, documentation, tests, and benchmark harness changes do not alter runtime morphology."
+}
