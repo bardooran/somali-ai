@@ -26,11 +26,45 @@ def test_future_auxiliaries_are_reviewed_context_forms_not_ordinary_finite_verbs
     assert analyze_reviewed_finite_verb("doonaan").recognized is False
 
 
+def test_raadin_has_separate_exact_future_and_habitual_candidates():
+    candidates = analyze_surface_form("raadin")
+    future = [
+        candidate
+        for candidate in candidates
+        if candidate.features.get("possible_use") == "future_with_auxiliary"
+    ]
+    habitual = [
+        candidate
+        for candidate in candidates
+        if candidate.analysis_type == "past_habitual_stem"
+    ]
+    assert len(future) == 1
+    assert future[0].lemma == "raadi"
+    assert future[0].features["conjugation_class"] == "II"
+    assert future[0].features["form"] == "infinitive"
+    assert future[0].features["tense_aspect"] == "timaaddo"
+    assert len(habitual) == 1
+    assert habitual[0].lemma == "raadi"
+
+
 def test_masculine_singular_future_auxiliary_agrees():
     result = analyze_future_auxiliary_agreement("Ninku wuu cuni doonaa.")
     assert result.recognized
     assert result.future_stem == "cuni"
     assert result.future_lemma == "cun"
+    assert result.subject_number == "singular"
+    assert result.subject_gender == "masculine"
+    assert result.expected_person == "3sg_m"
+    assert set(result.auxiliary_persons) == {"1sg", "3sg_m"}
+    assert result.tense_aspect == "timaaddo"
+    assert result.agrees is True
+
+
+def test_masculine_singular_raadin_future_auxiliary_agrees():
+    result = analyze_future_auxiliary_agreement("Ninku wuu raadin doonaa shaqo.")
+    assert result.recognized
+    assert result.future_stem == "raadin"
+    assert result.future_lemma == "raadi"
     assert result.subject_number == "singular"
     assert result.subject_gender == "masculine"
     assert result.expected_person == "3sg_m"
@@ -57,6 +91,17 @@ def test_feminine_singular_future_auxiliary_agrees():
     assert result.agrees is True
 
 
+def test_feminine_singular_raadin_future_auxiliary_agrees():
+    result = analyze_future_auxiliary_agreement("Gabadhu way raadin doontaa buugga.")
+    assert result.recognized
+    assert result.future_lemma == "raadi"
+    assert result.subject_number == "singular"
+    assert result.subject_gender == "feminine"
+    assert result.expected_person == "3sg_f"
+    assert set(result.auxiliary_persons) == {"2sg", "3sg_f"}
+    assert result.agrees is True
+
+
 def test_feminine_singular_rejects_masculine_future_auxiliary():
     result = analyze_future_auxiliary_agreement("Gabadhu way cuni doonaa.")
     assert result.recognized
@@ -65,9 +110,30 @@ def test_feminine_singular_rejects_masculine_future_auxiliary():
     assert result.agrees is False
 
 
+def test_feminine_raadin_rejects_masculine_future_auxiliary():
+    result = analyze_future_auxiliary_agreement("Gabadhu way raadin doonaa buugga.")
+    assert result.recognized
+    assert result.future_lemma == "raadi"
+    assert result.expected_person == "3sg_f"
+    assert set(result.auxiliary_persons) == {"1sg", "3sg_m"}
+    assert result.agrees is False
+
+
 def test_plural_future_auxiliary_agrees():
     result = analyze_future_auxiliary_agreement("Macallimiintu way cuni doonaan.")
     assert result.recognized
+    assert result.subject_number == "plural"
+    assert result.expected_person == "3pl"
+    assert result.auxiliary_persons == ("3pl",)
+    assert result.agrees is True
+
+
+def test_plural_raadin_future_auxiliary_agrees():
+    result = analyze_future_auxiliary_agreement(
+        "Macallimiintu way raadin doonaan buugaagta."
+    )
+    assert result.recognized
+    assert result.future_lemma == "raadi"
     assert result.subject_number == "plural"
     assert result.expected_person == "3pl"
     assert result.auxiliary_persons == ("3pl",)
@@ -94,6 +160,10 @@ def test_non_future_stem_does_not_trigger_future_layer():
     assert analyze_future_auxiliary_agreement("Ninku wuu tijaabi doonaa.").recognized is False
 
 
+def test_reviewed_finite_raadiyay_is_not_reinterpreted_as_future_infinitive():
+    assert analyze_future_auxiliary_agreement("Ninku wuu raadiyay doonaa shaqo.").recognized is False
+
+
 def _run_checker(sentence: str) -> str:
     completed = subprocess.run(
         [sys.executable, "check.py", sentence],
@@ -109,3 +179,11 @@ def test_cli_reports_future_auxiliary_conflict_without_autofix():
     assert "possible future auxiliary agreement conflict" in output
     assert "Expected 3sg_f" in output
     assert "Safe corrected text:\nGabadhu way cuni doonaa." in output
+
+
+def test_cli_reports_raadin_future_auxiliary_conflict_without_autofix():
+    sentence = "Gabadhu way raadin doonaa buugga."
+    output = _run_checker(sentence)
+    assert "possible future auxiliary agreement conflict" in output
+    assert "Expected 3sg_f" in output
+    assert f"Safe corrected text:\n{sentence}" in output
