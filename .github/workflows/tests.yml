@@ -43,3 +43,6 @@ jobs:
 
       - name: Print frozen Class-I morphology paradigm v8 baseline
         run: python -m src.morphology_paradigm_v8
+
+      - name: Print frozen Conjugation-2 morphology paradigm v9 baseline
+        run: python -m src.morphology_paradigm_v9
