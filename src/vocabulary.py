@@ -1,8 +1,8 @@
 """Small, source-backed Somali vocabulary lookup.
 
 Default lookup combines reviewed Qaamuus vocabulary datasets, reviewed
-regional-variant metadata, and a conservative morphology-candidate layer.
-Homographs are preserved as multiple analyses.
+calendar vocabulary, regional-variant metadata, and a conservative
+morphology-candidate layer. Homographs are preserved as multiple analyses.
 
 Inflected forms are only linked to lemmas when the exact surface form is stored
 in reviewed morphology data. The module does not perform open-ended suffix
@@ -23,10 +23,12 @@ EVERYDAY_VOCABULARY_PATH = Path("data/vocabulary/qaamuus_2012_everyday_words.jso
 EVERYDAY_VERB_VOCABULARY_PATH = Path(
     "data/vocabulary/qaamuus_2012_everyday_verbs.jsonl"
 )
+CALENDAR_VOCABULARY_PATH = Path("data/vocabulary/somali_calendar_terms.jsonl")
 DEFAULT_VOCABULARY_PATHS = (
     GRAMMAR_VOCABULARY_PATH,
     EVERYDAY_VOCABULARY_PATH,
     EVERYDAY_VERB_VOCABULARY_PATH,
+    CALENDAR_VOCABULARY_PATH,
 )
 
 
@@ -91,9 +93,10 @@ def lookup_word(
 ) -> WordLookup:
     """Look up a Somali surface form across reviewed evidence layers.
 
-    Exact dictionary headwords, exact reviewed morphology mappings, and
-    regional-variant metadata are returned independently. Multiple analyses are
-    deliberately retained so callers can resolve them using sentence context.
+    Exact dictionary/calendar headwords, exact reviewed morphology mappings,
+    and regional-variant metadata are returned independently. Multiple analyses
+    are deliberately retained so callers can resolve them using sentence
+    context.
 
     ``vocabulary_path`` can restrict only the dictionary dataset for tests or
     specialized callers; reviewed morphology and regional evidence still use
@@ -116,7 +119,7 @@ def lookup_word(
     known = bool(entries or morphology or regional)
 
     if entries and len(entries) > 1:
-        note = "Exact headword has multiple dictionary analyses; context is required to choose among them."
+        note = "Exact headword has multiple reviewed analyses; context is required to choose among them."
     elif entries and morphology:
         note = "Exact source-backed headword and reviewed morphology evidence found."
     elif entries:
