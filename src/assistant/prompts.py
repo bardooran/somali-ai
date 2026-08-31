@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Iterable
+from datetime import datetime
 
 from .retrieval import KnowledgeHit
 
@@ -24,13 +25,31 @@ Primary behavior:
 """
 
 
-def build_instructions(hits: Iterable[KnowledgeHit]) -> str:
+def _runtime_context(current_time: datetime | None) -> str:
+    if current_time is None:
+        return ""
+    if current_time.tzinfo is None:
+        raise ValueError("current_time must be timezone-aware")
+    return (
+        "\nRuntime date/time from the machine running Somali AI: "
+        f"{current_time.isoformat(timespec='minutes')}.\n"
+        "Use this to interpret relative dates such as maanta, berri, and shalay. "
+        "Do not assume it is the user's timezone if the user gives a different location or timezone.\n"
+    )
+
+
+def build_instructions(
+    hits: Iterable[KnowledgeHit],
+    *,
+    current_time: datetime | None = None,
+) -> str:
     evidence = list(hits)
+    runtime = _runtime_context(current_time)
     if not evidence:
-        return BASE_INSTRUCTIONS
+        return BASE_INSTRUCTIONS + runtime
 
     lines = [
-        BASE_INSTRUCTIONS,
+        BASE_INSTRUCTIONS + runtime,
         "",
         "Relevant Somali language evidence retrieved for this turn:",
     ]

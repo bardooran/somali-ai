@@ -1,4 +1,5 @@
 import json
+from datetime import datetime, timedelta, timezone
 
 from src.assistant.model import (
     OpenAIResponsesAdapter,
@@ -93,6 +94,23 @@ def test_prompt_prefers_somali_and_preserves_uncertainty():
     assert "Never invent" in prompt
 
 
+def test_prompt_includes_timezone_aware_runtime_context():
+    current = datetime(2026, 8, 31, 18, 30, tzinfo=timezone(timedelta(hours=2)))
+    prompt = build_instructions((), current_time=current)
+    assert "2026-08-31T18:30+02:00" in prompt
+    assert "maanta, berri, and shalay" in prompt
+
+
+def test_prompt_rejects_naive_runtime_datetime():
+    current = datetime(2026, 8, 31, 18, 30)
+    try:
+        build_instructions((), current_time=current)
+    except ValueError as exc:
+        assert "timezone-aware" in str(exc)
+    else:
+        raise AssertionError("expected timezone-aware datetime validation")
+
+
 def test_static_pipeline_returns_model_answer():
     assistant = SomaliAssistant(
         StaticModelAdapter("Jawaab wanaagsan."),
@@ -102,6 +120,29 @@ def test_static_pipeline_returns_model_answer():
     result = assistant.ask("Salaan")
     assert result.text == "Jawaab wanaagsan."
     assert result.model == "static-test-model"
+
+
+def test_pipeline_uses_injected_runtime_clock():
+    class CaptureModel:
+        model_name = "capture-model"
+
+        def __init__(self):
+            self.instructions = ""
+
+        def generate(self, messages, instructions):
+            self.instructions = instructions
+            return "Haa."
+
+    current = datetime(2026, 8, 31, 18, 30, tzinfo=timezone(timedelta(hours=2)))
+    model = CaptureModel()
+    assistant = SomaliAssistant(
+        model,
+        knowledge=KnowledgeIndex(),
+        response_rules=(),
+        clock=lambda: current,
+    )
+    assistant.ask("Berri maxaan sameeyaa?")
+    assert "2026-08-31T18:30+02:00" in model.instructions
 
 
 def test_pipeline_applies_safe_response_fix():

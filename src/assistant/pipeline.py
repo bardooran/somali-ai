@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterable, Sequence
+from collections.abc import Callable, Iterable, Sequence
+from datetime import datetime
 from pathlib import Path
 
 from src.checker import Rule, apply_safe_fixes, check_text, load_rules
@@ -30,6 +31,10 @@ def load_response_rules(
     return tuple(rules)
 
 
+def _local_now() -> datetime:
+    return datetime.now().astimezone()
+
+
 class SomaliAssistant:
     """A Somali-first reasoning model wrapped with project retrieval and checking."""
 
@@ -40,6 +45,7 @@ class SomaliAssistant:
         knowledge: KnowledgeIndex | None = None,
         response_rules: Sequence[Rule] | None = None,
         evidence_limit: int = 8,
+        clock: Callable[[], datetime] | None = None,
     ) -> None:
         self.model = model
         self.knowledge = knowledge if knowledge is not None else KnowledgeIndex.build()
@@ -47,6 +53,7 @@ class SomaliAssistant:
             tuple(response_rules) if response_rules is not None else load_response_rules()
         )
         self.evidence_limit = evidence_limit
+        self.clock = clock or _local_now
 
     def ask(
         self,
@@ -59,7 +66,7 @@ class SomaliAssistant:
             raise ValueError("user_text must not be empty")
 
         hits = self.knowledge.search(stripped, limit=self.evidence_limit)
-        instructions = build_instructions(hits)
+        instructions = build_instructions(hits, current_time=self.clock())
         messages = [*history, ChatMessage(role="user", content=stripped)]
         draft = self.model.generate(messages, instructions).strip()
         if not draft:
