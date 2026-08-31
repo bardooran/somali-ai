@@ -28,3 +28,6 @@ jobs:
 
       - name: Print morphology benchmark v1
         run: python -m src.morphology_benchmark
+
+      - name: Print analyzer-blind morphology challenge v2
+        run: python -m src.morphology_challenge_v2
