@@ -30,11 +30,15 @@ def test_exact_published_cali_negative_focus_example_is_recognized_without_bax_p
         assert result.marker == marker
         assert result.predicate == "bixin"
         assert result.case_agrees is True
+        assert result.marker_agrees is True
+        assert result.orthographically_ambiguous is True
         assert result.temporal_scope == ("past",)
         assert "source_exact_cali_bixin" in (result.evidence or "")
 
     # A single source sentence does not license unseen BAX morphology.
     assert analyze_subject_focus_negative("Cali baan baxXYZ.").recognized is False
+    # Nor does it license a bare-positive-marker correction for unseen BAX morphology.
+    assert analyze_subject_focus_negative("Cali baa bixin.").recognized is False
 
 
 def test_person_neutral_simple_negative_is_reduced_subjunctive_present_or_past_under_focus():
@@ -52,6 +56,8 @@ def test_person_neutral_simple_negative_is_reduced_subjunctive_present_or_past_u
         assert result.tense_aspect == "reduced_subjunctive_simple"
         assert result.temporal_scope == ("present", "past")
         assert result.case_agrees is True
+        assert result.marker_agrees is True
+        assert result.predicate_has_nonnegative_analysis is False
         assert "exact_person_neutral_reduced_subjunctive_simple" in (result.evidence or "")
 
 
@@ -64,6 +70,15 @@ def test_temporal_context_does_not_change_the_reduced_simple_surface():
         assert result.predicate == "cunin"
         assert result.tense_aspect == "reduced_subjunctive_simple"
         assert result.temporal_scope == ("present", "past")
+
+
+def test_waxba_is_recorded_as_negative_context_without_assigning_a_new_role():
+    result = analyze_subject_focus_negative("Carruurta baan maanta waxba cunin.")
+    assert result.recognized is True
+    assert result.marker_agrees is True
+    assert result.predicate == "cunin"
+    assert result.negative_context_evidence == ("waxba",)
+    assert "negative_context_waxba" in (result.evidence or "")
 
 
 def test_person_neutral_progressive_negative_is_reduced_subjunctive_present_or_past():
@@ -80,6 +95,31 @@ def test_person_neutral_progressive_negative_is_reduced_subjunctive_present_or_p
         assert result.tense_aspect == "reduced_subjunctive_progressive"
         assert result.temporal_scope == ("present", "past")
         assert result.case_agrees is True
+        assert result.marker_agrees is True
+
+
+def test_bare_baa_ayaa_are_marker_conflicts_before_proven_reduced_negative_predicate():
+    for sentence, marker, expected in (
+        ("Carruurta baa maanta cunin.", "baa", "baan"),
+        ("Carruurta ayaa maanta cunin.", "ayaa", "ayaan"),
+        ("Carruurta ayaa maanta waxba cunin.", "ayaa", "ayaan"),
+    ):
+        result = analyze_subject_focus_negative(sentence)
+        assert result.recognized is True
+        assert result.covered is True
+        assert result.marker == marker
+        assert result.marker_agrees is False
+        assert result.expected_marker == expected
+        assert result.predicate == "cunin"
+        assert result.case_agrees is True
+
+
+def test_connective_ayaana_and_markerless_fragments_are_not_forced_into_negative_focus():
+    for sentence in (
+        "Carruurta ayaana maanta wax cunin.",
+        "Carruurta maanta wax cunin.",
+    ):
+        assert analyze_subject_focus_negative(sentence).recognized is False
 
 
 def test_negative_focus_disambiguation_makes_common_noun_absolute_case_judgeable():
@@ -126,8 +166,6 @@ def test_baan_ayaan_are_not_globally_reinterpreted_as_negative():
 
 
 def test_full_present_negative_forms_are_not_substituted_for_reduced_focus_forms():
-    # Present meaning under focus still uses the reduced subjunctive; ordinary
-    # full ma-negative forms do not become valid merely because baan/ayaan occurs.
     for sentence in (
         "Carruurta baan cuno.",
         "Carruurta baan cunayo.",
@@ -148,6 +186,7 @@ def test_cli_accepts_reviewed_negative_focus_and_reports_only_safe_case_conflict
     assert _run_checker("Cali baan bixin.") == NO_FINDINGS
     assert _run_checker("Carruurta baan cunin.") == NO_FINDINGS
     assert _run_checker("Carruurta baan maanta cunin.") == NO_FINDINGS
+    assert _run_checker("Carruurta baan maanta waxba cunin.") == NO_FINDINGS
     assert _run_checker("Gabadha ayaan imanayn.") == NO_FINDINGS
 
     output = _run_checker("Carruurtu baan cunin.")
