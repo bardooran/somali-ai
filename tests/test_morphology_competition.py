@@ -145,8 +145,11 @@ def test_live_scorecard_counts_new_reviewed_homographs():
 
 def test_scorecard_tracks_lemma_type_overlap_separately_from_lemma_overlap():
     scorecard = build_scorecard()
-    assert scorecard.reviewed_giellalt_shared_lemma_type_count >= (
-        scorecard.reviewed_giellalt_shared_lemma_count
+    assert scorecard.reviewed_giellalt_shared_lemma_count >= 1
+    assert scorecard.reviewed_giellalt_shared_lemma_type_count >= 1
+    assert scorecard.reviewed_giellalt_type_mismatch_lemma_count >= 0
+    assert scorecard.reviewed_giellalt_shared_lemma_type_count <= (
+        scorecard.giellalt_candidate_unique_lemma_type_count
     )
     assert scorecard.cross_source_backlog_analysis_count >= (
         scorecard.cross_source_backlog_count

@@ -56,6 +56,7 @@ class MorphologyScorecard:
     giellalt_unique_lemma_counts_by_type: dict[str, int]
     reviewed_giellalt_shared_lemma_count: int
     reviewed_giellalt_shared_lemma_type_count: int
+    reviewed_giellalt_type_mismatch_lemma_count: int
     cross_source_backlog_count: int
     cross_source_backlog_analysis_count: int
     giellalt_only_lemma_count: int
@@ -394,6 +395,23 @@ def build_scorecard() -> MorphologyScorecard:
         for lemma, reviewed_types in reviewed_types_by_lemma.items()
         for reviewed_type in reviewed_types
     }
+    candidate_types_by_lemma = {
+        lemma: {
+            record_type
+            for record_type, lemmas in by_type.items()
+            if lemma in lemmas
+        }
+        for lemma in candidate_lemmas
+    }
+    shared_lemmas = reviewed_lemmas & candidate_lemmas
+    type_mismatch_lemmas = {
+        lemma
+        for lemma in shared_lemmas
+        if not (
+            reviewed_types_by_lemma.get(lemma, set())
+            & candidate_types_by_lemma.get(lemma, set())
+        )
+    }
 
     guessed = sum(bool(analyze_surface_form(probe)) for probe in SAFETY_PROBES)
     probe_count = len(SAFETY_PROBES)
@@ -410,8 +428,9 @@ def build_scorecard() -> MorphologyScorecard:
         giellalt_unique_lemma_counts_by_type={
             key: len(values) for key, values in sorted(by_type.items())
         },
-        reviewed_giellalt_shared_lemma_count=len(reviewed_lemmas & candidate_lemmas),
+        reviewed_giellalt_shared_lemma_count=len(shared_lemmas),
         reviewed_giellalt_shared_lemma_type_count=len(reviewed_pairs & candidate_pairs),
+        reviewed_giellalt_type_mismatch_lemma_count=len(type_mismatch_lemmas),
         cross_source_backlog_count=len(backlog),
         cross_source_backlog_analysis_count=sum(
             len(item.candidate_types) for item in backlog
