@@ -1,4 +1,4 @@
-from src.lexicon import lookup_word
+from src.vocabulary import lookup_word
 from src.morphology_candidates import analyze_surface_form
 
 
