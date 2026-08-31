@@ -1,0 +1,37 @@
+{
+  "benchmark_version": "v9",
+  "benchmark_name": "Independent Conjugation-2 infinitive morphology challenge v9",
+  "manifest_path": "data/qa/morphology_paradigm_benchmark_v9.jsonl",
+  "manifest_git_blob_sha": "pending_until_freeze_merge",
+  "freeze_commit": "pending_until_freeze_merge",
+  "pre_freeze_runtime_commit": "7e705a87f96cf9a0768eb2bd868857b99b51d66a",
+  "source_family": "Fayruus 2015 Isrogrogidda Falka Af-soomaaliga",
+  "publisher": "Akadeemiye-Goboleedka Af-soomaaliga / Intergovernmental Academy of Somali Language",
+  "source_url": "https://arcadia.sba.uniroma3.it/bitstream/2307/5702/1/Isrogrogidda%20Falka%20Af-soomaaliga.%20Aragti%20ku%20aadan%20Midaynta%20Qoraalkiisa_Mustafa%20Cabdilaahi%20Fayruus.pdf",
+  "source_work": "Afmaal. Proceedings of the Conference on the 40th Anniversary of Somali Orthography, Djibouti, 17-21 December 2012",
+  "publication_year": 2015,
+  "source_pages": [52, 53],
+  "positive_case_count": 7,
+  "positive_unique_surface_count": 7,
+  "unknown_case_count": 8,
+  "total_case_count": 15,
+  "pre_freeze_overlap_status": "not_measured",
+  "measured_result": null,
+  "benchmark_policy": {
+    "answers_are_evaluation_only": true,
+    "runtime_rule_learning_from_v9_allowed": false,
+    "explicit_source_forms_only": true,
+    "inferred_unattested_forms_included": false,
+    "synthetic_unknowns_are_claimed_somali_forms": false
+  },
+  "independence": {
+    "independent_of_qaamuus_v2_v4": true,
+    "independent_of_nilsson_v5": true,
+    "independent_of_orwin_v6": true,
+    "independent_of_zorc_issa_v7": true,
+    "independent_of_warner_v8": true,
+    "independent_of_green_morrison_development": true,
+    "independent_of_saeed_development": true
+  },
+  "notes": "Frozen after the first finite Conjugation-2A runtime slice (kari -> karisaa) merged and before any Fayruus-informed runtime development. The positive set contains only infinitive forms explicitly printed in Fayruus pp. 52-53. Positive lemmas cafi, layli, caddee, cashee, and malee are outside the existing finite Class-I and Conjugation-2 development profiles. Fayruus becomes evaluation-only for these answers after freeze and may not be used to authorize runtime rules targeting v9 answers."
+}
