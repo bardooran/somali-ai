@@ -1,0 +1,30 @@
+{
+  "benchmark_version": "v7",
+  "benchmark_name": "Independent third-conjugation morphology paradigm challenge v7",
+  "manifest_path": "data/qa/morphology_paradigm_benchmark_v7.jsonl",
+  "manifest_git_blob_sha": "d6bcb87cb26636b4914ad3ef9c6d15ee1d7320c4",
+  "freeze_commit": "f69359ea7b8828b2442c3b6b23e1d78ab58a7166",
+  "pre_freeze_runtime_commit": "04d576dedf47f326a740d297ef01a6a476a2366f",
+  "source_family": "Zorc & Issa 1990 Somali Textbook",
+  "publisher": "Dunwoody Press",
+  "source_url": "https://zorc.net/RDZorc/SOMALI/Somali_Textbook-Chap%2310-15-Somali.pdf",
+  "source_chapter": "15 - Third Conjugation Verbs and Sound Changes",
+  "source_page": 113,
+  "positive_case_count": 8,
+  "positive_unique_surface_count": 6,
+  "unknown_case_count": 8,
+  "total_case_count": 16,
+  "pre_freeze_overlap_status": "pending_measurement",
+  "benchmark_policy": {
+    "answers_are_evaluation_only": true,
+    "runtime_rule_learning_from_v7_allowed": false,
+    "explicit_source_forms_only": true,
+    "inferred_unattested_forms_included": false
+  },
+  "independence": {
+    "independent_of_qaamuus_v2_v4": true,
+    "independent_of_nilsson_v5": true,
+    "independent_of_orwin_v6": true
+  },
+  "notes": "Frozen before any v6-driven morphophonology expansion. The positive set is deliberately narrow: the explicit joogso Pattern-1 third-conjugation past paradigm plus the explicitly derived plural imperative on printed page 113. The source describes intervocalic t voicing, tt reduction, and t+n > nn. Synthetic unknown probes are safety checks and are not claimed Somali forms."
+}
