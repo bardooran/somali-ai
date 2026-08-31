@@ -36,6 +36,8 @@ def _apply_processes(
         return lemma[:-1] + "sh" + tam, "l_t_assibilation"
     if agreement == "n" and lemma.endswith("l") and "l_n_assimilation" in processes:
         return lemma + "l" + tam, "l_n_assimilation"
+    if agreement == "n" and lemma.endswith("r") and "r_n_assimilation" in processes:
+        return lemma + "r" + tam, "r_n_assimilation"
     if agreement == "t" and lemma.endswith("dh") and "dh_t_assimilation" in processes:
         return lemma + "dh" + tam, "dh_t_assimilation"
     return lemma + agreement + tam, "concatenative_elsewhere"
