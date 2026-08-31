@@ -52,7 +52,7 @@ def test_unreviewed_noun_pair_is_not_guessed_from_suffix_shape():
     assert result.recognized is False
 
 
-def test_singular_common_noun_focus_reuses_exact_reviewed_finite_agreement():
+def test_singular_common_noun_focus_reuses_exact_reviewed_surface_morphology():
     masculine = analyze_subject_focus_agreement("Wiilka ayaa yimid.")
     assert masculine.recognized is True
     assert masculine.expected_person == "3sg_m"
@@ -80,18 +80,26 @@ def test_singular_common_noun_focus_detects_gender_person_conflict():
     assert feminine.agrees is False
 
 
-def test_reviewed_plural_focus_is_recognized_but_restrictive_paradigm_is_pending():
-    for sentence in (
-        "Carruurta ayaa yimid.",
-        "Carruurta ayaa yimaaddeen.",
-        "Baabuurta baa yimid.",
-    ):
-        result = analyze_subject_focus_agreement(sentence)
-        assert result.recognized is True
-        assert result.expected_person is None
-        assert result.agrees is None
-        assert result.evidence == "plural_focus_restrictive_paradigm_pending"
-        assert result.rule_id == "GRAM-SUBJFOCUS-006"
+def test_reviewed_plural_focus_uses_restrictive_simple_past():
+    reduced = analyze_subject_focus_agreement("Carruurta ayaa yimid.")
+    assert reduced.recognized is True
+    assert reduced.expected_person == "3pl"
+    assert reduced.agrees is True
+    assert reduced.evidence and "restrictive_simple_past" in reduced.evidence
+    assert reduced.rule_id == "GRAM-SUBJFOCUS-006"
+
+    full = analyze_subject_focus_agreement("Carruurta ayaa yimaaddeen.")
+    assert full.recognized is True
+    assert full.expected_person == "3pl"
+    assert full.agrees is False
+    assert full.evidence and "restrictive_simple_past" in full.evidence
+    assert full.rule_id == "GRAM-SUBJFOCUS-006"
+
+    other_plural = analyze_subject_focus_agreement("Baabuurta baa yimid.")
+    assert other_plural.recognized is True
+    assert other_plural.expected_person == "3pl"
+    assert other_plural.agrees is True
+    assert other_plural.rule_id == "GRAM-SUBJFOCUS-006"
 
 
 def test_cli_accepts_reviewed_singular_common_noun_subject_focus():
@@ -123,9 +131,13 @@ def test_cli_reports_singular_common_noun_focus_predicate_conflict():
     assert "a reviewed 3sg_f predicate" in output
 
 
-def test_cli_leaves_reviewed_plural_focus_predicate_unjudged_for_now():
+def test_cli_uses_restrictive_plural_focus_simple_past():
     assert _run_checker("Carruurta ayaa yimid.") == NO_FINDINGS
-    assert _run_checker("Carruurta ayaa yimaaddeen.") == NO_FINDINGS
+
+    output = _run_checker("Carruurta ayaa yimaaddeen.")
+    assert "possible subject-verb agreement conflict" in output
+    assert "'Carruurta' + 'yimaaddeen'" in output
+    assert "a reviewed 3pl predicate under restrictive focused-subject simple-past agreement" in output
 
 
 def test_cli_still_reports_wrong_plural_noun_case_before_focus_particle():
