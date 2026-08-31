@@ -1,4 +1,4 @@
-# Somali Grammar + Somali AI
+# Somali AI — Somali-First Language Intelligence
 
 An evidence-based Somali language foundation and a working Somali-first AI assistant layer.
 
@@ -7,7 +7,7 @@ The project has two connected goals:
 1. build reliable Somali grammar, morphology, vocabulary, regional-variant, corpus, and QA knowledge;
 2. use that knowledge around a strong reasoning model so people can converse, ask questions, get explanations, compare choices, make plans, and improve Somali writing now.
 
-The language engine remains conservative: unsupported forms stay unknown or context-dependent rather than being guessed.
+Grammar is one subsystem inside the larger Somali AI foundation. The language engine remains conservative: unsupported forms stay unknown or context-dependent rather than being guessed.
 
 ## Somali AI v0.1
 
@@ -126,10 +126,10 @@ Coverage is intentionally open-ended. Unsupported forms remain unjudged until ev
 ## Repository layout
 
 ```text
-somali-grammar/
+somali-ai/
 ├── somali_ai.py             # terminal Somali AI
 ├── somali_ai_web.py         # local browser chat
-├── check.py                 # grammar/orthography checker
+├── check.py                 # grammar/orthography checker subsystem
 ├── src/
 │   ├── assistant/           # conversation, retrieval, model, evaluation, web
 │   └── ...                  # Somali analysis modules
@@ -151,7 +151,7 @@ somali-grammar/
 └── docs/
 ```
 
-## Running the checker
+## Running the checker subsystem
 
 ```bash
 python check.py "Somali text here"

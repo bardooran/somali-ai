@@ -28,6 +28,13 @@ DEFAULT_ROOTS = (
 # Large natural corpora remain excluded by root. This ceiling is high enough for
 # compact provenance-rich lexical candidate indexes such as GiellaLT.
 MAX_INDEX_FILE_BYTES = 25_000_000
+IDENTITY_KEYS = (
+    "lemma",
+    "form",
+    "input",
+    "preferred_written",
+    "surface_pattern",
+)
 
 
 @dataclass(frozen=True)
@@ -44,6 +51,7 @@ class _IndexedRecord:
     path: str
     searchable: str
     tokens: frozenset[str]
+    exact_terms: frozenset[str]
     trust: str
     status: str
     excerpt: str
@@ -64,6 +72,25 @@ def _flatten_strings(value: object) -> Iterator[str]:
     elif isinstance(value, list):
         for item in value:
             yield from _flatten_strings(item)
+
+
+def _identity_terms(record: dict) -> frozenset[str]:
+    """Return exact lexical/form values that deserve stronger relevance.
+
+    This prevents a record whose actual lemma is ``baa`` from losing to many
+    higher-trust records that merely mention ``baa`` in prose or examples.
+    Trust still affects ranking after relevance is established.
+    """
+
+    terms: set[str] = set()
+    for key in IDENTITY_KEYS:
+        value = record.get(key)
+        if not isinstance(value, str):
+            continue
+        folded = value.casefold().strip()
+        if folded:
+            terms.add(folded)
+    return frozenset(terms)
 
 
 def _records_from_json(path: Path) -> Iterator[dict]:
@@ -160,6 +187,7 @@ class KnowledgeIndex:
                             path=path.as_posix(),
                             searchable=searchable,
                             tokens=record_tokens,
+                            exact_terms=_identity_terms(record),
                             trust=_trust_for(path, record),
                             status=str(record.get("status", "unspecified")),
                             excerpt=_excerpt(record),
@@ -183,6 +211,8 @@ class KnowledgeIndex:
             searchable_folded = record.searchable.casefold()
             if folded_query and folded_query in searchable_folded:
                 score += 1.25
+            if folded_query and folded_query in record.exact_terms:
+                score += 1.00
             if record.trust == "reviewed":
                 score += 0.20
             elif record.trust == "external_candidate":

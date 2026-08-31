@@ -40,6 +40,26 @@ def test_retrieval_labels_imported_data_as_external_candidate(tmp_path):
     assert hits[0].trust == "external_candidate"
 
 
+def test_exact_lemma_match_beats_incidental_reviewed_mention(tmp_path):
+    reviewed = tmp_path / "data" / "vocabulary" / "reviewed.jsonl"
+    imported = tmp_path / "data" / "imported" / "source" / "items.jsonl"
+    _write_jsonl(
+        reviewed,
+        [{"lemma": "focus", "status": "reviewed", "note": "Tusaalaha wuxuu leeyahay baa."}],
+    )
+    _write_jsonl(
+        imported,
+        [{"lemma": "baa", "status": "external_candidate_unreviewed"}],
+    )
+    index = KnowledgeIndex.build([tmp_path / "data"])
+
+    hits = index.search("baa", limit=2)
+    assert len(hits) == 2
+    assert hits[0].path.endswith("data/imported/source/items.jsonl")
+    assert hits[0].trust == "external_candidate"
+    assert hits[1].trust == "reviewed"
+
+
 def test_retrieval_returns_empty_for_unrelated_query(tmp_path):
     path = tmp_path / "words.jsonl"
     _write_jsonl(path, [{"lemma": "buug"}])
