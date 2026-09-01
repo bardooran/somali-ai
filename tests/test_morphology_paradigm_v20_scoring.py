@@ -20,11 +20,11 @@ def test_v20_scorer_keeps_unresolved_cells_out_of_score() -> None:
     unresolved = result["preauthorization"]["unresolved_cells"]
 
     assert len(unresolved) == 4
-    assert {(row["lemma"], row["cell"]) for row in unresolved} == {
-        ("butaaci", "imperative_2sg"),
-        ("butaaci", "imperative_2pl"),
-        ("caajisi", "imperative_2sg"),
-        ("caajisi", "imperative_2pl"),
+    assert {(row["lemma"], row["mood"], row["person"]) for row in unresolved} == {
+        ("butaaci", "imperative", "2sg"),
+        ("butaaci", "imperative", "2pl"),
+        ("caajisi", "imperative", "2sg"),
+        ("caajisi", "imperative", "2pl"),
     }
 
 
