@@ -109,20 +109,24 @@ def test_class_lexicon_itself_does_not_turn_entries_into_explicit_profiles() -> 
         assert entry.correction_allowed is False
 
 
-def test_stage1n_batch_is_class_known_but_not_in_frozen_activation_cohort() -> None:
+def test_stage1n_batch_is_class_only_but_explicitly_activated_by_separate_policy() -> None:
     activated = set(eligible_conj2_class_activation_lemmas())
-    assert activated == PRE_V11_CLASS_ONLY
-    assert activated.isdisjoint(STAGE1N_CLASS_ONLY)
+    assert activated == EXPECTED_CLASS_ONLY
 
     for lemma in STAGE1N_CLASS_ONLY:
+        entry = reviewed_class_entry(lemma)
+        assert entry is not None
+        assert entry.generation_enabled is False
+        assert entry.status == "reviewed_class_only"
         for person in ("1sg", "2sg", "3sg_m", "3sg_f", "1pl", "2pl", "3pl"):
-            assert generate_class_authorized_conj2_present(lemma, person) is None
+            candidate = generate_class_authorized_conj2_present(lemma, person)
+            assert candidate is not None
+            assert candidate.lemma == lemma
+            assert candidate.status == "reviewed_rule_derived"
+            assert candidate.correction_allowed is False
 
 
-def test_stage1n_class_additions_create_no_rule_derived_surface_hits() -> None:
-    # This stage deliberately avoids looking up or freezing paradigm answers.
-    # Probe only synthetic strings derived from the lemma names to prove class
-    # knowledge itself does not activate the runtime.
+def test_stage1n_activation_still_rejects_malformed_synthetic_surfaces() -> None:
     probes = (
         "aaddizz",
         "aammusizz",

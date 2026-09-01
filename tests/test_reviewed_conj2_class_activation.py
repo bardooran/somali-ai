@@ -10,6 +10,7 @@ from src.morphology_class_lexicon import (
     reviewed_class_lemmas,
 )
 from src.morphology_paradigm_v11 import report as v11_report
+from src.morphology_paradigm_v12 import report as v12_report
 from src.morphophonology_generator import (
     analyze_morphophonological_surface,
     eligible_conj2_class_activation_lemmas,
@@ -21,8 +22,23 @@ from src.morphophonology_generator import (
 ACTIVATION = Path("rules/morphology/reviewed_conjugation_2_class_activation.json")
 V10 = Path("data/qa/morphology_paradigm_benchmark_v10.jsonl")
 V11 = Path("data/qa/morphology_paradigm_benchmark_v11.jsonl")
+V12 = Path("data/qa/morphology_paradigm_benchmark_v12.jsonl")
 
-EXPECTED_CLASS_LEMMAS = (
+PRE_V11_LEMMAS = (
+    "bushi",
+    "butaaci",
+    "buubi",
+    "buufi",
+    "buuxi",
+    "caafi",
+    "caajisi",
+)
+STAGE1N_LEMMAS = ("aaddi", "aammusi", "abhi", "afceli")
+EXPECTED_ACTIVATED_LEMMAS = (
+    "aaddi",
+    "aammusi",
+    "abhi",
+    "afceli",
     "bushi",
     "butaaci",
     "buubi",
@@ -57,29 +73,42 @@ def _expected_present_surface(lemma: str, person: str) -> str:
     raise AssertionError(person)
 
 
-def test_activation_cohort_is_explicitly_frozen_to_pre_v11_registry() -> None:
+def test_activation_cohort_is_explicit_and_stage1n_was_delayed_until_after_v12_baseline() -> None:
     activation = json.loads(ACTIVATION.read_text(encoding="utf-8"))
-    assert tuple(activation["activated_lemmas"]) == EXPECTED_CLASS_LEMMAS
-    assert activation["class_lexicon_freeze_commit"] == (
-        "b7c57eeadc02282d3830bbf80399ea418917d6ea"
+    assert tuple(activation["activated_lemmas"]) == EXPECTED_ACTIVATED_LEMMAS
+    assert tuple(activation["activation_cohorts"]["pre_v11"]) == PRE_V11_LEMMAS
+    assert tuple(activation["activation_cohorts"]["stage1n_post_v12_baseline"]) == STAGE1N_LEMMAS
+    assert activation["stage1n_class_authorization_commit"] == (
+        "0ab8f13d2e5bc932048b413ebb3a82b445193b6a"
     )
-    assert activation["class_lexicon_blob_sha_at_v11_pre_freeze"] == (
-        "55e1fff0cfa593a9e4df118b4be56d3e715fbbc5"
+    assert activation["stage1n_class_lexicon_blob_sha"] == (
+        "2c4cbf5e2736cb6bd4fee7614c5495258a44c3b3"
     )
+    assert activation["v12_freeze_commit"] == (
+        "83c7a7d06a3a988b07a43835847e180b9b0d1fc3"
+    )
+    assert activation["v12_baseline_measurement_merge_commit"] == (
+        "ea0366f7f785ced58fc11022702c42900135c19f"
+    )
+
     policy = activation["eligibility_policy"]
     assert policy["explicit_activated_lemma_allowlist"] is True
     assert policy["future_class_lexicon_entries_auto_activate"] is False
     assert policy["arbitrary_i_final_lemma_allowed"] is False
 
+    isolation = activation["benchmark_isolation"]
+    assert isolation["v12_answers_used_as_runtime_evidence"] is False
+    assert isolation["v12_answer_sources_used_as_stage1o_activation_evidence"] is False
+    assert isolation["v12_targets_special_cased"] is False
+    assert isolation["stage1n_complete_cohort_activated_uniformly"] is True
 
-def test_activation_uniformly_covers_complete_pre_v11_c2a_registry() -> None:
-    # The reviewed class lexicon may grow after v11. Activation must remain frozen
-    # to the pre-v11 cohort until a later explicit activation stage.
+
+def test_activation_uniformly_covers_all_explicitly_activated_c2a_lemmas() -> None:
     known_c2a = set(reviewed_class_lemmas("2A"))
-    assert set(EXPECTED_CLASS_LEMMAS).issubset(known_c2a)
-    assert eligible_conj2_class_activation_lemmas() == EXPECTED_CLASS_LEMMAS
+    assert set(EXPECTED_ACTIVATED_LEMMAS).issubset(known_c2a)
+    assert eligible_conj2_class_activation_lemmas() == EXPECTED_ACTIVATED_LEMMAS
 
-    for lemma in EXPECTED_CLASS_LEMMAS:
+    for lemma in EXPECTED_ACTIVATED_LEMMAS:
         for person, process in PERSON_PROCESS.items():
             candidate = generate_class_authorized_conj2_present(lemma, person)
             assert candidate is not None
@@ -122,7 +151,7 @@ def test_future_reviewed_class_entry_does_not_auto_activate(monkeypatch) -> None
         )
 
 
-def test_activation_generalizes_on_non_v11_lemmas_and_preserves_syncretism() -> None:
+def test_activation_generalizes_on_non_benchmark_lemmas_and_preserves_syncretism() -> None:
     for lemma in ("buufi", "buuxi", "caajisi"):
         singular_common = _expected_present_surface(lemma, "1sg")
         t_common = _expected_present_surface(lemma, "2sg")
@@ -148,18 +177,29 @@ def test_activation_generalizes_on_non_v11_lemmas_and_preserves_syncretism() -> 
         assert all(item.correction_allowed is False for item in analyses)
 
 
-def test_class_activation_does_not_create_target_specific_profiles_or_past_forms() -> None:
+def test_stage1n_activation_is_cohort_wide_not_v12_target_specific() -> None:
     explicit_profiles = set(eligible_conj2_profile_lemmas())
     assert explicit_profiles == {"joogi", "kari"}
-    assert "buubi" not in explicit_profiles
 
-    for lemma in EXPECTED_CLASS_LEMMAS:
+    for lemma in STAGE1N_LEMMAS:
+        assert lemma not in explicit_profiles
+        for person in PERSON_PROCESS:
+            candidate = generate_class_authorized_conj2_present(lemma, person)
+            assert candidate is not None
+            assert candidate.rule_id.startswith("MORPH-CONJ-IIA-CLASS-ACT-001:")
+            assert candidate.correction_allowed is False
+
         assert generate_conj2_past(lemma, "1sg") is None
         assert generate_conj2_past(lemma, "2sg") is None
         assert generate_conj2_past(lemma, "3pl") is None
 
+    # These reserve forms are mechanics tests only. They are not claims that the
+    # surfaces have been independently attested in a post-activation benchmark.
+    assert generate_class_authorized_conj2_present("abhi", "3pl").surface == "abhiyaan"
+    assert generate_class_authorized_conj2_present("afceli", "3pl").surface == "afceliyaan"
 
-def test_activation_never_infers_class_from_i_final_spelling() -> None:
+
+def test_class_activation_never_infers_class_from_i_final_spelling() -> None:
     for unknown_lemma in ("zzabi", "qarqari", "nadiifi", "qurxi", "kari", "joogi"):
         for person in PERSON_PROCESS:
             assert generate_class_authorized_conj2_present(unknown_lemma, person) is None
@@ -216,7 +256,7 @@ def test_v11_target_is_reached_only_through_generic_class_activation() -> None:
         assert all(item.correction_allowed is False for item in candidates)
 
 
-def test_v11_score_demonstrates_post_freeze_cross_lemma_generalization() -> None:
+def test_v11_score_remains_perfect_after_stage1n_activation() -> None:
     result = v11_report()
     combined = result["combined"]
 
@@ -232,3 +272,50 @@ def test_v11_score_demonstrates_post_freeze_cross_lemma_generalization() -> None
     assert combined["unknown_safety_rate"] == 1.0
     assert combined["authority_diagnostics"]["reviewed_exact_surfaces"] == []
     assert len(combined["authority_diagnostics"]["reviewed_rule_derived_surfaces"]) == 5
+
+
+def test_v12_targets_are_reached_only_through_uniform_stage1n_activation() -> None:
+    positive_rows = [
+        json.loads(line)
+        for line in V12.read_text(encoding="utf-8").splitlines()
+        if line.strip() and json.loads(line).get("benchmark_role") == "positive"
+    ]
+    assert {row["lemma"] for row in positive_rows} == {"aaddi", "aammusi"}
+
+    for row in positive_rows:
+        candidates = [
+            item
+            for item in analyze_morphophonological_surface(str(row["surface"]))
+            if item.lemma == row["lemma"]
+        ]
+        assert candidates
+        assert {item.person for item in candidates} == {"3pl"}
+        assert all(
+            item.rule_id == "MORPH-CONJ-IIA-CLASS-ACT-001:i_vowel_glide"
+            for item in candidates
+        )
+        assert all(item.correction_allowed is False for item in candidates)
+
+
+def test_v12_score_demonstrates_post_baseline_multi_lemma_generalization() -> None:
+    result = v12_report()
+    combined = result["combined"]
+
+    assert combined["recognized_unique_surface_count"] == 2
+    assert combined["lemma_matched_unique_surface_count"] == 2
+    assert combined["pos_matched_unique_surface_count"] == 2
+    assert combined["conjugation_matched_unique_surface_count"] == 2
+    assert combined["tense_matched_unique_surface_count"] == 2
+    assert combined["mood_matched_unique_surface_count"] == 2
+    assert combined["deep_feature_matched_row_count"] == 2
+    assert combined["unknown_rejected_count"] == 8
+    assert combined["unknown_safety_rate"] == 1.0
+    assert combined["authority_diagnostics"]["reviewed_exact_surfaces"] == []
+    assert combined["authority_diagnostics"]["reviewed_rule_derived_surfaces"] == [
+        "aaddiyaan",
+        "aammusiyaan",
+    ]
+
+    master = result["master"]
+    assert master["recognized_unique_surface_count"] == 0
+    assert master["unknown_rejected_count"] == 8
