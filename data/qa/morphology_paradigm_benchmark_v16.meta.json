@@ -1,0 +1,92 @@
+{
+  "benchmark_version": "v16",
+  "benchmark_name": "Preselected Conjugation-2A 1pl past attestation challenge v16",
+  "manifest_path": "data/qa/morphology_paradigm_benchmark_v16.jsonl",
+  "manifest_git_blob_sha": "17f92a5d64aaa933a860c125e7fccb12f1b9ccf8",
+  "freeze_status": "candidate",
+  "freeze_commit": null,
+  "freeze_validation": null,
+  "measurement_status": "unmeasured",
+  "measured_result": null,
+  "pre_answer_target_registry_path": "data/qa/morphology_paradigm_v16_target_registry.json",
+  "pre_answer_target_registry_merge_commit": "ab04068f4ab7a2b563020f2375f22201f1d732c1",
+  "selected_target_lemmas": ["bushi", "butaaci", "buubi"],
+  "scored_target_lemmas": ["buubi"],
+  "unresolved_target_lemmas": ["bushi", "butaaci"],
+  "positive_case_count": 1,
+  "positive_unique_surface_count": 1,
+  "unknown_case_count": 8,
+  "total_case_count": 9,
+  "answer_sources": [
+    {
+      "target_lemma": "buubi",
+      "surface": "buubinnay",
+      "source_family": "Green 2021 Somali Grammar",
+      "publication_year": 2021,
+      "publisher": "De Gruyter Mouton",
+      "source_section": "7.5.1.3 Simple Past",
+      "source_table": "50",
+      "source_pages": [167, 168],
+      "source_url": "https://doi.org/10.1515/9781501503610",
+      "evidence_type": "explicit_scholarly_paradigm_table",
+      "feature_resolution": "Table 50 labels the columns 1SG/3SG.M, 2SG/3SG.F, 1PL, 2PL and 3PL and explicitly prints the weak-causative row buubiyay, buubisay, buubinnay, buubiseen, buubiyeen. The 1PL cell is therefore directly attested as buubinnay."
+    }
+  ],
+  "unresolved_targets": [
+    {
+      "lemma": "bushi",
+      "requested_cell": "1pl past",
+      "status": "unresolved_not_scored",
+      "reason": "No trustworthy explicit independent attestation of the selected 1pl-past cell was found during the v16 answer search. No surface is inferred from the C2A pattern."
+    },
+    {
+      "lemma": "butaaci",
+      "requested_cell": "1pl past",
+      "status": "unresolved_not_scored",
+      "reason": "No trustworthy explicit independent attestation of the selected 1pl-past cell was found during the v16 answer search. No surface is inferred from the C2A pattern."
+    }
+  ],
+  "pre_freeze_runtime_blob_identities": {
+    "rules/morphology/reviewed_conjugation_2_class_past_activation.json": "4ca74d7d73483214dd2744134d8140160d4632a6",
+    "src/morphology_analysis.py": "11b5b04e4c617100d0e05a20775420f5775e33a7",
+    "src/morphophonology_conj2_class_past.py": "81ef5aee4fa454330c689249f43e90e00f0c4fd5"
+  },
+  "pre_freeze_runtime_state": {
+    "authorized_class_past_persons": ["2sg", "2pl", "3pl"],
+    "generic_1pl_past_authorized": false,
+    "bushi_1pl_past_available": false,
+    "butaaci_1pl_past_available": false,
+    "buubi_1pl_past_available": false,
+    "target_specific_profiles_allowed": false
+  },
+  "benchmark_policy": {
+    "answers_are_evaluation_only": true,
+    "runtime_rule_learning_from_v16_allowed": false,
+    "answer_sources_may_not_authorize_special_case_runtime_forms": true,
+    "explicit_source_surfaces_only": true,
+    "inferred_unattested_surfaces_included": false,
+    "unresolved_targets_may_not_be_guessed": true,
+    "synthetic_unknowns_are_claimed_somali_forms": false,
+    "feature_scope_is_row_specific": true,
+    "mood_is_scored": false,
+    "future_generic_1pl_past_improvement_allowed_from_independent_development_evidence": true,
+    "development_rule_authority_must_be_independent_of_v16_answer_sources": true
+  },
+  "experimental_design": {
+    "target_selection_is_git_verifiable": true,
+    "target_selection_predates_answer_lookup": true,
+    "answer_lookup_started_only_after_registry_merge": true,
+    "partial_answer_set_is_intentional": true,
+    "global_generalization_claim_from_v16_alone_allowed": false,
+    "purpose": "Test the previously unsupported C2A 1pl past cell on preselected long-authorized class lemmas, scoring only explicit attestations and leaving unresolved targets unjudged."
+  },
+  "independence_limits": {
+    "full_paradigm_benchmark": false,
+    "single_positive_surface": true,
+    "answer_source_is_scholarly_grammar_table": true,
+    "answer_source_family_is_novel_to_project": false,
+    "post_freeze_development_authority_must_be_distinct_from_v16_answer_source": true,
+    "reason": "Green 2021 has contributed elsewhere in the project, so v16 is not a novel-source-family discovery benchmark. Its blindness comes from Git-verifiable target selection before answer lookup. Any post-freeze generic 1pl rule must still be authorized from an independent development source, not from the v16 buubinnay answer row."
+  },
+  "notes": "PR #46 merged the answer-free target registry before any 1pl answer lookup. The subsequent search found one explicit scored target: Green 2021 Table 50 prints buubinnay as the 1PL Simple Past weak-causative form. bushi and butaaci remain unresolved and are not scored or inferred. This candidate freeze changes no runtime morphology."
+}
