@@ -50,7 +50,25 @@
   "total_case_count": 10,
   "stage1n_reserve_class_only_lemmas": ["abhi", "afceli"],
   "pre_freeze_overlap_status": "class_known_targets_unactivated",
-  "measurement_status": "pending_measurement",
+  "measurement_status": "measured",
+  "measured_result": {
+    "full_test_suite": "1096/1096 passed",
+    "somali_ai_combined_positive_surface_recognition": "0/2",
+    "somali_ai_combined_lemma_matches": "0/2",
+    "somali_ai_combined_pos_matches": "0/2",
+    "somali_ai_combined_conjugation_2a_matches": "0/2",
+    "somali_ai_combined_present_tense_matches": "0/2",
+    "somali_ai_combined_indicative_mood_matches": "0/2",
+    "somali_ai_combined_deep_feature_rows": "0/2",
+    "somali_ai_reviewed_exact_positive_surface_recognition": "0/2",
+    "somali_ai_reviewed_rule_derived_positive_surface_recognition": "0/2",
+    "somali_ai_master_positive_surface_recognition": "0/2",
+    "target_activation_at_baseline": "0/2 targets activated",
+    "unknown_safety": "8/8 for combined runtime and master exact",
+    "tested_head_commit": "a4eb6e365b338856dc8667a2437235d553a8a9e1",
+    "tested_pull_request_merge_commit": "1879179fcb4d9c536894adb1a161819527dbfa3d",
+    "workflow_run_id": 33456661445
+  },
   "benchmark_policy": {
     "answers_are_evaluation_only": true,
     "runtime_rule_learning_from_v12_allowed": false,
@@ -80,5 +98,5 @@
     "kapchits_is_scholarly_source": true,
     "answer_sources_independent_of_v5_to_v11_answer_families": true
   },
-  "notes": "Stage 1N merged aaddi, aammusi, abhi and afceli as reviewed C2A class-only entries before any finite answer-source search. Stage 1M keeps them outside the activation allowlist. v12 freezes only two directly attested target surfaces: aaddiyaan and aammusiyaan. The other two Stage 1N lemmas remain untested reserves. After v12 freeze and baseline measurement, runtime may uniformly activate the complete Stage 1N cohort using already-reviewed C2A rules, but the v12 answer rows themselves may never be used to special-case either target."
+  "notes": "Stage 1N merged aaddi, aammusi, abhi and afceli as reviewed C2A class-only entries before any finite answer-source search. Stage 1M kept them outside the activation allowlist through the v12 freeze and baseline measurement. The first successful untouched measurement found 0/2 surface recognition, 0/2 complete deep-feature rows, no exact or rule-derived target hits, and 8/8 unknown safety. The historical baseline is now locked, but current runtime scores are allowed to improve later through uniform activation of the complete Stage 1N cohort using already-reviewed C2A rules. v12 answer rows may never be used to special-case either target."
 }
