@@ -3,7 +3,7 @@
   "benchmark_name": "Preauthorized Conjugation-2A multi-source natural 3pl glide challenge v12",
   "manifest_path": "data/qa/morphology_paradigm_benchmark_v12.jsonl",
   "manifest_git_blob_sha": "6ddfc6e97245911569e833472a2c4c71af76e17d",
-  "freeze_commit": "pending_merge",
+  "freeze_commit": "83c7a7d06a3a988b07a43835847e180b9b0d1fc3",
   "pre_freeze_class_authorization_commit": "0ab8f13d2e5bc932048b413ebb3a82b445193b6a",
   "pre_freeze_runtime_commit": "0ab8f13d2e5bc932048b413ebb3a82b445193b6a",
   "pre_freeze_blob_identities": {
