@@ -179,6 +179,8 @@ def iter_jsonl_candidates(
         counts[candidate.source] += 1
         yield candidate
 
+        # Stop once every requested source has reached its quota. Unresolved
+        # sources will normally never reach it unless explicitly enabled.
         active_sources = {
             source
             for source in requested_sources
