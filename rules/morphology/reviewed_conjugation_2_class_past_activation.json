@@ -6,13 +6,14 @@
   "conjugation_class": "2A",
   "tense_aspect": "past",
   "mood": "indicative",
-  "authorized_persons": ["1sg", "1pl", "2sg", "2pl", "3sg_m", "3pl"],
+  "authorized_persons": ["1sg", "1pl", "2sg", "2pl", "3sg_m", "3sg_f", "3pl"],
   "past_morphology": {
     "1sg": {"agreement": "", "tam": "ay"},
     "1pl": {"agreement": "n", "tam": "ay"},
     "2sg": {"agreement": "t", "tam": "ay"},
     "2pl": {"agreement": "s", "tam": "een"},
     "3sg_m": {"agreement": "", "tam": "ay"},
+    "3sg_f": {"agreement": "t", "tam": "ay"},
     "3pl": {"agreement": "", "tam": "een"}
   },
   "activated_lemmas": [
@@ -51,12 +52,12 @@
   "development_evidence": {
     "primary": {
       "citation": "Puglielli & Cabdallah Cumar Mansuur. 1997. Grammatica della lingua somala per le scuole medie superiori, section 6.3.2.1, grammar pp. 97-98 (PDF pp. 98-99); John I. Saeed. 1999. Somali, section 4.3.4.3 Past simple, p. 86.",
-      "evidence": "The already-reviewed Conjugation-2 morphophonology records Puglielli & Cabdallah Cumar Mansuur's explicit 2SG past waad joogi-s-ay, decomposed as joogi+t+ay, together with the rule that t changes to s after an i-final stem. The same reviewed rule records kari+t+ay as a C2A example of that assibilation. Saeed's explicit C2A past-simple table independently supplies the already-active plural cells 2PL kariseen and 3PL kariyeen. These development facts predate the corresponding benchmark answer lookups and no benchmark answer surface is used as runtime evidence.",
+      "evidence": "The already-reviewed Conjugation-2 morphophonology records Puglielli & Cabdallah Cumar Mansuur's explicit 2SG past waad joogi-s-ay, decomposed as joogi+t+ay, together with the rule that t changes to s after an i-final stem. The same reviewed source also prints wey kari-s-ay as kari+t+ay, independently exposing the t-bearing 3SG feminine past cell. Saeed's explicit C2A past-simple table independently supplies the already-active plural cells 2PL kariseen and 3PL kariyeen. These development facts predate the corresponding benchmark answer lookups and no benchmark answer surface is used as runtime evidence.",
       "source_path": "rules/morphology/reviewed_conjugation_2_morphophonology.json"
     },
     "independent_corroboration": {
       "citation": "Zorc et al. Somali textbook, Chapter 11 Second Conjugation Verbs, p. 85; GiellaLT Somali morphophonology documentation.",
-      "evidence": "The C2A kari paradigm independently prints second-person singular karisey/karisay, second-person plural kariseen, and third-person plural kariyeen, and explicitly describes the second-conjugation t-to-s change in the 2SG/3SGF cells. This corroborates the class mechanics without using buuxisay or any other frozen target answer source.",
+      "evidence": "The C2A kari paradigm independently prints second-person singular karisey/karisay, second-person plural kariseen, and third-person plural kariyeen, and explicitly describes the second-conjugation t-to-s change in the 2SG/3SGF cells. This corroborates the class mechanics without using buuxisay, caafisay, bushisay, or any other frozen target answer source.",
       "source_url": "https://zorc.net/RDZorc/SOMALI/Somali_Textbook-Chap%2310-15-Somali.pdf"
     },
     "first_plural_independent": {
@@ -69,17 +70,23 @@
       "evidence": "Orwin's explicit general-past C2A table gives kari + ay -> kariyay for 1SG and the same kariyay surface for 3SG masculine, and states that y is inserted between stem-final i and a. The Zorc reference grammar independently indexes kariyey as both 1SG past and 3SG masculine past. This independently authorizes the syncretic 1SG/3SG-masculine structure as empty agreement plus past ay using the already-reviewed i-vowel-glide process. The previously live 1SG analysis is retained and the newly activated 3SG masculine analysis is added as a second candidate for the same surface. Frozen v17 aaddiyay/buufiyay and frozen v18 aammusiyay/abhiyay answer rows are not used to author this rule.",
       "orthography_note": "Orwin prints -ay spelling (kariyay); Zorc also indexes the -ey variant kariyey. The existing project policy continues to defer broad ay/ey variant activation.",
       "benchmark_boundary": "v17 and v18 target answers remain evaluation-only; runtime authority comes from the pre-v18 Orwin/Zorc class evidence"
+    },
+    "third_singular_feminine_independent": {
+      "citation": "Puglielli & Cabdallah Cumar Mansuur. 1997. Grammatica della lingua somala per le scuole medie superiori, section 6.3.2.1, grammar pp. 97-98 (PDF pp. 98-99); Zorc et al. Somali textbook, Chapter 11 Second Conjugation Verbs, p. 85.",
+      "evidence": "The pre-v19 reviewed Puglielli evidence explicitly prints wey kari-s-ay and analyzes the C2A past ending as kari+t+ay with t changing to s after stem-final i. Zorc independently states that the same second-conjugation t-to-s alternation applies in the 2SG and 3SG feminine cells. This authorizes 3SG feminine as agreement t plus past ay through the already-reviewed i_t_assibilation process. Because 2SG uses the same underlying morphology, both person analyses must be retained for the same -isay surface.",
+      "benchmark_boundary": "Frozen v19 caafisay and bushisay remain evaluation-only and are not used to author or special-case the runtime rule."
     }
   },
   "scope_limits": {
-    "only_1sg_1pl_2sg_2pl_3sg_m_and_3pl_past_are_authorized": true,
+    "all_seven_staged_past_person_cells_authorized": true,
     "other_past_persons_inferred": false,
-    "full_past_paradigm_claimed": false,
+    "full_open_class_past_paradigm_claimed": false,
     "orthographic_ay_ey_variant_question_deferred": true,
     "first_plural_past_manner_alternation_deferred": false,
     "first_singular_and_third_singular_masculine_syncretism_documented": true,
+    "second_singular_and_third_singular_feminine_syncretism_documented": true,
     "third_singular_masculine_runtime_activation_deferred": false,
-    "third_singular_feminine_runtime_activation_deferred": true
+    "third_singular_feminine_runtime_activation_deferred": false
   },
   "benchmark_isolation": {
     "v5_answers_used_as_runtime_evidence": false,
@@ -96,6 +103,7 @@
     "v16_answers_used_as_runtime_evidence": false,
     "v17_answers_used_as_runtime_evidence": false,
     "v18_answers_used_as_runtime_evidence": false,
+    "v19_answers_used_as_runtime_evidence": false,
     "v13_afceli_special_case_allowed": false,
     "v14_buufi_special_case_allowed": false,
     "v14_caafi_special_case_allowed": false,
@@ -109,14 +117,17 @@
     "v17_afceli_special_case_allowed": false,
     "v18_aammusi_special_case_allowed": false,
     "v18_abhi_special_case_allowed": false,
+    "v19_caafi_special_case_allowed": false,
+    "v19_bushi_special_case_allowed": false,
     "v13_historical_baseline_merge_commit": "10e41ed8578672b015f8f51bfa1ee8de0158c5eb",
     "v14_historical_baseline_merge_commit": "36ea856fc4ad322ee4e8d41fb3a5a9ef579147f9",
     "v15_historical_baseline_merge_commit": "22959891cb4953e65a3037e4ace756f29febc8f8",
     "v16_historical_baseline_merge_commit": "385af8091945c7c40f058e8f0d262c02638333a2",
     "v17_historical_baseline_merge_commit": "6c818b3603f0cd73ce8ac6c6b6d4c6f21cda822d",
     "v18_historical_baseline_merge_commit": "3e6d10840dad48d578da53490b6e6b37605f7e16",
-    "complete_stage1o_class_cohort_activated_uniformly_for_1sg_1pl_2sg_2pl_3sg_m_and_3pl_past": true,
-    "note": "The 3SG masculine rule is activated from the same independent Orwin/Zorc development evidence that predates v18 and explicitly documents C2A 1SG/3SG-m syncretism as kariyay/kariyey. Frozen v18 aammusiyay and abhiyay remain evaluation-only and no target-specific profile is added. All eleven activated C2A class lemmas receive the same narrow 1SG/1PL/2SG/2PL/3SG-m/3PL past authority, with no open-class generation or correction authority."
+    "v19_historical_baseline_merge_commit": "695ca642ab5f9f1ab8da628bff8cb99b5874c210",
+    "complete_stage1o_class_cohort_activated_uniformly_for_all_seven_staged_past_person_cells": true,
+    "note": "The 3SG feminine rule is activated from pre-v19 Puglielli/Zorc class development evidence for the t-bearing 3SG-feminine cell and i+t assibilation. Frozen v19 caafisay and bushisay remain evaluation-only and no target-specific profile is added. All eleven activated C2A class lemmas receive the same narrow seven-cell past authority, with 1SG/3SG-m and 2SG/3SG-f syncretisms preserved as separate analyses, no open-class generation, and no correction authority."
   },
-  "notes": "Narrow generic C2A class-level past activation. It authorizes 1SG, 1PL, 2SG, 2PL, 3SG masculine and 3PL. 1SG and 3SG masculine are syncretic: both use empty agreement plus past ay with the reviewed i-vowel glide, yielding -iyay and remaining as separate analyses for the same surface. 1PL uses agreement n plus past ay with the reviewed weak-causative i+n -> inn alternation; 2SG uses reviewed i+t assibilation with past ay; 2PL uses stem + s + een; 3PL uses the reviewed i-vowel glide before een. The 3SG feminine cell remains unjudged at class level until separately staged. Mechanical generated outputs are recognition/analysis candidates only, are not claims of independent attestation, and never receive automatic correction authority."
+  "notes": "Narrow generic C2A class-level past activation for the complete seven-person staged set over the reviewed 11-lemma allowlist. 1SG and 3SG masculine are syncretic and both use empty agreement plus past ay with the reviewed i-vowel glide. 2SG and 3SG feminine are syncretic and both use agreement t plus past ay with reviewed i+t assibilation, yielding -isay while remaining separate analyses for the same surface. 1PL uses agreement n plus past ay with the reviewed weak-causative i+n -> inn alternation; 2PL uses stem + s + een; 3PL uses the reviewed i-vowel glide before een. Mechanical generated outputs are recognition/analysis candidates only, are not claims of independent attestation, and never receive automatic correction authority. This does not claim open-class or all-orthography past coverage."
 }
