@@ -1,0 +1,84 @@
+{
+  "benchmark_version": "v12",
+  "benchmark_name": "Preauthorized Conjugation-2A multi-source natural 3pl glide challenge v12",
+  "manifest_path": "data/qa/morphology_paradigm_benchmark_v12.jsonl",
+  "manifest_git_blob_sha": "6ddfc6e97245911569e833472a2c4c71af76e17d",
+  "freeze_commit": "pending_merge",
+  "pre_freeze_class_authorization_commit": "0ab8f13d2e5bc932048b413ebb3a82b445193b6a",
+  "pre_freeze_runtime_commit": "0ab8f13d2e5bc932048b413ebb3a82b445193b6a",
+  "pre_freeze_blob_identities": {
+    "rules/morphology/reviewed_conjugation_2_class_lexicon.json": "2c4cbf5e2736cb6bd4fee7614c5495258a44c3b3",
+    "rules/morphology/reviewed_conjugation_2_class_activation.json": "2ff0e40c4d85784fe2d7e0d94ab8f96c2287aeea",
+    "src/morphophonology_generator.py": "43a62617d4f6ad9c0fad0a446afcbd9724dc703b"
+  },
+  "class_authorization_source": {
+    "source_family": "Zorc 2019 Somali-English Dictionary",
+    "authorization_scope": "lemma_and_conjugation_class_only",
+    "target_lemmas": ["aaddi", "aammusi"],
+    "target_class": "2A",
+    "class_entries_merged_before_answer_search": true,
+    "surface_generation_enabled_before_freeze": false
+  },
+  "answer_sources": [
+    {
+      "source_family": "Dalka Journal 2023 Somali natural text",
+      "target_lemma": "aaddi",
+      "surface": "aaddiyaan",
+      "publication_date": "2023-10-10",
+      "source_url": "https://dalkajournal.so/xuska-bisha-mowliid-iyo-waxa-ay-culimadu-ka-tiri/",
+      "evidence_type": "natural_published_sentence",
+      "feature_resolution": "The printed clause has overt plural subject muslimiinta and finite predicate aaddiyaan; 3pl is resolved from subject agreement and present indicative from the clause/form context."
+    },
+    {
+      "source_family": "Kapchits 2005 Sentence particles in the Somali language",
+      "target_lemma": "aammusi",
+      "surface": "aammusiyaan",
+      "publication_year": 2005,
+      "publisher": "Shaker Verlag",
+      "source_page": 96,
+      "source_example": "324",
+      "source_url": "https://arcadia.sba.uniroma3.it/bitstream/2307/2149/1/Sentence%20particles%20in%20the%20Somali%20language.pdf",
+      "evidence_type": "scholarly_published_proverb_example",
+      "feature_resolution": "The printed proverb has a coordinated substantive subject and finite predicate aammusiyaan; surrounding discussion explains subject-pronoun omission in these waa proverbs. 3pl is resolved from plural agreement and present indicative from the construction/form context."
+    }
+  ],
+  "positive_case_count": 2,
+  "positive_unique_surface_count": 2,
+  "target_lemma_count": 2,
+  "syncretic_surface_count": 0,
+  "unknown_case_count": 8,
+  "total_case_count": 10,
+  "stage1n_reserve_class_only_lemmas": ["abhi", "afceli"],
+  "pre_freeze_overlap_status": "class_known_targets_unactivated",
+  "measurement_status": "pending_measurement",
+  "benchmark_policy": {
+    "answers_are_evaluation_only": true,
+    "runtime_rule_learning_from_v12_allowed": false,
+    "explicit_source_surfaces_only": true,
+    "inferred_unattested_surfaces_included": false,
+    "person_features_resolved_from_attested_subject_agreement": true,
+    "tense_mood_features_resolved_from_attested_finite_context": true,
+    "synthetic_unknowns_are_claimed_somali_forms": false,
+    "pre_freeze_class_authorization_allowed": true,
+    "pre_freeze_surface_generation_for_targets_enabled": false,
+    "post_freeze_uniform_activation_of_stage1n_cohort_allowed": true,
+    "v12_answer_rows_may_authorize_special_case_runtime_forms": false
+  },
+  "experimental_design": {
+    "class_authorization_predates_answer_search": true,
+    "class_authorization_predates_answer_freeze": true,
+    "answer_sources_distinct_from_class_authorization_source": true,
+    "two_distinct_answer_source_families": true,
+    "targets_were_not_in_activation_cohort_before_freeze": true,
+    "purpose": "Test whether the already-reviewed C2A 3pl i-vowel-glide process generalizes after freeze to two independently class-preauthorized lemmas attested in two unrelated natural-source contexts."
+  },
+  "independence_limits": {
+    "full_paradigm_benchmark": false,
+    "printed_person_labeled_paradigm_table": false,
+    "reason": "v12 deliberately tests two naturally attested 3pl finite surfaces rather than a full paradigm. Surface forms are explicit; person/tense/mood labels are resolved from the attested syntax and finite construction.",
+    "dalkajournal_is_scholarly_grammar": false,
+    "kapchits_is_scholarly_source": true,
+    "answer_sources_independent_of_v5_to_v11_answer_families": true
+  },
+  "notes": "Stage 1N merged aaddi, aammusi, abhi and afceli as reviewed C2A class-only entries before any finite answer-source search. Stage 1M keeps them outside the activation allowlist. v12 freezes only two directly attested target surfaces: aaddiyaan and aammusiyaan. The other two Stage 1N lemmas remain untested reserves. After v12 freeze and baseline measurement, runtime may uniformly activate the complete Stage 1N cohort using already-reviewed C2A rules, but the v12 answer rows themselves may never be used to special-case either target."
+}

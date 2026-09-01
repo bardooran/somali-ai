@@ -1,0 +1,10 @@
+{"id":"V12-AADDI-PRS-3PL","surface":"aaddiyaan","lemma":"aaddi","part_of_speech":"verb","conjugation":"2A","tense_aspect":"present","mood":"indicative","person":"3pl","source_family":"Dalka Journal 2023 Somali natural text","source_url":"https://dalkajournal.so/xuska-bisha-mowliid-iyo-waxa-ay-culimadu-ka-tiri/","source_date":"2023-10-10","source_note":"The article explicitly prints the clause 'waxay muslimiinta xuska maalintaas ku aaddiyaan bisha Mowliid'. The overt plural subject muslimiinta together with the predicate aaddiyaan supports the 3pl finite reading; only the printed surface is admitted.","benchmark_role":"positive"}
+{"id":"V12-AAMMUSI-PRS-3PL","surface":"aammusiyaan","lemma":"aammusi","part_of_speech":"verb","conjugation":"2A","tense_aspect":"present","mood":"indicative","person":"3pl","source_family":"Kapchits 2005 Sentence particles in the Somali language","source_url":"https://arcadia.sba.uniroma3.it/bitstream/2307/2149/1/Sentence%20particles%20in%20the%20Somali%20language.pdf","source_page":"96","source_example":"324","source_note":"Example 324 explicitly prints 'Hadal aadan filayn iyo fallaarba waa ku aammusiyaan'. The coordinated substantive subject supplies plural agreement; the surrounding discussion explains that short subjective pronouns are characteristically omitted in these waa proverbs. Only the printed finite surface is admitted.","benchmark_role":"positive"}
+{"id":"V12-UNK-01","surface":"aaddiyzz","benchmark_role":"unknown"}
+{"id":"V12-UNK-02","surface":"aaddiqyaan","benchmark_role":"unknown"}
+{"id":"V12-UNK-03","surface":"aammusiyzz","benchmark_role":"unknown"}
+{"id":"V12-UNK-04","surface":"aammusivyaan","benchmark_role":"unknown"}
+{"id":"V12-UNK-05","surface":"abhiyzz","benchmark_role":"unknown"}
+{"id":"V12-UNK-06","surface":"abhivyaan","benchmark_role":"unknown"}
+{"id":"V12-UNK-07","surface":"afceliyzz","benchmark_role":"unknown"}
+{"id":"V12-UNK-08","surface":"afceliqyaan","benchmark_role":"unknown"}
