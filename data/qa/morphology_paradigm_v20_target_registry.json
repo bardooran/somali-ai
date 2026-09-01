@@ -1,0 +1,40 @@
+{
+  "id": "MORPH-V20-TARGET-REGISTRY-001",
+  "status": "pre_answer_target_registry",
+  "target_lemmas": ["aaddi", "butaaci", "caajisi"],
+  "target_part_of_speech": "verb",
+  "target_conjugation_class": "2A",
+  "target_cells": [
+    {"mood": "imperative", "person": "2sg"},
+    {"mood": "imperative", "person": "2pl"},
+    {"form": "infinitive", "finite": false}
+  ],
+  "maximum_scored_rows": 9,
+  "answer_surfaces_recorded": false,
+  "answer_source_search_started": false,
+  "selection_commit_base": "b85279847233697bf19c808391d8898a30e7b69e",
+  "selection_rationale": "After v19, the reviewed 11-lemma C2A cohort has all seven present-indicative and all seven past-indicative person cells authorized. The next audited structural gap is imperative and infinitive/nonfinite morphology. aaddi, butaaci and caajisi are selected before any v20 answer-form lookup to create a cross-cohort nine-cell challenge. Only independently attested cells may later be scored; unresolved cells remain unscored.",
+  "pre_answer_state": {
+    "class_entries_predate_v20": true,
+    "generic_present_all_seven_persons_predates_v20": true,
+    "generic_past_all_seven_persons_predates_v20": true,
+    "generic_c2a_imperative_activation_exists": false,
+    "generic_c2a_infinitive_activation_exists": false,
+    "target_specific_profiles_exist": false,
+    "v20_answers_used_as_runtime_evidence": false,
+    "correction_authority": false,
+    "open_class_generation": false,
+    "reverse_suffix_stripping": false
+  },
+  "benchmark_policy": {
+    "external_answer_lookup_allowed_only_after_registry_merge": true,
+    "answers_will_be_evaluation_only": true,
+    "target_specific_runtime_special_cases_allowed": false,
+    "inferred_unattested_forms_allowed": false,
+    "unknown_safety_probes_required": true,
+    "development_rule_authority_must_be_independent_of_v20_answer_sources": true,
+    "unresolved_cells_must_remain_unscored": true,
+    "orthographic_variants_must_be_attested_not_assumed": true
+  },
+  "notes": "This registry intentionally contains no v20 imperative or infinitive surface answers. Its purpose is to create a Git-verifiable pre-answer checkpoint for the first larger post-v19 C2A paradigm block."
+}
