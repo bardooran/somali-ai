@@ -1,10 +1,57 @@
 # Competitive Scoreboard
 
-Last measured: 2026-08-31
+Last measured: 2026-09-01
 
-This document records reproducible competitive evidence for Somali AI. It is not a marketing scorecard. A project is only called ahead on a metric that has actually been measured on the same frozen benchmark or on another directly comparable evaluation.
+This document records reproducible competitive evidence for Somali AI. It is not a marketing scorecard.
 
-## Morphology: frozen analyzer-blind challenge v4
+**Claim rule:** a project is only called ahead on a metric that has actually been measured on the same frozen benchmark with the same scoring rules. A narrow metric win is not an overall-system win. Passing Somali AI's own tests is never evidence that Somali AI beat another system.
+
+## Current morphology result: independent paradigm challenge v5
+
+v5 is the current strongest directly comparable morphology benchmark because it uses an independent published source family and tests inflected forms with grammatical features rather than only lexical/headword recognition.
+
+Benchmark identity:
+
+- Source: Morgan Nilsson, *Learner's Somali Grammar* (2025), University of Gothenburg course/reference literature.
+- 37 positive rows representing 33 unique positive surfaces, plus 8 deterministic unknown probes.
+- Frozen manifest: `data/qa/morphology_paradigm_benchmark_v5.jsonl`.
+- Frozen manifest git blob SHA: `75f5e3f7b2da98b5b6eef4d2c76a1249596bc1ec`.
+- Freeze commit: `a31cf5fb083870abdb94c0d2996963c2851664d9`.
+- Pre-freeze Somali AI runtime commit: `da24c0d11d9e538a92e6fbabd0c2ff7d19b39608`.
+- GiellaLT commit: `5278929712e9c0c67f254f1a1dc64c80ea7b2b8d`.
+- Successful comparison workflow run: `33441911288`.
+- 25 of the 33 positive surfaces were absent from Somali AI master recognition before the benchmark freeze.
+
+| Metric | Somali AI | GiellaLT | Leader |
+| --- | ---: | ---: | --- |
+| Exact positive-surface recognition | 8 / 33 (24.24%) | **25 / 33 (75.76%)** | GiellaLT |
+| Lemma recall | 5 / 33 (15.15%) | **24 / 33 (72.73%)** | GiellaLT |
+| POS recall | 5 / 33 (15.15%) | **24 / 33 (72.73%)** | GiellaLT |
+| Comparable deep morphology features | 0 / 37 (0%) | **19 / 37 (51.35%)** | GiellaLT |
+| Syncretic ambiguity preservation | 0% | **100%** | GiellaLT |
+| Unknown-word safety | **8 / 8 (100%)** | **8 / 8 (100%)** | Tie |
+
+### v5 unseen/generalization subset
+
+Among the 25 positive surfaces that were absent from Somali AI master recognition before freeze:
+
+- Somali AI recognized **0 / 25**.
+- GiellaLT recognized **17 / 25 (68%)**.
+
+This is the clearest current morphology gap. It shows that Somali AI's main problem is not merely storing more forms; it needs stronger generic paradigm generalization from known lemmas and independently supported class rules.
+
+### v5 interpretation
+
+- **GiellaLT leads 5 measured morphology metrics.**
+- **Unknown-word safety is tied.**
+- **Somali AI has 0 verified metric wins on v5.**
+- No global winner is declared because v5 does not combine unlike metrics into an arbitrary overall score.
+- The v5 generation diagnostic for GiellaLT matched 5 / 29 eligible rows (17.24%), but v5 did not evaluate a directly comparable general Somali AI generator. Therefore this is **not** a Somali AI generation win.
+- v5 is now visible and must be treated as a diagnostic/regression benchmark, not as an unseen benchmark for future competitive claims.
+
+## Historical lexical benchmark: frozen analyzer-blind challenge v4
+
+v4 remains a valid historical lexical/headword benchmark, but it is narrower than v5 and must not be used to claim overall morphology leadership.
 
 Benchmark identity:
 
@@ -13,62 +60,25 @@ Benchmark identity:
 - All 230 positive surfaces used by v2/v3 were excluded before v4 selection; overlap is zero.
 - Frozen manifest SHA-256: `6a61900ea57a2c0f77121eb133195c4cae1246a518624b361d37d924e33cb3ce`.
 - Exact frozen benchmark commit: `03f855e4865a21aea60ea570ecb3a35a2a6d10c7`.
-- Selection was analyzer-blind and frozen before v4 runtime evaluation.
-- GiellaLT was compiled from commit `5278929712e9c0c67f254f1a1dc64c80ea7b2b8d`.
-- Successful compiled comparison run: GitHub Actions `33437673300`.
-- Normal Somali AI CI for the benchmark harness also passed: run `33437673310`, 992 tests.
-- Scope is fresh lexical recognition, coarse part-of-speech agreement, and unknown safety. It is not a complete morphology-quality score.
+- GiellaLT commit: `5278929712e9c0c67f254f1a1dc64c80ea7b2b8d`.
+- Successful compiled comparison run: `33437673300`.
+- Scope: fresh lexical recognition, coarse POS agreement, and unknown safety; not deep paradigm morphology.
 
-| Metric | Somali AI reviewed-only | Somali AI master exact recognition | Compiled GiellaLT | Current leader |
+| Metric | Somali AI reviewed-only | Somali AI master exact recognition | Compiled GiellaLT | Leader on v4 |
 | --- | ---: | ---: | ---: | --- |
 | Positive recognition | 1 / 144 (0.69%) | **62 / 144 (43.06%)** | 58 / 144 (40.28%) | Somali AI master |
 | Expected POS coverage | 1 / 144 (0.69%) | **57 / 144 (39.58%)** | 50 / 144 (34.72%) | Somali AI master |
 | Exact POS cases | 1 / 144 (0.69%) | **55 / 144 (38.19%)** | 43 / 144 (29.86%) | Somali AI master |
-| POS precision | **100.00%** | **91.94%** | 78.13% | Reviewed-only on precision; Somali AI master leads broad systems |
+| POS precision | **100.00%** | **91.94%** | 78.13% | Reviewed-only on precision; Somali AI master over broad systems |
 | Unknown safety | 16 / 16 (100%) | 16 / 16 (100%) | 16 / 16 (100%) | Tie |
 
-The reviewed-only runtime is deliberately tiny and conservative, so its 100% POS precision is not a breadth claim. The directly useful competitive comparison is master recognition vs compiled GiellaLT: Somali AI master leads every aggregate positive metric on this untouched v4 draw while both systems reject all unknown probes.
+Correct interpretation: Somali AI master led GiellaLT on these **v4 lexical metrics only**. This never proved that Somali AI was a better morphology system overall, and the later, deeper v5 paradigm benchmark shows GiellaLT substantially ahead on inflected-form analysis/generalization.
 
-### v4 category diagnostics
+## Historical analyzer-blind challenge v3
 
-| Category | Metric | Somali AI master | Compiled GiellaLT | Leader |
-| --- | --- | ---: | ---: | --- |
-| Noun (64) | Recognition | **10 / 64 (15.63%)** | 6 / 64 (9.38%) | Somali AI |
-| Noun | Expected POS coverage | **7 / 64 (10.94%)** | 0 / 64 (0.00%) | Somali AI |
-| Noun | Exact POS | **6 / 64 (9.38%)** | 0 / 64 (0.00%) | Somali AI |
-| Noun | POS precision | **70.00%** | 0.00% | Somali AI |
-| Verb (64) | Recognition | 44 / 64 (68.75%) | 44 / 64 (68.75%) | Tie |
-| Verb | Expected POS coverage | 43 / 64 (67.19%) | 43 / 64 (67.19%) | Tie |
-| Verb | Exact POS | 42 / 64 (65.63%) | **43 / 64 (67.19%)** | GiellaLT |
-| Verb | POS precision | 97.73% | **100.00%** | GiellaLT |
-| Numeral (16) | Recognition | 8 / 16 (50.00%) | 8 / 16 (50.00%) | Tie |
-| Numeral | Expected POS coverage | 7 / 16 (43.75%) | 7 / 16 (43.75%) | Tie |
-| Numeral | Exact POS | **7 / 16 (43.75%)** | 0 / 16 (0.00%) | Somali AI |
-| Numeral | POS precision | **87.50%** | 46.67% | Somali AI |
+v3 remains a historical diagnostic. It has no principled weighted composite score and no overall winner should be declared.
 
-v4 changes the immediate morphology target. The prior v3 raw-recognition deficit should **not** be answered by adding benchmark words: on a fresh disjoint draw Somali AI master already leads GiellaLT 62–58 overall and 10–6 on nouns. The harder next proof is paradigm-level morphology: held-out surface analysis and generation with lemma/person/tense/mood/class features, ambiguity handling, and overgeneration safety.
-
-Important limitation: v2, v3, and v4 are disjoint selections but come from the same pinned Qaamuus source family. They are strong leakage-controlled lexical tests, not fully source-independent morphology evidence. The next morphology benchmark should therefore use an independent published source and report pre-freeze runtime overlap explicitly.
-
-## Morphology: independent paradigm challenge v5 (freeze in progress)
-
-Source family: Morgan Nilsson, *Learner's Somali Grammar* (2025), University of Gothenburg course/reference literature. The source is independent of the Qaamuus family used for v2-v4. v5 is designed to test explicit inflected surface forms with grammatical features rather than headword recognition. Its freeze protocol must record pre-freeze overlap with the Somali AI reviewed runtime and master recognition index, and the unseen subset must be scored separately.
-
-No v5 winner is recorded until the manifest is frozen and both systems have been evaluated unchanged.
-
-## Morphology: frozen analyzer-blind challenge v3
-
-Benchmark identity:
-
-- 126 total cases: 110 positive Somali lexical cases + 16 unknown probes.
-- Positive composition: 48 nouns, 48 verbs, 8 numerals, 6 adjectives.
-- Zero positive overlap with challenge v2.
-- Frozen manifest SHA-256: `7222ef7a4e4f0c9b960b5feece50aaba11737dc7f3265040cfdac6a3e99ffd6c`.
-- Selection was frozen before the master-recognition bridge was evaluated.
-- GiellaLT was compiled from commit `5278929712e9c0c67f254f1a1dc64c80ea7b2b8d`, which was also the live `bardooran/GiellaLT` `main` commit when this result was checked on 2026-08-31.
-- Scope is lexical recognition, coarse part-of-speech agreement, and unknown safety. It is not a complete morphology-quality score.
-
-| Metric | Somali AI reviewed-only | Somali AI master exact recognition | Compiled GiellaLT | Current leader |
+| Metric | Somali AI reviewed-only | Somali AI master exact recognition | Compiled GiellaLT | Leader on v3 |
 | --- | ---: | ---: | ---: | --- |
 | Positive recognition | 0 / 110 (0.00%) | 44 / 110 (40.00%) | **53 / 110 (48.18%)** | GiellaLT |
 | Expected POS coverage | 0 / 110 (0.00%) | **40 / 110 (36.36%)** | 37 / 110 (33.64%) | Somali AI master |
@@ -76,24 +86,31 @@ Benchmark identity:
 | POS precision | 0.00% | **85.11%** | 59.68% | Somali AI master |
 | Unknown safety | 16 / 16 (100%) | 16 / 16 (100%) | 16 / 16 (100%) | Tie |
 
-No overall winner is declared. v3 has no principled weighted composite score. The later v4 result is the current lexical benchmark; v3 remains useful as a historical disjoint diagnostic.
-
-The runtime distinction is intentional. Reviewed-only data remains the conservative correction authority. Master-store records may be recognized at trusted, supported, or provisional confidence, but provisional recognition does not authorize correction.
-
 ## Competitive areas
 
 | Area | Current external reference | Measurement status | Somali AI next proof target |
 | --- | --- | --- | --- |
-| Morphology / lexical breadth | GiellaLT | v4: Somali AI master leads aggregate lexical metrics; no full morphology winner | Freeze independent cross-source paradigm analysis/generation benchmark |
-| Grammar / syntax | SLS plus project evidence | Not yet a directly comparable executable benchmark | Build a frozen sentence-level benchmark before claiming leadership |
+| Morphology / paradigms | GiellaLT | v5: GiellaLT leads 5 metrics, unknown safety tied | Improve generic class-level generalization, then freeze a new unseen cross-source benchmark |
+| Lexical/headword recognition | GiellaLT | v4: Somali AI master led aggregate lexical metrics on that frozen draw | Preserve as historical result; do not generalize it to full morphology |
+| Grammar / syntax | SLS plus project evidence | Not yet directly comparable | Build frozen sentence-level benchmark before claiming leadership |
 | Orthography / spellchecking | GiellaLT | Not yet directly benchmarked | Build typo, real-word error, variant, and false-positive suites |
-| Corpus quality / scale | SomNLP | Source corpus measurements exist; not a Somali AI win claim | Measure clean usable text, provenance, duplication, dialect distribution, and license-safe training eligibility |
-| Tokenization | SomNLP | Not yet directly benchmarked by Somali AI | Compare Somali words/token, fragmentation, names, clitics, morphology, and compression on held-out Somali text |
-| Regional Somali | No established single leader | Foundation exists; no competitive benchmark yet | Build region-labeled held-out evaluation without treating variation as error |
-| QA / evaluation | No established single leader | Four frozen morphology benchmark generations now exist | Expand independent held-out suites across morphology, grammar, orthography, regional usage, and assistant quality |
-| Conversation / reasoning | No comparable system among these repositories | Assistant exists; live-model semantic eval awaits credentials | Build Somali-first blind human/LLM-judge evaluation with leakage controls |
-| Standalone Somali model | No current winner among these four projects | Not yet built | Train/fine-tune only after data and evaluation foundations are strong enough |
+| Corpus quality / scale | SomNLP | No competitive win established | Measure clean usable text, provenance, duplication, dialect distribution, and license-safe training eligibility |
+| Tokenization | SomNLP | Not yet directly benchmarked | Compare fragmentation and compression on held-out Somali text |
+| Regional Somali | No established single leader | No competitive benchmark yet | Build region-labeled held-out evaluation without treating variation as error |
+| QA / evaluation | No established single leader | Multiple frozen morphology benchmarks exist | Expand independent held-out suites across morphology, grammar, orthography, regional usage, and assistant quality |
+| Conversation / reasoning | No comparable system among these repositories | Assistant exists; no fair external win established | Build Somali-first blind evaluation with leakage controls |
+| Standalone Somali model | No current project result | Not yet built | Train/fine-tune only after data and evaluation foundations are strong enough |
 
 ## Rules for future claims
 
-Raw record counts are not competitive wins. Derived sources are not counted as independent confirmation. Benchmark answers must never be copied into runtime as trusted knowledge merely to raise the score. Corpus occurrence is attestation, not grammatical correctness. Every competitive result should name the benchmark identity, exact repository commits, metric definitions, and known limitations.
+A statement such as **"Somali AI beat GiellaLT"** is not allowed unless all of the following are true:
+
+1. Both systems ran the same task.
+2. Both systems used the same frozen test set.
+3. The same scoring rules were applied.
+4. The evaluation data was genuinely unseen/frozen before the relevant development work.
+5. Raw outputs and exact system versions/commits are reproducible.
+6. The result is saved and inspectable.
+7. The wording names the exact task/benchmark instead of implying overall superiority.
+
+Raw record counts are not competitive wins. Internal regression-test counts are not competitive wins. Derived sources are not independent confirmation. Benchmark answers must never be copied into runtime as trusted knowledge merely to raise a score. Corpus occurrence is attestation, not grammatical correctness.

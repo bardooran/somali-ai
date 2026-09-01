@@ -4,6 +4,20 @@ This file tracks structural cleanup separately from linguistic development.
 
 Rule: **do not delete or move language data until dependencies and unique evidence are checked.**
 
+## Cleanup completed — 2026-09-01
+
+### Competitive-evidence safety pass
+
+- Corrected `docs/COMPETITIVE_SCOREBOARD.md`, which still described v5 as "freeze in progress" after the benchmark had already completed.
+- Recorded the measured v5 result: GiellaLT leads 5 directly comparable morphology metrics; unknown-word safety is tied; Somali AI has 0 metric wins on v5.
+- Preserved the historical v4 lexical result but narrowed its interpretation explicitly: it is a lexical/headword benchmark result, not proof of overall morphology leadership.
+- Added `docs/BENCHMARK_CLAIMS_POLICY.md` so internal test counts, development probes, and narrow benchmark wins cannot be reported as broader competitive wins.
+- Explicitly marked inspected frozen benchmarks as diagnostic/regression data for future development; new unseen claims require newly frozen evaluation data.
+- Added `tests/test_benchmark_runtime_isolation.py`, a CI guard that scans production `src/` modules and fails if they directly read `data/qa/` or import benchmark/challenge/paradigm evaluation modules.
+- The guard deliberately exempts benchmark/evaluation tooling itself, because those programs must read frozen manifests in order to score them.
+- The guard includes coverage assertions for core morphology runtime files so those files cannot silently fall out of protection because of a naming change.
+- No morphology runtime rules, reviewed evidence, benchmark manifests, or language data were changed in this pass.
+
 ## Cleanup completed — 2026-08-31
 
 | Old location/name | New location/name | Result |
@@ -42,9 +56,11 @@ Some internal linguistic data may still use technical words such as `lexical` in
 
 Potential future work:
 
+- audit scoreboard/status documents for stale benchmark states when a new benchmark finishes;
+- consider a manifest registry if benchmark count grows enough that filename-based evaluation-tool classification becomes hard to maintain;
 - reorganize the increasingly large flat `tests/` directory by domain;
 - eventually package Python code as `src/somali_grammar/`;
 - continue auditing duplicate or obsolete files;
 - keep root files minimal.
 
-These should remain behavior-neutral refactors and should always be followed by the full automated test suite.
+These should remain behavior-neutral refactors and should always be followed by the full automated test suite when code or runtime-sensitive files are touched.
