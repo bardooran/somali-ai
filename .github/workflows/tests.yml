@@ -61,3 +61,6 @@ jobs:
 
       - name: Print frozen preselected C2A 2pl past paradigm v14 baseline
         run: python -m src.morphology_paradigm_v14
+
+      - name: Print frozen preselected C2A 2sg past paradigm v15 baseline
+        run: python -m src.morphology_paradigm_v15
