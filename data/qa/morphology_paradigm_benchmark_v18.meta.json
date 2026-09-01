@@ -2,7 +2,7 @@
   "benchmark_version": "v18",
   "benchmark_name": "Preselected Conjugation-2A 3sg masculine past attestation challenge v18",
   "manifest_path": "data/qa/morphology_paradigm_benchmark_v18.jsonl",
-  "manifest_git_blob_sha": "650beeccc8c369ef22024f6a78d396be30d947d5",
+  "manifest_git_blob_sha": "bb33f8038ca8c2225e03bec17bfc8b01cde195d3",
   "freeze_commit": "pending_validation",
   "freeze_status": "frozen_pending_validation",
   "freeze_validation": {
