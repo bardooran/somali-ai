@@ -24,7 +24,7 @@ def test_v20_manifest_is_frozen_after_registry_merge() -> None:
     positives = [row for row in rows if row["benchmark_role"] == "positive"]
     unknowns = [row for row in rows if row["benchmark_role"] == "unknown"]
 
-    assert meta["status"] == "frozen_pending_baseline"
+    assert meta["status"] == "historical_baseline_locked"
     assert meta["registry_merge_commit"] == "2130e2bf53d29e5b4b015778009dac44b53639f3"
     assert meta["benchmark_blob_sha"] == "08a3f58a73fdc2bbfb5c9381932fed295403dcf8"
     assert len(positives) == 5
