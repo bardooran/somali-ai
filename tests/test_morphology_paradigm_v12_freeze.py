@@ -99,7 +99,7 @@ def test_v12_targets_were_class_known_but_unactivated_before_freeze() -> None:
     activated = set(eligible_conj2_class_activation_lemmas())
     explicit_profiles = set(eligible_conj2_profile_lemmas())
 
-    for lemma in TARGETS | RESERVE_STAGE1N:
+    for lemma in set(TARGETS) | RESERVE_STAGE1N:
         entry = reviewed_class_entry(lemma)
         assert entry is not None
         assert entry.part_of_speech == "verb"
