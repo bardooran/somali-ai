@@ -45,6 +45,32 @@ def test_v18_measurement_preserves_unknown_safety_and_evaluation_boundary() -> N
     assert integrity["unresolved_targets_may_not_be_guessed"] is True
 
 
+def test_v18_metadata_locks_untouched_historical_baseline() -> None:
+    benchmark = report()["benchmark"]
+    measured = benchmark["measured_result"]
+
+    assert benchmark["measurement_status"] == "measured"
+    assert measured["full_test_suite"] == "1195/1195 passed"
+    assert measured["pull_request"] == 56
+    assert measured["tested_head_commit"] == "32904a205ba8f789415e3b1e9acaa1e75227d1a2"
+    assert measured["workflow_run_id"] == 33496886364
+    assert measured["workflow_job_id"] == 99821019191
+    assert measured["somali_ai_combined_positive_surface_recognition"] == "2/2"
+    assert measured["somali_ai_combined_lemma_matches"] == "2/2"
+    assert measured["somali_ai_combined_pos_matches"] == "2/2"
+    assert measured["somali_ai_combined_conjugation_2a_matches"] == "2/2"
+    assert measured["somali_ai_combined_past_tense_matches"] == "2/2"
+    assert measured["somali_ai_combined_3sg_m_person_matches"] == "0/2"
+    assert measured["somali_ai_combined_deep_feature_rows"] == "0/2"
+    assert measured["somali_ai_existing_1sg_analysis"] == "2/2"
+    assert measured["somali_ai_1sg_3sg_m_syncretism_preserved"] == "0/2"
+    assert measured["somali_ai_reviewed_exact_positive_surface_recognition"] == "0/2"
+    assert measured["somali_ai_reviewed_rule_derived_positive_surface_recognition"] == "2/2"
+    assert measured["somali_ai_master_positive_surface_recognition"] == "0/2"
+    assert measured["unknown_safety"] == "8/8 for combined runtime and master exact"
+    assert "3sg_m person and deep-feature resolution remained 0/2" in benchmark["notes"]
+
+
 def test_v18_scorer_exposes_syncretism_without_forcing_unique_person() -> None:
     diagnostics = report()["combined"]["syncretism_diagnostics"]
 
