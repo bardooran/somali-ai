@@ -4,6 +4,17 @@ This file tracks structural cleanup separately from linguistic development.
 
 Rule: **do not delete or move language data until dependencies and unique evidence are checked.**
 
+## Cleanup completed — 2026-09-01
+
+### Competitive-evidence safety pass
+
+- Corrected `docs/COMPETITIVE_SCOREBOARD.md`, which still described v5 as "freeze in progress" after the benchmark had already completed.
+- Recorded the measured v5 result: GiellaLT leads 5 directly comparable morphology metrics; unknown-word safety is tied; Somali AI has 0 metric wins on v5.
+- Preserved the historical v4 lexical result but narrowed its interpretation explicitly: it is a lexical/headword benchmark result, not proof of overall morphology leadership.
+- Added `docs/BENCHMARK_CLAIMS_POLICY.md` so internal test counts, development probes, and narrow benchmark wins cannot be reported as broader competitive wins.
+- Explicitly marked inspected frozen benchmarks as diagnostic/regression data for future development; new unseen claims require newly frozen evaluation data.
+- No morphology runtime rules, reviewed evidence, benchmark manifests, or language data were changed in this pass.
+
 ## Cleanup completed — 2026-08-31
 
 | Old location/name | New location/name | Result |
@@ -42,9 +53,11 @@ Some internal linguistic data may still use technical words such as `lexical` in
 
 Potential future work:
 
+- add automated checks that frozen benchmark manifests are not imported by runtime-authority code;
+- audit scoreboard/status documents for stale benchmark states when a new benchmark finishes;
 - reorganize the increasingly large flat `tests/` directory by domain;
 - eventually package Python code as `src/somali_grammar/`;
 - continue auditing duplicate or obsolete files;
 - keep root files minimal.
 
-These should remain behavior-neutral refactors and should always be followed by the full automated test suite.
+These should remain behavior-neutral refactors and should always be followed by the full automated test suite when code or runtime-sensitive files are touched.
