@@ -3,9 +3,15 @@
   "benchmark_name": "Preselected Conjugation-2A 1pl past attestation challenge v16",
   "manifest_path": "data/qa/morphology_paradigm_benchmark_v16.jsonl",
   "manifest_git_blob_sha": "17f92a5d64aaa933a860c125e7fccb12f1b9ccf8",
-  "freeze_status": "candidate",
-  "freeze_commit": null,
-  "freeze_validation": null,
+  "freeze_status": "frozen",
+  "freeze_commit": "dd7905fcfaa66175aadc2d52d49a05f6417f78c4",
+  "freeze_validation": {
+    "full_test_suite": "1165/1165 passed",
+    "pull_request": 47,
+    "tested_head_commit": "dd7905fcfaa66175aadc2d52d49a05f6417f78c4",
+    "workflow_job_id": 99793741065,
+    "workflow_run_id": 33488380081
+  },
   "measurement_status": "unmeasured",
   "measured_result": null,
   "pre_answer_target_registry_path": "data/qa/morphology_paradigm_v16_target_registry.json",
@@ -88,5 +94,5 @@
     "post_freeze_development_authority_must_be_distinct_from_v16_answer_source": true,
     "reason": "Green 2021 has contributed elsewhere in the project, so v16 is not a novel-source-family discovery benchmark. Its blindness comes from Git-verifiable target selection before answer lookup. Any post-freeze generic 1pl rule must still be authorized from an independent development source, not from the v16 buubinnay answer row."
   },
-  "notes": "PR #46 merged the answer-free target registry before any 1pl answer lookup. The subsequent search found one explicit scored target: Green 2021 Table 50 prints buubinnay as the 1PL Simple Past weak-causative form. bushi and butaaci remain unresolved and are not scored or inferred. This candidate freeze changes no runtime morphology."
+  "notes": "PR #46 merged the answer-free target registry before any 1pl answer lookup. The subsequent search found one explicit scored target: Green 2021 Table 50 prints buubinnay as the 1PL Simple Past weak-causative form. bushi and butaaci remain unresolved and are not scored or inferred. PR #47 first validated this frozen benchmark on head dd7905fc with 1165/1165 tests passed while runtime morphology remained unchanged."
 }
