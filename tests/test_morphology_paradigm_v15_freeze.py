@@ -90,8 +90,15 @@ def test_v15_metadata_records_frozen_partial_attestation_without_guessing_caajis
         "workflow_job_id": 99719176772,
         "full_test_suite": "1142/1142 passed",
     }
-    assert meta["measurement_status"] == "not_measured"
-    assert meta["measured_result"] is None
+    assert meta["measurement_status"] == "measured"
+    assert meta["measured_result"]["tested_head_commit"] == (
+        "cf9fe4cab77072fbeca28aa9ba5e58aea3a6c8fa"
+    )
+    assert meta["measured_result"]["somali_ai_combined_positive_surface_recognition"] == "0/1"
+    assert meta["measured_result"]["somali_ai_combined_deep_feature_rows"] == "0/1"
+    assert meta["measured_result"]["unknown_safety"] == (
+        "8/8 for combined runtime and master exact"
+    )
     assert meta["pre_answer_target_registry_merge_commit"] == (
         "fb56031809f9b9e75d4d01aa4e023897f730235a"
     )
