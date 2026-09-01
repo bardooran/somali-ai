@@ -70,3 +70,6 @@ jobs:
 
       - name: Print frozen preselected C2A 1sg past paradigm v17 baseline
         run: python -m src.morphology_paradigm_v17
+
+      - name: Print frozen preselected C2A 3sg masculine past paradigm v18 baseline
+        run: python -m src.morphology_paradigm_v18
