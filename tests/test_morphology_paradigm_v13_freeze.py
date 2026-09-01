@@ -64,9 +64,16 @@ def test_v13_freeze_metadata_pins_pre_answer_runtime_state() -> None:
 
     assert meta["benchmark_version"] == "v13"
     assert meta["manifest_git_blob_sha"] == "fe0d0617cdeb40b22c95633dc3b644c238583309"
-    assert meta["freeze_commit"] is None
-    assert meta["freeze_status"] == "pending_merge"
-    assert meta["measurement_status"] == "pending_measurement"
+    assert meta["freeze_commit"] == "5dd761c6c0187b15e0039f7e6f9cdb8d8c67140b"
+    assert meta["freeze_status"] == "frozen"
+    assert meta["measurement_status"] in {"pending_measurement", "measured"}
+    assert meta["freeze_validation"] == {
+        "pull_request": 35,
+        "tested_head_commit": "d829b6ab59d03b02e13839d418afa6467bdf1c36",
+        "workflow_run_id": 33459430413,
+        "workflow_job_id": 99706272358,
+        "full_test_suite": "1103/1103 passed",
+    }
     assert meta["pre_answer_activation_commit"] == (
         "4b2bed488dbbb89d26ac48ca7f87a4de7464d6c3"
     )
