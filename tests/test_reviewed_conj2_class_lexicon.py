@@ -122,7 +122,7 @@ def test_stage1n_batch_is_class_only_but_explicitly_activated_by_separate_policy
             candidate = generate_class_authorized_conj2_present(lemma, person)
             assert candidate is not None
             assert candidate.lemma == lemma
-            assert candidate.authority == "reviewed_rule_derived"
+            assert candidate.status == "reviewed_rule_derived"
             assert candidate.correction_allowed is False
 
 
