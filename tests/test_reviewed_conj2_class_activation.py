@@ -73,7 +73,10 @@ def test_activation_cohort_is_explicitly_frozen_to_pre_v11_registry() -> None:
 
 
 def test_activation_uniformly_covers_complete_pre_v11_c2a_registry() -> None:
-    assert reviewed_class_lemmas("2A") == EXPECTED_CLASS_LEMMAS
+    # The reviewed class lexicon may grow after v11. Activation must remain frozen
+    # to the pre-v11 cohort until a later explicit activation stage.
+    known_c2a = set(reviewed_class_lemmas("2A"))
+    assert set(EXPECTED_CLASS_LEMMAS).issubset(known_c2a)
     assert eligible_conj2_class_activation_lemmas() == EXPECTED_CLASS_LEMMAS
 
     for lemma in EXPECTED_CLASS_LEMMAS:
