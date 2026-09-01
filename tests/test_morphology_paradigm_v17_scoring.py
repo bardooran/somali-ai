@@ -30,24 +30,6 @@ def test_v17_scorer_keeps_scored_and_unresolved_targets_separate() -> None:
         assert details["target_in_class_past_activation_cohort"] is True
 
 
-def test_v17_untouched_runtime_baseline_is_zero_of_two() -> None:
-    result = report()
-    combined = result["combined"]
-    master = result["master"]
-
-    assert combined["recognized_unique_surface_count"] == 0
-    assert combined["lemma_matched_unique_surface_count"] == 0
-    assert combined["pos_matched_unique_surface_count"] == 0
-    assert combined["conjugation_matched_unique_surface_count"] == 0
-    assert combined["tense_matched_unique_surface_count"] == 0
-    assert combined["person_matched_unique_surface_count"] == 0
-    assert combined["deep_feature_matched_row_count"] == 0
-    assert combined["authority_diagnostics"]["reviewed_exact_surfaces"] == []
-    assert combined["authority_diagnostics"]["reviewed_rule_derived_surfaces"] == []
-    assert master["recognized_unique_surface_count"] == 0
-    assert result["benchmark"]["measurement_status"] == "not_measured"
-
-
 def test_v17_measurement_preserves_unknown_safety_and_evaluation_boundary() -> None:
     result = report()
 
@@ -61,6 +43,32 @@ def test_v17_measurement_preserves_unknown_safety_and_evaluation_boundary() -> N
     assert integrity["runtime_rule_learning_from_v17_allowed"] is False
     assert integrity["answer_sources_may_not_authorize_special_case_runtime_forms"] is True
     assert integrity["unresolved_targets_may_not_be_guessed"] is True
+
+
+def test_v17_metadata_locks_untouched_historical_baseline() -> None:
+    benchmark = report()["benchmark"]
+    measured = benchmark["measured_result"]
+
+    assert benchmark["measurement_status"] == "measured"
+    assert measured["full_test_suite"] == "1180/1180 passed"
+    assert measured["pull_request"] == 52
+    assert measured["tested_head_commit"] == "b5e8615382cbf4387288f563993655a426b4e707"
+    assert measured["workflow_run_id"] == 33493694140
+    assert measured["workflow_job_id"] == 99810866856
+    assert measured["somali_ai_combined_positive_surface_recognition"] == "0/2"
+    assert measured["somali_ai_combined_lemma_matches"] == "0/2"
+    assert measured["somali_ai_combined_pos_matches"] == "0/2"
+    assert measured["somali_ai_combined_conjugation_2a_matches"] == "0/2"
+    assert measured["somali_ai_combined_past_tense_matches"] == "0/2"
+    assert measured["somali_ai_combined_person_matches"] == "0/2"
+    assert measured["somali_ai_combined_deep_feature_rows"] == "0/2"
+    assert measured["somali_ai_master_positive_surface_recognition"] == "0/2"
+    assert measured["somali_ai_reviewed_exact_positive_surface_recognition"] == "0/2"
+    assert measured["somali_ai_reviewed_rule_derived_positive_surface_recognition"] == "0/2"
+    assert measured["unknown_safety"] == "8/8 for combined runtime and master exact"
+    assert "0/2" in measured["historical_interpretation"]
+    assert "afceli remained unresolved" in measured["historical_interpretation"]
+    assert "1180/1180" in benchmark["notes"]
 
 
 def test_v17_scorer_does_not_claim_mood_full_paradigm_or_global_win() -> None:
