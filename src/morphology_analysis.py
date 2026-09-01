@@ -12,6 +12,7 @@ from dataclasses import dataclass
 
 from .morphology_candidates import MorphologyCandidate, analyze_surface_form
 from .morphology_generator import GeneratedMorphology, analyze_generated_surface
+from .morphophonology_conj2_class_past import analyze_conj2_class_past_surface
 from .morphophonology_generator import analyze_morphophonological_surface
 
 
@@ -119,7 +120,11 @@ def analyze_morphology(form: str) -> tuple[MorphologyAnalysis, ...]:
     exact = tuple(_from_exact(candidate) for candidate in analyze_surface_form(form))
     seen = {_signature(item) for item in exact}
     generated: list[MorphologyAnalysis] = []
-    candidates = analyze_generated_surface(form) + analyze_morphophonological_surface(form)
+    candidates = (
+        analyze_generated_surface(form)
+        + analyze_morphophonological_surface(form)
+        + analyze_conj2_class_past_surface(form)
+    )
     for candidate in candidates:
         item = _from_generated(candidate)
         signature = _signature(item)
