@@ -76,14 +76,22 @@ def test_v15_target_registry_proves_selection_predated_answer_lookup() -> None:
     )
 
 
-def test_v15_metadata_records_partial_attestation_without_guessing_caajisi() -> None:
+def test_v15_metadata_records_frozen_partial_attestation_without_guessing_caajisi() -> None:
     meta = _meta()
 
     assert meta["benchmark_version"] == "v15"
     assert meta["manifest_git_blob_sha"] == "0e0170f398c55c30ace8c14c5159052502afd19e"
-    assert meta["freeze_commit"] is None
-    assert meta["freeze_status"] == "freeze_candidate"
+    assert meta["freeze_commit"] == "6e05780305802610870dfd94c5d64936e768b178"
+    assert meta["freeze_status"] == "frozen"
+    assert meta["freeze_validation"] == {
+        "pull_request": 43,
+        "tested_head_commit": "a8ce9917c53a2b3a3edd1a62d61712497bcc05ba",
+        "workflow_run_id": 33463736584,
+        "workflow_job_id": 99719176772,
+        "full_test_suite": "1142/1142 passed",
+    }
     assert meta["measurement_status"] == "not_measured"
+    assert meta["measured_result"] is None
     assert meta["pre_answer_target_registry_merge_commit"] == (
         "fb56031809f9b9e75d4d01aa4e023897f730235a"
     )
