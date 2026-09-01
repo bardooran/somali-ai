@@ -5,10 +5,6 @@ from pathlib import Path
 
 from src.morphology_analysis import analyze_morphology
 from src.morphology_class_lexicon import reviewed_class_entry
-from src.morphophonology_conj2_class_past import (
-    CONJ2_CLASS_PAST_ACTIVATION_PATH,
-    generate_class_authorized_conj2_past,
-)
 from src.morphophonology_generator import eligible_conj2_profile_lemmas
 
 MANIFEST = Path("data/qa/morphology_paradigm_benchmark_v15.jsonl")
@@ -30,10 +26,6 @@ def _meta() -> dict:
 
 def _registry() -> dict:
     return json.loads(REGISTRY.read_text(encoding="utf-8"))
-
-
-def _past_activation() -> dict:
-    return json.loads(CONJ2_CLASS_PAST_ACTIVATION_PATH.read_text(encoding="utf-8"))
 
 
 def test_v15_manifest_scores_only_independently_attested_buuxi_surface() -> None:
@@ -129,22 +121,22 @@ def test_v15_metadata_records_frozen_partial_attestation_without_guessing_caajis
     assert source["independent_corroboration"]["visual_screenshot_claimed"] is False
 
 
-def test_v15_freeze_pins_plural_only_class_past_scope_and_2sg_gap() -> None:
+def test_v15_freeze_pins_historical_plural_only_class_past_scope_and_2sg_gap() -> None:
     meta = _meta()
-    activation = _past_activation()
-
-    assert activation["authorized_persons"] == ["2pl", "3pl"]
-    assert set(activation["past_morphology"]) == {"2pl", "3pl"}
     state = meta["pre_freeze_runtime_state"]
+
+    # These facts describe the immutable pre-v15 runtime snapshot, not the
+    # current post-freeze runtime, which is allowed to improve generically.
     assert state["authorized_class_past_persons"] == ["2pl", "3pl"]
     assert state["generic_2sg_past_authorized"] is False
     assert state["buuxi_2sg_past_available"] is False
     assert state["caajisi_2sg_past_available"] is False
-
-    for lemma in ("buuxi", "caajisi"):
-        assert generate_class_authorized_conj2_past(lemma, "2sg") is None
-        assert generate_class_authorized_conj2_past(lemma, "2pl") is not None
-        assert generate_class_authorized_conj2_past(lemma, "3pl") is not None
+    assert meta["pre_freeze_runtime_blob_identities"][
+        "rules/morphology/reviewed_conjugation_2_class_past_activation.json"
+    ] == "2dcf0793826e4e3c62b1189a87318f4d2b1c72e5"
+    assert meta["benchmark_policy"][
+        "future_generic_2sg_past_improvement_allowed_from_independent_development_evidence"
+    ] is True
 
 
 def test_v15_targets_remain_class_entries_not_target_specific_profiles() -> None:

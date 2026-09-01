@@ -6,8 +6,9 @@
   "conjugation_class": "2A",
   "tense_aspect": "past",
   "mood": "indicative",
-  "authorized_persons": ["2pl", "3pl"],
+  "authorized_persons": ["2sg", "2pl", "3pl"],
   "past_morphology": {
+    "2sg": {"agreement": "t", "tam": "ay"},
     "2pl": {"agreement": "s", "tam": "een"},
     "3pl": {"agreement": "", "tam": "een"}
   },
@@ -28,7 +29,8 @@
   "required_class_entry_status": "reviewed_class_only",
   "class_lexicon_path": "rules/morphology/reviewed_conjugation_2_class_lexicon.json",
   "present_activation_path": "rules/morphology/reviewed_conjugation_2_class_activation.json",
-  "required_processes": ["i_vowel_glide"],
+  "morphophonology_rule_path": "rules/morphology/reviewed_conjugation_2_morphophonology.json",
+  "required_processes": ["i_t_assibilation", "i_vowel_glide"],
   "open_class_generation": false,
   "reverse_suffix_stripping": false,
   "correction_authority": false,
@@ -41,18 +43,18 @@
   },
   "development_evidence": {
     "primary": {
-      "citation": "John I. Saeed. 1999. Somali. London Oriental and African Language Library 10. Amsterdam/Philadelphia: John Benjamins, section 4.3.4.3 Past simple, p. 86.",
-      "evidence": "The explicit C2A past-simple table gives 2PL kariseen and 3PL kariyeen. The 2PL cell directly supports an i-final C2A stem plus agreement s plus past een; the 3PL cell supports stem plus vowel-initial een with y between stem-final i and the ending. This Saeed evidence was already recorded in the Stage 1P policy before v14 target selection or answer lookup.",
-      "source_url": "https://theswissbay.ch/pdf/Books/Linguistics/Mega%20linguistics%20pack/Afro-Asiatic/Cushitic/Somali%20%28Saeed%29.pdf"
+      "citation": "Puglielli & Cabdallah Cumar Mansuur. 1997. Grammatica della lingua somala per le scuole medie superiori, section 6.3.2.1, grammar pp. 97-98 (PDF pp. 98-99); John I. Saeed. 1999. Somali, section 4.3.4.3 Past simple, p. 86.",
+      "evidence": "The already-reviewed Conjugation-2 morphophonology records Puglielli & Cabdallah Cumar Mansuur's explicit 2SG past waad joogi-s-ay, decomposed as joogi+t+ay, together with the rule that t changes to s after an i-final stem. The same reviewed rule records kari+t+ay as a C2A example of that assibilation. Saeed's explicit C2A past-simple table independently supplies the already-active plural cells 2PL kariseen and 3PL kariyeen. These development facts were present in the repository before v15 target selection and answer lookup; no v15 answer surface is used as runtime evidence.",
+      "source_path": "rules/morphology/reviewed_conjugation_2_morphophonology.json"
     },
     "independent_corroboration": {
-      "citation": "Michal Allon Livnat. 1983. The Indicator Particle baa in Somali. Studies in the Linguistic Sciences 13(1): 89-132, section 4.6, p. 118.",
-      "evidence": "Plural-subject extensive-paradigm examples explicitly print cuntadii bay dumarku kariyeen and dumarkii way kariyeen cuntadii, independently confirming the 3PL kariyeen cell. It is not used as 2PL evidence.",
-      "source_url": "https://libsysdigi.library.illinois.edu/OCA/Books2008-11/studiesinlinguis/studiesinlinguis1314119831984univ/studiesinlinguis1314119831984univ.pdf"
+      "citation": "Zorc et al. Somali textbook, Chapter 11 Second Conjugation Verbs, p. 85; GiellaLT Somali morphophonology documentation.",
+      "evidence": "The C2A kari paradigm independently prints second-person singular karisey/karisay, second-person plural kariseen, and third-person plural kariyeen, and explicitly describes the second-conjugation t-to-s change in the 2SG/3SGF cells. This corroborates the class mechanics without using buuxisay or any other v15 answer source.",
+      "source_url": "https://zorc.net/RDZorc/SOMALI/Somali_Textbook-Chap%2310-15-Somali.pdf"
     }
   },
   "scope_limits": {
-    "only_2pl_and_3pl_past_are_authorized": true,
+    "only_2sg_2pl_and_3pl_past_are_authorized": true,
     "other_past_persons_inferred": false,
     "full_past_paradigm_claimed": false,
     "orthographic_ay_ey_variant_question_deferred": true,
@@ -69,13 +71,17 @@
     "v12_answers_used_as_runtime_evidence": false,
     "v13_answers_used_as_runtime_evidence": false,
     "v14_answers_used_as_runtime_evidence": false,
+    "v15_answers_used_as_runtime_evidence": false,
     "v13_afceli_special_case_allowed": false,
     "v14_buufi_special_case_allowed": false,
     "v14_caafi_special_case_allowed": false,
+    "v15_buuxi_special_case_allowed": false,
+    "v15_caajisi_special_case_allowed": false,
     "v13_historical_baseline_merge_commit": "10e41ed8578672b015f8f51bfa1ee8de0158c5eb",
     "v14_historical_baseline_merge_commit": "36ea856fc4ad322ee4e8d41fb3a5a9ef579147f9",
-    "complete_stage1o_class_cohort_activated_uniformly_for_2pl_and_3pl_past": true,
-    "note": "The 2PL and 3PL past rules are authorized from Saeed 1999 evidence that was already present in the Stage 1P policy before v14 target selection and answer search. Frozen v13 afceliyeen and v14 buufiseen remain evaluation-only. All eleven activated C2A class lemmas receive the same narrow plural-past authority."
+    "v15_historical_baseline_merge_commit": "22959891cb4953e65a3037e4ace756f29febc8f8",
+    "complete_stage1o_class_cohort_activated_uniformly_for_2sg_2pl_and_3pl_past": true,
+    "note": "The 2SG rule is authorized only from pre-v15 reviewed development morphology: agreement t plus past ay with i+t assibilating to is. Frozen v15 buuxisay remains evaluation-only and caajisi remains unresolved as attestation evidence. All eleven activated C2A class lemmas receive the same narrow 2SG/2PL/3PL past authority, with no target-specific profile."
   },
-  "notes": "Narrow generic C2A class-level past activation. It authorizes only 2PL and 3PL: 2PL uses stem + s + een (for example Saeed's kariseen) and 3PL uses the reviewed i-vowel glide before een (kariyeen). Other past persons remain unjudged at class level. Generated forms are recognition/analysis candidates only and never automatic correction authority."
+  "notes": "Narrow generic C2A class-level past activation. It authorizes 2SG, 2PL and 3PL only. 2SG uses the reviewed i+t assibilation with past ay (for example independently reviewed joogi+t+ay -> joogisay); 2PL uses stem + s + een; 3PL uses the reviewed i-vowel glide before een. Other past persons remain unjudged at class level. Mechanical generated outputs are recognition/analysis candidates only, are not claims of independent attestation, and never receive automatic correction authority."
 }

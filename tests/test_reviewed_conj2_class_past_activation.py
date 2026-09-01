@@ -11,6 +11,7 @@ from src.morphology_paradigm_v11 import report as v11_report
 from src.morphology_paradigm_v12 import report as v12_report
 from src.morphology_paradigm_v13 import report as v13_report
 from src.morphology_paradigm_v14 import report as v14_report
+from src.morphology_paradigm_v15 import report as v15_report
 from src.morphophonology_conj2_class_past import (
     analyze_conj2_class_past_surface,
     eligible_conj2_class_past_activation_lemmas,
@@ -38,38 +39,51 @@ def test_past_activation_is_narrow_independent_and_benchmark_isolated() -> None:
 
     assert activation["tense_aspect"] == "past"
     assert activation["mood"] == "indicative"
-    assert activation["authorized_persons"] == ["2pl", "3pl"]
+    assert activation["authorized_persons"] == ["2sg", "2pl", "3pl"]
     assert activation["past_morphology"] == {
+        "2sg": {"agreement": "t", "tam": "ay"},
         "2pl": {"agreement": "s", "tam": "een"},
         "3pl": {"agreement": "", "tam": "een"},
     }
-    assert activation["required_processes"] == ["i_vowel_glide"]
+    assert activation["required_processes"] == ["i_t_assibilation", "i_vowel_glide"]
     assert tuple(activation["activated_lemmas"]) == EXPECTED_LEMMAS
 
     primary = activation["development_evidence"]["primary"]
+    assert "Puglielli" in primary["citation"]
     assert "Saeed" in primary["citation"]
+    assert "joogi-s-ay" in primary["evidence"]
+    assert "joogi+t+ay" in primary["evidence"]
     assert "2PL kariseen" in primary["evidence"]
     assert "3PL kariyeen" in primary["evidence"]
-    assert "before v14 target selection or answer lookup" in primary["evidence"]
+    assert "before v15 target selection and answer lookup" in primary["evidence"]
+    assert "no v15 answer surface is used as runtime evidence" in primary["evidence"]
+
+    corroboration = activation["development_evidence"]["independent_corroboration"]
+    assert "Zorc" in corroboration["citation"]
+    assert "karisey/karisay" in corroboration["evidence"]
+    assert "buuxisay" in corroboration["evidence"]
+    assert "without using" in corroboration["evidence"]
 
     limits = activation["scope_limits"]
-    assert limits["only_2pl_and_3pl_past_are_authorized"] is True
+    assert limits["only_2sg_2pl_and_3pl_past_are_authorized"] is True
     assert limits["other_past_persons_inferred"] is False
     assert limits["full_past_paradigm_claimed"] is False
     assert limits["orthographic_ay_ey_variant_question_deferred"] is True
     assert limits["first_plural_past_manner_alternation_deferred"] is True
 
     isolation = activation["benchmark_isolation"]
-    for version in range(5, 15):
+    for version in range(5, 16):
         assert isolation[f"v{version}_answers_used_as_runtime_evidence"] is False
     assert isolation["v13_afceli_special_case_allowed"] is False
     assert isolation["v14_buufi_special_case_allowed"] is False
     assert isolation["v14_caafi_special_case_allowed"] is False
-    assert isolation["v14_historical_baseline_merge_commit"] == (
-        "36ea856fc4ad322ee4e8d41fb3a5a9ef579147f9"
+    assert isolation["v15_buuxi_special_case_allowed"] is False
+    assert isolation["v15_caajisi_special_case_allowed"] is False
+    assert isolation["v15_historical_baseline_merge_commit"] == (
+        "22959891cb4953e65a3037e4ace756f29febc8f8"
     )
     assert isolation[
-        "complete_stage1o_class_cohort_activated_uniformly_for_2pl_and_3pl_past"
+        "complete_stage1o_class_cohort_activated_uniformly_for_2sg_2pl_and_3pl_past"
     ] is True
 
 
@@ -77,6 +91,23 @@ def test_past_activation_uniformly_covers_complete_stage1o_class_cohort() -> Non
     assert eligible_conj2_class_past_activation_lemmas() == EXPECTED_LEMMAS
 
     for lemma in EXPECTED_LEMMAS:
+        candidate_2sg = generate_class_authorized_conj2_past(lemma, "2sg")
+        assert candidate_2sg is not None
+        assert candidate_2sg.surface == lemma + "say"
+        assert candidate_2sg.lemma == lemma
+        assert candidate_2sg.part_of_speech == "verb"
+        assert candidate_2sg.conjugation_class == "2A"
+        assert candidate_2sg.tense_aspect == "past"
+        assert candidate_2sg.mood == "indicative"
+        assert candidate_2sg.person == "2sg"
+        assert candidate_2sg.status == "reviewed_rule_derived"
+        assert candidate_2sg.rule_id == "MORPH-CONJ-IIA-CLASS-PST-ACT-001:i_t_assibilation"
+        assert candidate_2sg.correction_allowed is False
+        assert any(
+            "Puglielli" in item and "joogi-s-ay" in item
+            for item in candidate_2sg.evidence_summary
+        )
+
         candidate_2pl = generate_class_authorized_conj2_past(lemma, "2pl")
         assert candidate_2pl is not None
         assert candidate_2pl.surface == lemma + "seen"
@@ -112,34 +143,37 @@ def test_past_activation_uniformly_covers_complete_stage1o_class_cohort() -> Non
             "Saeed" in item and "kariyeen" in item
             for item in candidate_3pl.evidence_summary
         )
-        assert any(
-            "Livnat" in item and "kariyeen" in item
-            for item in candidate_3pl.evidence_summary
-        )
 
 
 def test_other_class_level_past_persons_remain_unjudged() -> None:
     for lemma in EXPECTED_LEMMAS:
-        for person in ("1sg", "2sg", "3sg_m", "3sg_f", "1pl"):
+        for person in ("1sg", "3sg_m", "3sg_f", "1pl"):
             assert generate_class_authorized_conj2_past(lemma, person) is None
 
 
 def test_generic_past_is_not_inferred_from_i_final_spelling() -> None:
     for lemma in ("zzabi", "qarqari", "nadiifi", "qurxi", "kari", "joogi"):
+        assert generate_class_authorized_conj2_past(lemma, "2sg") is None
         assert generate_class_authorized_conj2_past(lemma, "2pl") is None
         assert generate_class_authorized_conj2_past(lemma, "3pl") is None
 
     for surface in (
+        "zzabisay",
         "zzabiseen",
         "zzabiyeen",
+        "qarqarisay",
         "qarqariseen",
         "qarqariyeen",
+        "nadiifisay",
         "nadiifiseen",
         "nadiifiyeen",
+        "qurxisay",
         "qurxiseen",
         "qurxiyeen",
+        "karisay",
         "kariseen",
         "kariyeen",
+        "joogisay",
         "joogiseen",
         "joogiyeen",
     ):
@@ -164,6 +198,7 @@ def test_future_class_entry_does_not_auto_activate_for_past(monkeypatch) -> None
         lambda lemma: future_entry if lemma.casefold() == "mustaqbali" else None,
     )
 
+    assert generate_class_authorized_conj2_past("mustaqbali", "2sg") is None
     assert generate_class_authorized_conj2_past("mustaqbali", "2pl") is None
     assert generate_class_authorized_conj2_past("mustaqbali", "3pl") is None
 
@@ -211,9 +246,52 @@ def test_v14_buufiseen_is_reached_only_through_generic_2pl_rule() -> None:
     assert all(item.correction_allowed is False for item in candidates)
 
 
-def test_non_v14_lemmas_use_same_generic_2pl_mechanics() -> None:
+def test_v15_buuxisay_is_reached_only_through_generic_2sg_rule() -> None:
+    direct = generate_class_authorized_conj2_past("buuxi", "2sg")
+    assert direct is not None
+    assert direct.surface == "buuxisay"
+
+    candidates = [
+        item
+        for item in analyze_morphology("buuxisay")
+        if item.lemma == "buuxi"
+    ]
+    assert candidates
+    assert {item.features.get("person") for item in candidates} == {"2sg"}
+    assert {item.features.get("tense_aspect") for item in candidates} == {"past"}
+    assert all(item.authority == "reviewed_rule_derived" for item in candidates)
+    assert all(
+        item.evidence_id == "MORPH-CONJ-IIA-CLASS-PST-ACT-001:i_t_assibilation"
+        for item in candidates
+    )
+    assert all(item.correction_allowed is False for item in candidates)
+
+
+def test_non_v15_lemmas_use_same_generic_2sg_mechanics() -> None:
     # Mechanics-only predictions. These assertions do not claim that the
     # generated surfaces below are independently attested Somali forms.
+    for lemma in ("aaddi", "aammusi", "abhi", "afceli", "buubi", "buufi", "caafi", "caajisi"):
+        surface = lemma + "say"
+        candidates = analyze_conj2_class_past_surface(surface)
+        assert len(candidates) == 1
+        assert candidates[0].lemma == lemma
+        assert candidates[0].person == "2sg"
+        assert candidates[0].rule_id == (
+            "MORPH-CONJ-IIA-CLASS-PST-ACT-001:i_t_assibilation"
+        )
+        assert candidates[0].correction_allowed is False
+
+    # caajisi was selected for v15 but remained unresolved as attestation
+    # evidence. Generic activation may mechanically analyze caajisisay, but
+    # this is not promoted to an independently attested answer.
+    caajisi_prediction = generate_class_authorized_conj2_past("caajisi", "2sg")
+    assert caajisi_prediction is not None
+    assert caajisi_prediction.surface == "caajisisay"
+    assert caajisi_prediction.status == "reviewed_rule_derived"
+    assert caajisi_prediction.correction_allowed is False
+
+
+def test_non_v14_lemmas_use_same_generic_2pl_mechanics() -> None:
     for lemma in ("aaddi", "aammusi", "abhi", "afceli", "buubi", "buuxi", "caajisi"):
         surface = lemma + "seen"
         candidates = analyze_conj2_class_past_surface(surface)
@@ -224,9 +302,6 @@ def test_non_v14_lemmas_use_same_generic_2pl_mechanics() -> None:
             "MORPH-CONJ-IIA-CLASS-PST-ACT-001:concatenative_elsewhere"
         )
 
-    # caafi is a selected v14 lemma whose 2pl answer remained unresolved.
-    # Its generated surface is therefore mechanics-only and must not be
-    # described as independently verified evidence.
     caafi_prediction = generate_class_authorized_conj2_past("caafi", "2pl")
     assert caafi_prediction is not None
     assert caafi_prediction.surface == "caafiseen"
@@ -246,7 +321,7 @@ def test_non_v13_lemmas_keep_same_generic_3pl_mechanics() -> None:
         )
 
 
-def test_frozen_benchmarks_preserve_v10_to_v13_and_improve_live_v14() -> None:
+def test_frozen_benchmarks_preserve_v10_to_v14_and_improve_live_v15() -> None:
     v10 = v10_report()["combined"]
     assert v10["recognized_unique_surface_count"] == 0
     assert v10["deep_feature_matched_row_count"] == 0
@@ -296,3 +371,34 @@ def test_frozen_benchmarks_preserve_v10_to_v13_and_improve_live_v14() -> None:
     assert historical14[
         "somali_ai_reviewed_rule_derived_positive_surface_recognition"
     ] == "0/1"
+
+    v15 = v15_report()
+    live15 = v15["combined"]
+    assert live15["recognized_unique_surface_count"] == 1
+    assert live15["lemma_matched_unique_surface_count"] == 1
+    assert live15["pos_matched_unique_surface_count"] == 1
+    assert live15["conjugation_matched_unique_surface_count"] == 1
+    assert live15["tense_matched_unique_surface_count"] == 1
+    assert live15["person_matched_unique_surface_count"] == 1
+    assert live15["deep_feature_matched_row_count"] == 1
+    assert live15["unknown_rejected_count"] == 8
+    assert live15["authority_diagnostics"]["reviewed_exact_surfaces"] == []
+    assert live15["authority_diagnostics"]["reviewed_rule_derived_surfaces"] == [
+        "buuxisay"
+    ]
+
+    # Class-level morphology improves the combined analyzer only. The separate
+    # master-exact inventory remains intentionally unchanged by a generated rule.
+    master15 = v15["master"]
+    assert master15["recognized_unique_surface_count"] == 0
+    assert master15["lemma_matched_unique_surface_count"] == 0
+    assert master15["pos_matched_unique_surface_count"] == 0
+    assert master15["unknown_rejected_count"] == 8
+
+    historical15 = v15["benchmark"]["measured_result"]
+    assert historical15["somali_ai_combined_positive_surface_recognition"] == "0/1"
+    assert historical15["somali_ai_combined_deep_feature_rows"] == "0/1"
+    assert historical15[
+        "somali_ai_reviewed_rule_derived_positive_surface_recognition"
+    ] == "0/1"
+    assert v15["preauthorization"]["generic_2sg_past_authorized_at_freeze"] is False
