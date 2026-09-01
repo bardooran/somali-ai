@@ -1,0 +1,91 @@
+{
+  "benchmark_version": "v17",
+  "benchmark_name": "Preselected Conjugation-2A 1sg past attestation challenge v17",
+  "manifest_path": "data/qa/morphology_paradigm_benchmark_v17.jsonl",
+  "manifest_git_blob_sha": "8f9d1bd4fd9e71a034c105eacaae19d3a05023d4",
+  "freeze_status": "pending_validation",
+  "measurement_status": "not_measured",
+  "pre_answer_target_registry_path": "data/qa/morphology_paradigm_v17_target_registry.json",
+  "pre_answer_target_registry_merge_commit": "2d432b6edacb96e18a93ae9fd52cf0af52e6b793",
+  "selected_target_lemmas": ["aaddi", "afceli", "buufi"],
+  "scored_target_lemmas": ["aaddi", "buufi"],
+  "unresolved_target_lemmas": ["afceli"],
+  "positive_case_count": 2,
+  "positive_unique_surface_count": 2,
+  "unknown_case_count": 8,
+  "total_case_count": 10,
+  "answer_sources": [
+    {
+      "target_lemma": "aaddi",
+      "surface": "aaddiyay",
+      "source_family": "Hadhwanaag 2020 Wax Tegay natural narrative",
+      "publication_date": "2020-07-25",
+      "source_url": "https://hadhwanaagnews.ca/articles/16456/Wax-Tegay-W-Q-Cabdisalaan-Ceeryaamo",
+      "evidence_type": "natural_published_first_person_narrative",
+      "attested_context": "Geelii oo i soo eegaya, ayaan galbeed foolka aaddiyay, dhabarkana bari.",
+      "feature_resolution": "The surrounding passage is sustained first-person narration, including kaligey and waan xusuustaa. In the target clause ayaan resolves the narrator as first-person singular; the completed narrative event supports past."
+    },
+    {
+      "target_lemma": "buufi",
+      "surface": "buufiyay",
+      "source_family": "Harvard ELIAS Beginning Somali Lesson 25",
+      "source_url": "https://elias.unix.fas.harvard.edu/index.php/languages/somali/Beginning/28/Reptiles-Amphibians-and-Insects",
+      "evidence_type": "university_hosted_bilingual_teaching_dialogue",
+      "attested_context": "Sun baan ku buufiyay",
+      "feature_resolution": "The lesson directly glosses the utterance as 'I have sprayed a poison' and separately lists Buufiyay = Sprayed. The baan construction and first-person English gloss resolve 1sg; the completed-event gloss supports past."
+    }
+  ],
+  "unresolved_targets": [
+    {
+      "lemma": "afceli",
+      "requested_cell": "1sg past",
+      "status": "unresolved_not_scored",
+      "reason": "Searches found afceliyay in third-person contexts, but no trustworthy explicit context was found that safely resolves the selected token to first-person singular. No surface is inferred from the C2A pattern."
+    }
+  ],
+  "pre_freeze_runtime_blob_identities": {
+    "rules/morphology/reviewed_conjugation_2_class_past_activation.json": "76460bc7e4f21cf235e908d3f9f1946c1fc296c9",
+    "src/morphology_analysis.py": "11b5b04e4c617100d0e05a20775420f5775e33a7",
+    "src/morphophonology_conj2_class_past.py": "0c1f3c839902037df490a2722a2e2c458c969d4f"
+  },
+  "pre_freeze_runtime_state": {
+    "authorized_class_past_persons": ["1pl", "2sg", "2pl", "3pl"],
+    "generic_1sg_past_authorized": false,
+    "aaddi_1sg_past_available": false,
+    "afceli_1sg_past_available": false,
+    "buufi_1sg_past_available": false,
+    "target_specific_profiles_allowed": false
+  },
+  "benchmark_policy": {
+    "answers_are_evaluation_only": true,
+    "runtime_rule_learning_from_v17_allowed": false,
+    "answer_sources_may_not_authorize_special_case_runtime_forms": true,
+    "explicit_source_surfaces_only": true,
+    "inferred_unattested_surfaces_included": false,
+    "unresolved_targets_may_not_be_guessed": true,
+    "synthetic_unknowns_are_claimed_somali_forms": false,
+    "feature_scope_is_row_specific": true,
+    "mood_is_scored": false,
+    "syncretic_person_values_require_contextual_resolution": true,
+    "future_generic_1sg_past_improvement_allowed_from_independent_development_evidence": true,
+    "development_rule_authority_must_be_independent_of_v17_answer_sources": true
+  },
+  "experimental_design": {
+    "target_selection_is_git_verifiable": true,
+    "target_selection_predates_answer_lookup": true,
+    "answer_lookup_started_only_after_registry_merge": true,
+    "partial_answer_set_is_intentional": true,
+    "global_generalization_claim_from_v17_alone_allowed": false,
+    "purpose": "Test the unsupported C2A 1sg past cell on preselected long-authorized class lemmas, scoring only explicit person-resolved attestations and leaving unresolved targets unjudged."
+  },
+  "independence_limits": {
+    "full_paradigm_benchmark": false,
+    "single_positive_surface": false,
+    "two_distinct_answer_source_families": true,
+    "one_answer_source_is_natural_text": true,
+    "one_answer_source_is_university_hosted_teaching_material": true,
+    "post_freeze_development_authority_must_be_distinct_from_v17_answer_sources": true,
+    "reason": "v17 uses two unrelated post-registry answer sources. The benchmark answers remain evaluation-only; any generic 1sg runtime rule must be authorized from separate development evidence."
+  },
+  "notes": "PR #50 merged the answer-free target registry before any 1sg answer lookup. Post-registry search found explicit person-resolved 1sg past evidence for aaddiyay and buufiyay. afceli remains unresolved because available afceliyay examples were third-person or did not safely resolve 1sg. This freeze branch changes benchmark/test infrastructure only, not runtime morphology."
+}
