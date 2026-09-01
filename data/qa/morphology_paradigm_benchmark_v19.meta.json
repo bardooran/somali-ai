@@ -3,9 +3,17 @@
   "benchmark_name": "Preselected Conjugation-2A 3sg feminine past attestation challenge v19",
   "manifest_path": "data/qa/morphology_paradigm_benchmark_v19.jsonl",
   "manifest_git_blob_sha": "7a30db59364c91e77bc40757e50ad2d3da94adb6",
-  "freeze_commit": "pending_validation",
-  "freeze_status": "pending_validation",
-  "freeze_validation": null,
+  "freeze_commit": "d380e382d778cc413fcb09f06fa1c6c4ecae6580",
+  "freeze_status": "frozen_validated",
+  "freeze_validation": {
+    "status": "validated",
+    "validated_head_sha": "d380e382d778cc413fcb09f06fa1c6c4ecae6580",
+    "workflow_run_id": 33499740489,
+    "job_id": 99830067776,
+    "full_test_suite": "1209/1209 passed",
+    "pytest_duration_seconds": 59.43,
+    "runtime_rules_changed": false
+  },
   "measurement_status": "unmeasured",
   "measured_result": null,
   "pre_answer_target_registry_path": "data/qa/morphology_paradigm_v19_target_registry.json",
@@ -82,5 +90,5 @@
     "post_freeze_development_authority_must_be_distinct_from_v19_answer_source": true,
     "reason": "Both target answers are resolved from lemma-specific entries in one authoritative dictionary family. v19 therefore tests two lexical targets but does not claim answer-source-family independence. Any generic 3sg-feminine runtime activation must use separate pre-v19 class development authority for the t-bearing 3sg-feminine cell and i+t assibilation, not these answer rows."
   },
-  "notes": "PR #58 merged the answer-free target registry before any v19 target-answer lookup. Post-registry lookup found lemma-specific Qaamuuska Af-Soomaaliga principal parts for both selected C2A verbs, and the dictionary's own grammar explicitly identifies the second C2 past principal part as third-person singular feminine. The benchmark freezes caafisay and bushisay as evaluation-only 3sg-feminine rows. Because 2sg is already live and the class evidence documents 2sg/3sg-feminine syncretism, the untouched baseline is not assumed to be 0/2 surface recognition; v19 is designed to measure person/deep-feature resolution separately."
+  "notes": "PR #58 merged the answer-free target registry before any v19 target-answer lookup. Post-registry lookup found lemma-specific Qaamuuska Af-Soomaaliga principal parts for both selected C2A verbs, and the dictionary's own grammar explicitly identifies the second C2 past principal part as third-person singular feminine. The benchmark freezes caafisay and bushisay as evaluation-only 3sg-feminine rows. The first exact-head freeze validation passed 1209/1209 tests with runtime untouched and 8/8 unknown safety; because 2sg was already live, both spellings were recognized through 2sg while the requested 3sg-feminine person/deep features remained absent. This records the freeze validation only; the separate historical baseline measurement is still unmeasured."
 }
