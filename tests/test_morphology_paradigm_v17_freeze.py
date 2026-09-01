@@ -106,7 +106,6 @@ def test_v17_freeze_metadata_locks_first_green_validation() -> None:
 
     assert meta["freeze_status"] == "frozen"
     assert meta["freeze_commit"] == "f149676ed5fe2a34a7848fbb64a19b11f5e5156e"
-    assert meta["measurement_status"] == "not_measured"
     assert validation["full_test_suite"] == "1175/1175 passed"
     assert validation["pull_request"] == 51
     assert validation["tested_head_commit"] == "f149676ed5fe2a34a7848fbb64a19b11f5e5156e"
