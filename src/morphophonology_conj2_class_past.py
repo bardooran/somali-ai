@@ -2,10 +2,11 @@
 
 This module intentionally lives beside the mature present activation rather than
 silently widening it. Only independently supported past cells listed by the
-separate policy are authorized. After the v17 baseline these are 1SG, 1PL,
-2SG, 2PL and 3PL. The 1SG cell reuses the reviewed ``i + vowel -> iyV`` glide;
-the 1PL cell reuses the reviewed weak-causative ``i+n -> inn`` process.
-Generation is forward-only, allowlist-only, and never grants correction authority.
+separate policy are authorized. After the v18 baseline these are 1SG, 1PL,
+2SG, 2PL, 3SG masculine and 3PL. The syncretic 1SG/3SG-masculine cells reuse
+the reviewed ``i + vowel -> iyV`` glide; the 1PL cell reuses the reviewed
+weak-causative ``i+n -> inn`` process. Generation is forward-only,
+allowlist-only, and never grants correction authority.
 """
 
 from __future__ import annotations
@@ -101,7 +102,8 @@ def generate_class_authorized_conj2_past(
     """Generate one reviewed class-authorized C2A past candidate.
 
     Only persons explicitly listed by the separate past activation policy are
-    eligible. After the v17 baseline these are 1SG, 1PL, 2SG, 2PL and 3PL only.
+    eligible. After the v18 baseline these are 1SG, 1PL, 2SG, 2PL, 3SG
+    masculine and 3PL. Syncretic cells remain separate analysis candidates.
     """
     entry = _eligible_entry(lemma)
     if entry is None:
