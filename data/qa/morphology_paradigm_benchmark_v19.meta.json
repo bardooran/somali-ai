@@ -14,8 +14,28 @@
     "pytest_duration_seconds": 59.43,
     "runtime_rules_changed": false
   },
-  "measurement_status": "unmeasured",
-  "measured_result": null,
+  "measurement_status": "measured",
+  "measured_result": {
+    "pull_request": 60,
+    "somali_ai_combined_positive_surface_recognition": "2/2",
+    "somali_ai_combined_lemma_matches": "2/2",
+    "somali_ai_combined_pos_matches": "2/2",
+    "somali_ai_combined_conjugation_2a_matches": "2/2",
+    "somali_ai_combined_past_tense_matches": "2/2",
+    "somali_ai_combined_3sg_f_person_matches": "0/2",
+    "somali_ai_combined_deep_feature_rows": "0/2",
+    "somali_ai_existing_2sg_analysis": "2/2",
+    "somali_ai_2sg_3sg_f_syncretism_preserved": "0/2",
+    "somali_ai_reviewed_exact_positive_surface_recognition": "0/2",
+    "somali_ai_reviewed_rule_derived_positive_surface_recognition": "2/2",
+    "somali_ai_master_positive_surface_recognition": "0/2",
+    "unknown_safety": "8/8 for combined runtime and master exact",
+    "tested_head_commit": "0d002a2076bb27f6d7eef12f5c437f75df65067a",
+    "workflow_run_id": 33500358318,
+    "workflow_job_id": 99832016710,
+    "workflow_conclusion": "success",
+    "historical_interpretation": "The first untouched post-freeze measurement recognized both v19 spellings through the already-authorized syncretic 2sg C2A past analysis, yielding 2/2 surface, lemma, POS, class and past recognition but 0/2 for the requested 3sg_f person and 0/2 deep-feature rows. The existing 2sg analysis was present for both surfaces, while no 3sg_f analysis was yet available, so full 2sg/3sg_f ambiguity preservation was 0/2. Master exact remained 0/2 and unknown safety remained 8/8."
+  },
   "pre_answer_target_registry_path": "data/qa/morphology_paradigm_v19_target_registry.json",
   "pre_answer_target_registry_merge_commit": "bcf86d494a0fbd62096df982868f714521670e41",
   "selected_target_lemmas": ["caafi", "bushi"],
@@ -90,5 +110,5 @@
     "post_freeze_development_authority_must_be_distinct_from_v19_answer_source": true,
     "reason": "Both target answers are resolved from lemma-specific entries in one authoritative dictionary family. v19 therefore tests two lexical targets but does not claim answer-source-family independence. Any generic 3sg-feminine runtime activation must use separate pre-v19 class development authority for the t-bearing 3sg-feminine cell and i+t assibilation, not these answer rows."
   },
-  "notes": "PR #58 merged the answer-free target registry before any v19 target-answer lookup. Post-registry lookup found lemma-specific Qaamuuska Af-Soomaaliga principal parts for both selected C2A verbs, and the dictionary's own grammar explicitly identifies the second C2 past principal part as third-person singular feminine. The benchmark freezes caafisay and bushisay as evaluation-only 3sg-feminine rows. The first exact-head freeze validation passed 1209/1209 tests with runtime untouched and 8/8 unknown safety; because 2sg was already live, both spellings were recognized through 2sg while the requested 3sg-feminine person/deep features remained absent. This records the freeze validation only; the separate historical baseline measurement is still unmeasured."
+  "notes": "PR #58 merged the answer-free target registry before any v19 target-answer lookup. PR #59 then froze caafisay and bushisay as evaluation-only 3sg-feminine rows with runtime untouched. PR #60's first exact-head run established the historical baseline on commit 0d002a2076bb27f6d7eef12f5c437f75df65067a (workflow 33500358318, job 99832016710): both spellings were already recognized through the live syncretic 2sg class rule, but 3sg_f person and deep-feature resolution remained 0/2; master exact stayed 0/2 and unknown safety stayed 8/8. The exact workflow conclusion was success."
 }
