@@ -3,8 +3,15 @@
   "benchmark_name": "Preselected Conjugation-2A 2pl past attestation challenge v14",
   "manifest_path": "data/qa/morphology_paradigm_benchmark_v14.jsonl",
   "manifest_git_blob_sha": "67786024c209abed20388bf47a6287b3d99efcd7",
-  "freeze_commit": "pending_merge",
-  "freeze_status": "candidate",
+  "freeze_commit": "7d7039565391a7641be3a29ae037f253a3b3f698",
+  "freeze_status": "frozen",
+  "freeze_validation": {
+    "pull_request": 39,
+    "tested_head_commit": "03a4de5fe16244636541699f96dc598a754c6b2f",
+    "workflow_run_id": 33461609377,
+    "workflow_job_id": 99712712452,
+    "full_test_suite": "1125/1125 passed"
+  },
   "measurement_status": "not_measured",
   "pre_answer_target_registry_merge_commit": "107b733021e27b8da6ba1470e76946d0b7181a78",
   "pre_answer_target_registry_path": "data/qa/morphology_paradigm_v14_target_registry.json",
@@ -82,5 +89,5 @@
     "pdf_visual_screenshot_verification_available": false,
     "reason": "v14 is deliberately narrow. It tests one independently attested preselected 2pl-past surface and preserves caafi as unresolved because no trustworthy exact attestation was found."
   },
-  "notes": "PR #38 merged the answer-free target registry before any external lookup. The subsequent search found exact buufiseen in an Addis Ababa University thesis's Somali questionnaire but did not find a trustworthy exact caafi 2pl-past attestation. v14 therefore scores buufiseen only and records caafi as unresolved."
+  "notes": "PR #38 merged the answer-free target registry before any external lookup. The subsequent search found exact buufiseen in an Addis Ababa University thesis's Somali questionnaire but did not find a trustworthy exact caafi 2pl-past attestation. PR #39 then froze that one-row benchmark with the runtime still limited to class-level 3pl past."
 }
