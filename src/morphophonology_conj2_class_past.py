@@ -2,11 +2,13 @@
 
 This module intentionally lives beside the mature present activation rather than
 silently widening it. Only independently supported past cells listed by the
-separate policy are authorized. After the v18 baseline these are 1SG, 1PL,
-2SG, 2PL, 3SG masculine and 3PL. The syncretic 1SG/3SG-masculine cells reuse
-the reviewed ``i + vowel -> iyV`` glide; the 1PL cell reuses the reviewed
-weak-causative ``i+n -> inn`` process. Generation is forward-only,
-allowlist-only, and never grants correction authority.
+separate policy are authorized. After the v19 baseline the reviewed 11-lemma
+allowlist has all seven staged person cells: 1SG, 1PL, 2SG, 2PL, 3SG masculine,
+3SG feminine and 3PL. The syncretic 1SG/3SG-masculine cells reuse the reviewed
+``i + vowel -> iyV`` glide; the syncretic 2SG/3SG-feminine cells reuse reviewed
+``i+t -> is`` assibilation; and the 1PL cell reuses the reviewed weak-causative
+``i+n -> inn`` process. Generation is forward-only, allowlist-only, and never
+grants correction authority.
 """
 
 from __future__ import annotations
@@ -82,6 +84,7 @@ def _evidence_summary(
             "independent_corroboration",
             "first_plural_independent",
             "first_singular_independent",
+            "third_singular_feminine_independent",
         ):
             record = evidence.get(key)
             if not isinstance(record, dict):
@@ -102,8 +105,9 @@ def generate_class_authorized_conj2_past(
     """Generate one reviewed class-authorized C2A past candidate.
 
     Only persons explicitly listed by the separate past activation policy are
-    eligible. After the v18 baseline these are 1SG, 1PL, 2SG, 2PL, 3SG
-    masculine and 3PL. Syncretic cells remain separate analysis candidates.
+    eligible. After the v19 baseline all seven staged person cells are authorized
+    for the reviewed 11-lemma allowlist. Syncretic cells remain separate analysis
+    candidates rather than being collapsed into one person label.
     """
     entry = _eligible_entry(lemma)
     if entry is None:
