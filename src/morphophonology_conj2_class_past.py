@@ -2,7 +2,8 @@
 
 This module intentionally lives beside the mature present activation rather than
 silently widening it. Only independently supported past cells listed by the
-separate policy are authorized. At Stage 1R those are 2SG, 2PL and 3PL.
+separate policy are authorized. After the v16 freeze these are 1PL, 2SG, 2PL
+and 3PL. The 1PL cell reuses the reviewed weak-causative ``i+n -> inn`` process.
 Generation is forward-only, allowlist-only, and never grants correction authority.
 """
 
@@ -74,7 +75,7 @@ def _evidence_summary(
         )
     ]
     if isinstance(evidence, dict):
-        for key in ("primary", "independent_corroboration"):
+        for key in ("primary", "independent_corroboration", "first_plural_independent"):
             record = evidence.get(key)
             if not isinstance(record, dict):
                 continue
@@ -94,7 +95,7 @@ def generate_class_authorized_conj2_past(
     """Generate one reviewed class-authorized C2A past candidate.
 
     Only persons explicitly listed by the separate past activation policy are
-    eligible. At Stage 1R these are 2SG, 2PL and 3PL only.
+    eligible. After the v16 freeze these are 1PL, 2SG, 2PL and 3PL only.
     """
     entry = _eligible_entry(lemma)
     if entry is None:
