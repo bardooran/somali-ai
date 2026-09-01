@@ -1,0 +1,98 @@
+{
+  "benchmark_version": "v15",
+  "benchmark_name": "Preselected Conjugation-2A 2sg past attestation challenge v15",
+  "manifest_path": "data/qa/morphology_paradigm_benchmark_v15.jsonl",
+  "manifest_git_blob_sha": "0e0170f398c55c30ace8c14c5159052502afd19e",
+  "freeze_commit": null,
+  "freeze_status": "freeze_candidate",
+  "freeze_validation": null,
+  "measurement_status": "not_measured",
+  "measured_result": null,
+  "pre_answer_target_registry_merge_commit": "fb56031809f9b9e75d4d01aa4e023897f730235a",
+  "pre_answer_target_registry_path": "data/qa/morphology_paradigm_v15_target_registry.json",
+  "selected_target_lemmas": ["buuxi", "caajisi"],
+  "scored_target_lemmas": ["buuxi"],
+  "unresolved_target_lemmas": ["caajisi"],
+  "positive_case_count": 1,
+  "positive_unique_surface_count": 1,
+  "unknown_case_count": 8,
+  "total_case_count": 9,
+  "answer_sources": [
+    {
+      "target_lemma": "buuxi",
+      "surface": "buuxisay",
+      "source_family": "City of Minneapolis School Based Clinics Somali minor consent form",
+      "source_url": "https://www2.minneapolismn.gov/media/content-assets/www2-documents/government/Minor-Registration-and-Consent-Form---Somali.pdf",
+      "source_page_pdf": 2,
+      "source_page_printed": 2,
+      "attested_context": "Fadlan u soo gudbi foomka oo aad buuxisay Xarunta Caafimaadka ee Dugsiga.",
+      "feature_resolution": "The document addresses the reader directly. In the relative clause foomka oo aad buuxisay, aad marks a second-person subject and the already-completed form is the object, supporting a 2sg past/completed-event reading. The lexical use is directly compatible with the reviewed buuxi sense 'fill up or out'. Mood is outside the scored scope.",
+      "verification": {
+        "pdf_text_layer_verified": true,
+        "web_screenshot_attempted": true,
+        "web_screenshot_succeeded": false,
+        "visual_screenshot_claimed": false,
+        "screenshot_failure": "web screenshot endpoint returned a cache miss"
+      },
+      "independent_corroboration": {
+        "source_family": "Laxa municipality Somali welcome brochure",
+        "source_url": "https://www.laxa.se/download/18.6d627bb318d2a9572d23a758/1706261376994/V%C3%A4lkommen%20till%20Lax%C3%A5%20kommun%20broschyr%202023%20-%20Somaliska.pdf",
+        "attested_context": "Foomka aad buuxisay waxaad u dhiibeysaa hogaamiyaha xilli firaaqada...",
+        "pdf_text_layer_verified": true,
+        "web_screenshot_attempted": true,
+        "web_screenshot_succeeded": false,
+        "visual_screenshot_claimed": false
+      }
+    }
+  ],
+  "unresolved_targets": [
+    {
+      "lemma": "caajisi",
+      "requested_cell": "2sg past",
+      "status": "unresolved_not_scored",
+      "reason": "Searches found many caajisay tokens meaning 'became/got bored', but the reviewed target caajisi is a distinct transitive C2A lemma meaning 'debilitate; weaken; tire someone out'. No trustworthy context was found that both resolves a 2sg subject and disambiguates the token to transitive caajisi. No surface is inferred from the class pattern."
+    }
+  ],
+  "pre_freeze_runtime_blob_identities": {
+    "rules/morphology/reviewed_conjugation_2_class_past_activation.json": "2dcf0793826e4e3c62b1189a87318f4d2b1c72e5",
+    "src/morphophonology_conj2_class_past.py": "36ec498c8189ce08baeda2e86dda4d60987601cc",
+    "src/morphology_analysis.py": "11b5b04e4c617100d0e05a20775420f5775e33a7"
+  },
+  "pre_freeze_runtime_state": {
+    "authorized_class_past_persons": ["2pl", "3pl"],
+    "generic_2sg_past_authorized": false,
+    "buuxi_2sg_past_available": false,
+    "caajisi_2sg_past_available": false,
+    "target_specific_profiles_allowed": false
+  },
+  "benchmark_policy": {
+    "answers_are_evaluation_only": true,
+    "runtime_rule_learning_from_v15_allowed": false,
+    "answer_sources_may_not_authorize_special_case_runtime_forms": true,
+    "explicit_source_surfaces_only": true,
+    "inferred_unattested_surfaces_included": false,
+    "unresolved_targets_may_not_be_guessed": true,
+    "feature_scope_is_row_specific": true,
+    "mood_is_scored": false,
+    "synthetic_unknowns_are_claimed_somali_forms": false,
+    "future_generic_2sg_past_improvement_allowed_from_independent_development_evidence": true,
+    "development_rule_authority_must_be_independent_of_v15_answer_sources": true
+  },
+  "experimental_design": {
+    "target_selection_predates_answer_lookup": true,
+    "target_selection_is_git_verifiable": true,
+    "answer_lookup_started_only_after_registry_merge": true,
+    "purpose": "Test an unsupported C2A 2sg past cell on preselected, long-authorized class lemmas. Score only independently attested and lemma-disambiguated surfaces, leaving ambiguous or unresolved targets unjudged rather than inferred.",
+    "partial_answer_set_is_intentional": true,
+    "global_generalization_claim_from_v15_alone_allowed": false
+  },
+  "independence_limits": {
+    "full_paradigm_benchmark": false,
+    "single_positive_surface": true,
+    "primary_answer_source_is_government_service_document_not_grammar_table": true,
+    "primary_answer_source_is_independent_of_saeed_development_authority": true,
+    "pdf_visual_screenshot_verification_available": false,
+    "reason": "v15 is deliberately narrow. It scores one semantically and syntactically resolved preselected 2sg-past surface and preserves caajisi as unresolved because common homographic-looking tokens could not be safely assigned to the transitive target lemma."
+  },
+  "notes": "PR #42 merged the answer-free target registry before any external lookup. The subsequent search found buuxisay in a City of Minneapolis Somali form with a direct second-person relative subject and completed fill-out context, independently corroborated by a Laxa municipality Somali brochure. No trustworthy lemma-disambiguated caajisi 2sg-past attestation was found. This freeze candidate changes no runtime morphology."
+}
