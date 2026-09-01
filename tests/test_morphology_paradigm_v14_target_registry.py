@@ -4,7 +4,6 @@ import json
 from pathlib import Path
 
 from src.morphology_class_lexicon import reviewed_class_entry
-from src.morphophonology_conj2_class_past import generate_class_authorized_conj2_past
 from src.morphophonology_generator import (
     eligible_conj2_class_activation_lemmas,
     eligible_conj2_profile_lemmas,
@@ -40,7 +39,7 @@ def test_v14_targets_are_registered_before_answer_lookup() -> None:
     ] is True
 
 
-def test_v14_targets_are_class_known_but_have_no_generic_2pl_past_authority() -> None:
+def test_v14_targets_remain_class_known_and_not_target_specific_profiles() -> None:
     activated = set(eligible_conj2_class_activation_lemmas())
     profiles = set(eligible_conj2_profile_lemmas())
 
@@ -54,10 +53,9 @@ def test_v14_targets_are_class_known_but_have_no_generic_2pl_past_authority() ->
         assert entry.correction_allowed is False
         assert lemma in activated
         assert lemma not in profiles
-        assert generate_class_authorized_conj2_past(lemma, "2pl") is None
 
 
-def test_v14_target_registry_contains_no_answer_surfaces() -> None:
+def test_v14_target_registry_permanently_records_no_2pl_authority_at_selection() -> None:
     raw = REGISTRY.read_text(encoding="utf-8")
     record = json.loads(raw)
 

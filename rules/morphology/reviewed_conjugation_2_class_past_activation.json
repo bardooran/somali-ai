@@ -6,8 +6,9 @@
   "conjugation_class": "2A",
   "tense_aspect": "past",
   "mood": "indicative",
-  "authorized_persons": ["3pl"],
+  "authorized_persons": ["2pl", "3pl"],
   "past_morphology": {
+    "2pl": {"agreement": "s", "tam": "een"},
     "3pl": {"agreement": "", "tam": "een"}
   },
   "activated_lemmas": [
@@ -41,17 +42,17 @@
   "development_evidence": {
     "primary": {
       "citation": "John I. Saeed. 1999. Somali. London Oriental and African Language Library 10. Amsterdam/Philadelphia: John Benjamins, section 4.3.4.3 Past simple, p. 86.",
-      "evidence": "The explicit C2A past-simple table gives 3PL kariyeen, distinct from 2PL kariseen and the singular/1PL cells. This directly supports an i-final C2A stem plus 3PL -een with y between stem-final i and the vowel-initial ending.",
+      "evidence": "The explicit C2A past-simple table gives 2PL kariseen and 3PL kariyeen. The 2PL cell directly supports an i-final C2A stem plus agreement s plus past een; the 3PL cell supports stem plus vowel-initial een with y between stem-final i and the ending. This Saeed evidence was already recorded in the Stage 1P policy before v14 target selection or answer lookup.",
       "source_url": "https://theswissbay.ch/pdf/Books/Linguistics/Mega%20linguistics%20pack/Afro-Asiatic/Cushitic/Somali%20%28Saeed%29.pdf"
     },
     "independent_corroboration": {
       "citation": "Michal Allon Livnat. 1983. The Indicator Particle baa in Somali. Studies in the Linguistic Sciences 13(1): 89-132, section 4.6, p. 118.",
-      "evidence": "Plural-subject extensive-paradigm examples explicitly print cuntadii bay dumarku kariyeen and dumarkii way kariyeen cuntadii, independently confirming kariyeen with a plural subject.",
+      "evidence": "Plural-subject extensive-paradigm examples explicitly print cuntadii bay dumarku kariyeen and dumarkii way kariyeen cuntadii, independently confirming the 3PL kariyeen cell. It is not used as 2PL evidence.",
       "source_url": "https://libsysdigi.library.illinois.edu/OCA/Books2008-11/studiesinlinguis/studiesinlinguis1314119831984univ/studiesinlinguis1314119831984univ.pdf"
     }
   },
   "scope_limits": {
-    "only_3pl_past_is_authorized": true,
+    "only_2pl_and_3pl_past_are_authorized": true,
     "other_past_persons_inferred": false,
     "full_past_paradigm_claimed": false,
     "orthographic_ay_ey_variant_question_deferred": true,
@@ -67,10 +68,14 @@
     "v11_answers_used_as_runtime_evidence": false,
     "v12_answers_used_as_runtime_evidence": false,
     "v13_answers_used_as_runtime_evidence": false,
+    "v14_answers_used_as_runtime_evidence": false,
     "v13_afceli_special_case_allowed": false,
+    "v14_buufi_special_case_allowed": false,
+    "v14_caafi_special_case_allowed": false,
     "v13_historical_baseline_merge_commit": "10e41ed8578672b015f8f51bfa1ee8de0158c5eb",
-    "complete_stage1o_class_cohort_activated_uniformly_for_3pl_past": true,
-    "note": "The 3PL past rule is authorized from Saeed 1999 plus Livnat 1983, not from the frozen v13 afceliyeen row. All eleven already activated C2A class lemmas receive the same narrow 3PL past authority."
+    "v14_historical_baseline_merge_commit": "36ea856fc4ad322ee4e8d41fb3a5a9ef579147f9",
+    "complete_stage1o_class_cohort_activated_uniformly_for_2pl_and_3pl_past": true,
+    "note": "The 2PL and 3PL past rules are authorized from Saeed 1999 evidence that was already present in the Stage 1P policy before v14 target selection and answer search. Frozen v13 afceliyeen and v14 buufiseen remain evaluation-only. All eleven activated C2A class lemmas receive the same narrow plural-past authority."
   },
-  "notes": "Narrow generic C2A class-level past activation. It authorizes only 3PL, using the independently documented C2A pattern kari + een -> kariyeen. Other past persons remain unjudged at class level. Generated forms are recognition/analysis candidates only and never automatic correction authority."
+  "notes": "Narrow generic C2A class-level past activation. It authorizes only 2PL and 3PL: 2PL uses stem + s + een (for example Saeed's kariseen) and 3PL uses the reviewed i-vowel glide before een (kariyeen). Other past persons remain unjudged at class level. Generated forms are recognition/analysis candidates only and never automatic correction authority."
 }

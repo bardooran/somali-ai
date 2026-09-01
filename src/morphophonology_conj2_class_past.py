@@ -1,9 +1,9 @@
 """Narrow reviewed class-level Conjugation-2A past generation.
 
 This module intentionally lives beside the mature present activation rather than
-silently widening it.  At this stage only the independently supported 3PL past
-cell is authorized.  Generation is forward-only, allowlist-only, and never grants
-correction authority.
+silently widening it.  Only the independently supported plural past cells listed
+by the separate policy are authorized.  At Stage 1Q those are 2PL and 3PL.
+Generation is forward-only, allowlist-only, and never grants correction authority.
 """
 
 from __future__ import annotations
@@ -94,7 +94,7 @@ def generate_class_authorized_conj2_past(
     """Generate one reviewed class-authorized C2A past candidate.
 
     Only persons explicitly listed by the separate past activation policy are
-    eligible.  At Stage 1P this is 3PL only.
+    eligible.  At Stage 1Q these are 2PL and 3PL only.
     """
     entry = _eligible_entry(lemma)
     if entry is None:
