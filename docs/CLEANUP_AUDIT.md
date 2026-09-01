@@ -18,6 +18,12 @@ Rule: **do not delete or move language data until dependencies and unique eviden
 - The guard includes coverage assertions for core morphology runtime files so those files cannot silently fall out of protection because of a naming change.
 - No morphology runtime rules, reviewed evidence, benchmark manifests, or language data were changed in this pass.
 
+### Unused-file removal pass
+
+- Removed `tools/importers/somnlp_extract.py` after verifying that no current workflow uses it, the live SomNLP refresh path uses `tools/importers/somnlp_tier_a_usage.py`, and the current external-candidate tests do not depend on the legacy importer.
+- Kept the GiellaLT, SLS, master-data, and Tier-A importer scripts because current GitHub Actions workflows call them directly.
+- Historical benchmark manifests and reports were deliberately kept: old benchmark files are part of the reproducible evidence trail, not disposable clutter.
+
 ## Cleanup completed — 2026-08-31
 
 | Old location/name | New location/name | Result |
