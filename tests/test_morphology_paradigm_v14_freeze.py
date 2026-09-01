@@ -66,14 +66,19 @@ def test_v14_target_registry_proves_selection_predated_answer_lookup() -> None:
     assert registry["benchmark_policy"]["inferred_unattested_forms_allowed"] is False
 
 
-def test_v14_metadata_records_partial_attestation_without_guessing_caafi() -> None:
+def test_v14_metadata_records_sealed_partial_attestation_without_guessing_caafi() -> None:
     meta = _meta()
 
     assert meta["benchmark_version"] == "v14"
     assert meta["manifest_git_blob_sha"] == "67786024c209abed20388bf47a6287b3d99efcd7"
-    assert meta["freeze_commit"] == "pending_merge"
-    assert meta["freeze_status"] == "candidate"
+    assert meta["freeze_commit"] == "7d7039565391a7641be3a29ae037f253a3b3f698"
+    assert meta["freeze_status"] == "frozen"
     assert meta["measurement_status"] == "not_measured"
+    assert meta["freeze_validation"]["pull_request"] == 39
+    assert meta["freeze_validation"]["tested_head_commit"] == "03a4de5fe16244636541699f96dc598a754c6b2f"
+    assert meta["freeze_validation"]["workflow_run_id"] == 33461609377
+    assert meta["freeze_validation"]["workflow_job_id"] == 99712712452
+    assert meta["freeze_validation"]["full_test_suite"] == "1125/1125 passed"
     assert meta["pre_answer_target_registry_merge_commit"] == (
         "107b733021e27b8da6ba1470e76946d0b7181a78"
     )
@@ -104,7 +109,7 @@ def test_v14_metadata_records_partial_attestation_without_guessing_caafi() -> No
     ] is True
 
 
-def test_v14_pre_freeze_runtime_really_has_no_generic_2pl_past() -> None:
+def test_v14_frozen_runtime_still_has_no_generic_2pl_past_before_measurement() -> None:
     meta = _meta()
     state = meta["pre_freeze_runtime_state"]
 
@@ -129,7 +134,7 @@ def test_v14_targets_are_longstanding_class_entries_not_special_profiles() -> No
         assert lemma not in profiles
 
 
-def test_v14_unknowns_are_synthetic_distinct_and_safe_at_freeze() -> None:
+def test_v14_unknowns_are_synthetic_distinct_and_safe_before_measurement() -> None:
     rows = _rows()
     positives = {row["surface"] for row in rows if row.get("benchmark_role") == "positive"}
     unknowns = [row["surface"] for row in rows if row.get("benchmark_role") == "unknown"]
