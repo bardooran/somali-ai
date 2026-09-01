@@ -1,0 +1,95 @@
+{
+  "benchmark_version": "v18",
+  "benchmark_name": "Preselected Conjugation-2A 3sg masculine past attestation challenge v18",
+  "manifest_path": "data/qa/morphology_paradigm_benchmark_v18.jsonl",
+  "manifest_git_blob_sha": "bb33f8038ca8c2225e03bec17bfc8b01cde195d3",
+  "freeze_commit": "f058e66dcc48638fa63606ef35015e5a1c2b9574",
+  "freeze_status": "frozen_validated",
+  "freeze_validation": {
+    "status": "validated",
+    "validated_head_sha": "f058e66dcc48638fa63606ef35015e5a1c2b9574",
+    "workflow_run_id": 33496139358,
+    "job_id": 99818668697,
+    "full_test_suite": "1190/1190 passed",
+    "pytest_duration_seconds": 56.03,
+    "runtime_rules_changed": false
+  },
+  "measurement_status": "unmeasured",
+  "measured_result": null,
+  "pre_answer_target_registry_path": "data/qa/morphology_paradigm_v18_target_registry.json",
+  "pre_answer_target_registry_merge_commit": "d899f769f13374ab497d0c3a04c2259c0925cfe4",
+  "selected_target_lemmas": ["aammusi", "abhi"],
+  "scored_target_lemmas": ["aammusi", "abhi"],
+  "unresolved_target_lemmas": [],
+  "positive_case_count": 2,
+  "positive_unique_surface_count": 2,
+  "unknown_case_count": 8,
+  "total_case_count": 10,
+  "answer_sources": [
+    {
+      "target_lemma": "aammusi",
+      "surface": "aammusiyay",
+      "source_family": "Qaamuuska Af-Soomaaliga (Puglielli & Cabdallah Cumar Mansuur)",
+      "source_url": "https://arcadia.sba.uniroma3.it/bitstream/2307/2621/19/A.pdf",
+      "grammar_url": "https://www.qaamuuska.org/naxwaha",
+      "evidence_type": "lemma_specific_dictionary_principal_part_with_dictionary_grammar_resolution",
+      "attested_entry": "aammusi f.g2 (-iyay, -isay)",
+      "feature_resolution": "The dictionary grammar states that Conjugation 2 third-person singular past uses -yay for masculine and -say for feminine, illustrated by kariyay / karisay. The lemma-specific principal-part entry therefore resolves aammusiyay as 3sg masculine past."
+    },
+    {
+      "target_lemma": "abhi",
+      "surface": "abhiyay",
+      "source_family": "Qaamuuska Af-Soomaaliga (Puglielli & Cabdallah Cumar Mansuur)",
+      "source_url": "https://arcadia.sba.uniroma3.it/bitstream/2307/2621/19/A.pdf",
+      "grammar_url": "https://www.qaamuuska.org/naxwaha",
+      "evidence_type": "lemma_specific_dictionary_principal_part_with_dictionary_grammar_resolution",
+      "attested_entry": "abhi f.g2 (-iyay, -isay)",
+      "feature_resolution": "The dictionary grammar states that Conjugation 2 third-person singular past uses -yay for masculine and -say for feminine, illustrated by kariyay / karisay. The lemma-specific principal-part entry therefore resolves abhiyay as 3sg masculine past."
+    }
+  ],
+  "pre_freeze_runtime_blob_identities": {
+    "rules/morphology/reviewed_conjugation_2_class_past_activation.json": "6371596f60ea7bf8497a0b94f454a595ddbf71a1",
+    "src/morphology_analysis.py": "11b5b04e4c617100d0e05a20775420f5775e33a7",
+    "src/morphophonology_conj2_class_past.py": "28f36bf9ed97c4ed5fff60292877612421a99eb2"
+  },
+  "pre_freeze_runtime_state": {
+    "authorized_class_past_persons": ["1sg", "1pl", "2sg", "2pl", "3pl"],
+    "generic_3sg_masculine_past_authorized": false,
+    "generic_3sg_feminine_past_authorized": false,
+    "existing_1sg_3sg_masculine_syncretism_documented": true,
+    "existing_1sg_surface_generation_authorized": true,
+    "target_specific_profiles_allowed": false
+  },
+  "benchmark_policy": {
+    "answers_are_evaluation_only": true,
+    "runtime_rule_learning_from_v18_allowed": false,
+    "answer_sources_may_not_authorize_special_case_runtime_forms": true,
+    "lemma_specific_lexicographic_principal_parts_count_as_explicit_attestation": true,
+    "inferred_unattested_surfaces_included": false,
+    "unresolved_targets_may_not_be_guessed": true,
+    "synthetic_unknowns_are_claimed_somali_forms": false,
+    "feature_scope_is_row_specific": true,
+    "mood_is_scored": false,
+    "syncretic_person_values_must_be_preserved": true,
+    "surface_recognition_must_not_be_equated_with_3sg_masculine_person_resolution": true,
+    "future_generic_3sg_masculine_improvement_allowed_from_independent_development_evidence": true,
+    "development_rule_authority_must_be_independent_of_v18_answer_sources": true
+  },
+  "experimental_design": {
+    "target_selection_is_git_verifiable": true,
+    "target_selection_predates_answer_lookup": true,
+    "answer_lookup_started_only_after_registry_merge": true,
+    "global_generalization_claim_from_v18_alone_allowed": false,
+    "purpose": "Test the still-unauthorized C2A 3sg-masculine past analysis on two preselected class lemmas while explicitly separating surface recognition from person resolution in a syncretic cell."
+  },
+  "independence_limits": {
+    "full_paradigm_benchmark": false,
+    "two_positive_lemmas": true,
+    "distinct_answer_source_families": 1,
+    "answer_source_is_lemma_specific_lexicographic_evidence": true,
+    "answer_source_is_not_runtime_development_authority": true,
+    "post_freeze_development_authority_must_be_distinct_from_v18_answer_source": true,
+    "reason": "Both target answers are resolved from lemma-specific entries in one authoritative dictionary family. v18 therefore tests two lexical targets but does not claim answer-source-family independence. Any generic 3sg-masculine runtime activation must use the separate pre-v18 Orwin/Zorc development authority already reviewed in the class policy."
+  },
+  "notes": "PR #54 merged the answer-free target registry before any v18 target-answer lookup. Post-registry lookup found lemma-specific Qaamuuska Af-Soomaaliga principal parts for both selected C2A verbs, and the dictionary's own grammar explicitly identifies the first C2A past principal part as third-person singular masculine. The benchmark freezes aammusiyay and abhiyay as evaluation-only 3sg-masculine rows. Because 1sg is already live and is documented as syncretic with 3sg masculine, the untouched baseline is not assumed to be 0/2 surface recognition; v18 is designed to measure person/deep-feature resolution separately."
+}
