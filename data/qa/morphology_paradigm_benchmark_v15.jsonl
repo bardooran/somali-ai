@@ -1,0 +1,9 @@
+{"id":"V15-BUUXI-PST-2SG","surface":"buuxisay","lemma":"buuxi","part_of_speech":"verb","conjugation":"2A","tense_aspect":"past","person":"2sg","feature_scope":["lemma","part_of_speech","conjugation","tense_aspect","person"],"source_family":"City of Minneapolis School Based Clinics Somali minor consent form","source_url":"https://www2.minneapolismn.gov/media/content-assets/www2-documents/government/Minor-Registration-and-Consent-Form---Somali.pdf","source_page_pdf":2,"source_page_printed":2,"source_note":"The Somali form directly prints 'Fadlan u soo gudbi foomka oo aad buuxisay Xarunta Caafimaadka ee Dugsiga.' The relative subject marker aad addresses the reader in second person singular, and the completed-form context supports past/completed-event interpretation. The lexical sense is directly compatible with reviewed buuxi 'fill up or out'. The PDF text layer was directly verified; web screenshot was attempted but failed with a cache miss, so visual screenshot verification is not claimed. Mood is deliberately not scored.","benchmark_role":"positive"}
+{"id":"V15-UNK-01","surface":"buuxisqay","benchmark_role":"unknown"}
+{"id":"V15-UNK-02","surface":"buuxivay","benchmark_role":"unknown"}
+{"id":"V15-UNK-03","surface":"buuxiszay","benchmark_role":"unknown"}
+{"id":"V15-UNK-04","surface":"buuxqisay","benchmark_role":"unknown"}
+{"id":"V15-UNK-05","surface":"caajisqay","benchmark_role":"unknown"}
+{"id":"V15-UNK-06","surface":"caajivsay","benchmark_role":"unknown"}
+{"id":"V15-UNK-07","surface":"caajiszay","benchmark_role":"unknown"}
+{"id":"V15-UNK-08","surface":"caajiqsay","benchmark_role":"unknown"}
