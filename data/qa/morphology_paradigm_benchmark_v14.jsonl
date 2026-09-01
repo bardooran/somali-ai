@@ -1,0 +1,9 @@
+{"id":"V14-BUUFI-PST-2PL","surface":"buufiseen","lemma":"buufi","part_of_speech":"verb","conjugation":"2A","tense_aspect":"past","person":"2pl","feature_scope":["lemma","part_of_speech","conjugation","tense_aspect","person"],"source_family":"Ebrahim 2019 Addis Ababa University malaria thesis Somali questionnaire","source_url":"https://etd.aau.edu.et/bitstreams/84bb2e6a-32c1-4c05-8d4b-24bdc1b424aa/download","source_page_pdf":74,"source_page_printed":66,"source_note":"Appendix II Af-Somali questionnaire explicitly prints question 34: 'Wali mara kanic sun kaniiceed maku buufiseen?' The thesis acknowledgement states Omer Said and Berwaqo Ibrahim translated the questionnaires into Af-Somali. The PDF text layer is directly verified; the web screenshot renderer failed on the university host, so visual screenshot verification is not claimed. The plural addressee/questionnaire form supports 2pl past. Mood is deliberately not scored.","benchmark_role":"positive"}
+{"id":"V14-UNK-01","surface":"buufisqeen","benchmark_role":"unknown"}
+{"id":"V14-UNK-02","surface":"buufivseen","benchmark_role":"unknown"}
+{"id":"V14-UNK-03","surface":"buufiszzn","benchmark_role":"unknown"}
+{"id":"V14-UNK-04","surface":"buufqseen","benchmark_role":"unknown"}
+{"id":"V14-UNK-05","surface":"caafisqeen","benchmark_role":"unknown"}
+{"id":"V14-UNK-06","surface":"caafivseen","benchmark_role":"unknown"}
+{"id":"V14-UNK-07","surface":"caafiszzn","benchmark_role":"unknown"}
+{"id":"V14-UNK-08","surface":"caafiqseen","benchmark_role":"unknown"}
