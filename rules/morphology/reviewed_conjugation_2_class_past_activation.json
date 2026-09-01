@@ -6,12 +6,13 @@
   "conjugation_class": "2A",
   "tense_aspect": "past",
   "mood": "indicative",
-  "authorized_persons": ["1sg", "1pl", "2sg", "2pl", "3pl"],
+  "authorized_persons": ["1sg", "1pl", "2sg", "2pl", "3sg_m", "3pl"],
   "past_morphology": {
     "1sg": {"agreement": "", "tam": "ay"},
     "1pl": {"agreement": "n", "tam": "ay"},
     "2sg": {"agreement": "t", "tam": "ay"},
     "2pl": {"agreement": "s", "tam": "een"},
+    "3sg_m": {"agreement": "", "tam": "ay"},
     "3pl": {"agreement": "", "tam": "een"}
   },
   "activated_lemmas": [
@@ -65,19 +66,20 @@
     },
     "first_singular_independent": {
       "citation": "Martin Orwin. 1995. Colloquial Somali: A Complete Language Course, General past C2A table, p. 51. Routledge; Zorc & Issa Somali Reference Grammar index, C2A kari entries referring to p. 79.",
-      "evidence": "Orwin's explicit general-past C2A table gives kari + ay -> kariyay for 1SG and the same kariyay surface for 3SG masculine, and states that y is inserted between stem-final i and a. The Zorc reference grammar independently indexes kariyey as both 1SG past and 3SG masculine past. For the current narrow step only 1SG is authorized: agreement is empty, TAM is ay, and the already-reviewed i-vowel-glide process yields -iyay. The v17 answer surfaces aaddiyay and buufiyay are not used to author this rule.",
+      "evidence": "Orwin's explicit general-past C2A table gives kari + ay -> kariyay for 1SG and the same kariyay surface for 3SG masculine, and states that y is inserted between stem-final i and a. The Zorc reference grammar independently indexes kariyey as both 1SG past and 3SG masculine past. This independently authorizes the syncretic 1SG/3SG-masculine structure as empty agreement plus past ay using the already-reviewed i-vowel-glide process. The previously live 1SG analysis is retained and the newly activated 3SG masculine analysis is added as a second candidate for the same surface. Frozen v17 aaddiyay/buufiyay and frozen v18 aammusiyay/abhiyay answer rows are not used to author this rule.",
       "orthography_note": "Orwin prints -ay spelling (kariyay); Zorc also indexes the -ey variant kariyey. The existing project policy continues to defer broad ay/ey variant activation.",
-      "benchmark_boundary": "v17 Hadhwanaag aaddiyay and Harvard ELIAS buufiyay remain evaluation-only"
+      "benchmark_boundary": "v17 and v18 target answers remain evaluation-only; runtime authority comes from the pre-v18 Orwin/Zorc class evidence"
     }
   },
   "scope_limits": {
-    "only_1sg_1pl_2sg_2pl_and_3pl_past_are_authorized": true,
+    "only_1sg_1pl_2sg_2pl_3sg_m_and_3pl_past_are_authorized": true,
     "other_past_persons_inferred": false,
     "full_past_paradigm_claimed": false,
     "orthographic_ay_ey_variant_question_deferred": true,
     "first_plural_past_manner_alternation_deferred": false,
     "first_singular_and_third_singular_masculine_syncretism_documented": true,
-    "third_singular_masculine_runtime_activation_deferred": true
+    "third_singular_masculine_runtime_activation_deferred": false,
+    "third_singular_feminine_runtime_activation_deferred": true
   },
   "benchmark_isolation": {
     "v5_answers_used_as_runtime_evidence": false,
@@ -93,6 +95,7 @@
     "v15_answers_used_as_runtime_evidence": false,
     "v16_answers_used_as_runtime_evidence": false,
     "v17_answers_used_as_runtime_evidence": false,
+    "v18_answers_used_as_runtime_evidence": false,
     "v13_afceli_special_case_allowed": false,
     "v14_buufi_special_case_allowed": false,
     "v14_caafi_special_case_allowed": false,
@@ -104,13 +107,16 @@
     "v17_aaddi_special_case_allowed": false,
     "v17_buufi_special_case_allowed": false,
     "v17_afceli_special_case_allowed": false,
+    "v18_aammusi_special_case_allowed": false,
+    "v18_abhi_special_case_allowed": false,
     "v13_historical_baseline_merge_commit": "10e41ed8578672b015f8f51bfa1ee8de0158c5eb",
     "v14_historical_baseline_merge_commit": "36ea856fc4ad322ee4e8d41fb3a5a9ef579147f9",
     "v15_historical_baseline_merge_commit": "22959891cb4953e65a3037e4ace756f29febc8f8",
     "v16_historical_baseline_merge_commit": "385af8091945c7c40f058e8f0d262c02638333a2",
     "v17_historical_baseline_merge_commit": "6c818b3603f0cd73ce8ac6c6b6d4c6f21cda822d",
-    "complete_stage1o_class_cohort_activated_uniformly_for_1sg_1pl_2sg_2pl_and_3pl_past": true,
-    "note": "The 1SG rule is authorized from independent Orwin development evidence for kari -> kariyay plus the already-reviewed i-vowel glide, with Zorc independently corroborating 1SG/3SG-m syncretism as kariyey. Frozen v17 aaddiyay and buufiyay remain evaluation-only; afceli remains unresolved as 1SG attestation evidence even though the generic rule can mechanically generate a candidate. All eleven activated C2A class lemmas receive the same narrow 1SG/1PL/2SG/2PL/3PL past authority, with no target-specific profile or correction authority."
+    "v18_historical_baseline_merge_commit": "3e6d10840dad48d578da53490b6e6b37605f7e16",
+    "complete_stage1o_class_cohort_activated_uniformly_for_1sg_1pl_2sg_2pl_3sg_m_and_3pl_past": true,
+    "note": "The 3SG masculine rule is activated from the same independent Orwin/Zorc development evidence that predates v18 and explicitly documents C2A 1SG/3SG-m syncretism as kariyay/kariyey. Frozen v18 aammusiyay and abhiyay remain evaluation-only and no target-specific profile is added. All eleven activated C2A class lemmas receive the same narrow 1SG/1PL/2SG/2PL/3SG-m/3PL past authority, with no open-class generation or correction authority."
   },
-  "notes": "Narrow generic C2A class-level past activation. It authorizes 1SG, 1PL, 2SG, 2PL and 3PL only. 1SG uses empty agreement plus past ay with the reviewed i-vowel glide, yielding -iyay; 1PL uses agreement n plus past ay with the reviewed weak-causative i+n -> inn alternation; 2SG uses reviewed i+t assibilation with past ay; 2PL uses stem + s + een; 3PL uses the reviewed i-vowel glide before een. The documented 3SG masculine syncretic cell and 3SG feminine cell remain unjudged at class level until separately staged. Mechanical generated outputs are recognition/analysis candidates only, are not claims of independent attestation, and never receive automatic correction authority."
+  "notes": "Narrow generic C2A class-level past activation. It authorizes 1SG, 1PL, 2SG, 2PL, 3SG masculine and 3PL. 1SG and 3SG masculine are syncretic: both use empty agreement plus past ay with the reviewed i-vowel glide, yielding -iyay and remaining as separate analyses for the same surface. 1PL uses agreement n plus past ay with the reviewed weak-causative i+n -> inn alternation; 2SG uses reviewed i+t assibilation with past ay; 2PL uses stem + s + een; 3PL uses the reviewed i-vowel glide before een. The 3SG feminine cell remains unjudged at class level until separately staged. Mechanical generated outputs are recognition/analysis candidates only, are not claims of independent attestation, and never receive automatic correction authority."
 }
