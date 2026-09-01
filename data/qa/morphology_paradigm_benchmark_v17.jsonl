@@ -1,0 +1,10 @@
+{"id":"V17-AADDI-PST-1SG","surface":"aaddiyay","lemma":"aaddi","part_of_speech":"verb","conjugation":"2A","tense_aspect":"past","person":"1sg","feature_scope":["lemma","part_of_speech","conjugation","tense_aspect","person"],"source_family":"Hadhwanaag 2020 Wax Tegay natural narrative","source_url":"https://hadhwanaagnews.ca/articles/16456/Wax-Tegay-W-Q-Cabdisalaan-Ceeryaamo","source_date":"2020-07-25","attested_context":"Geelii oo i soo eegaya, ayaan galbeed foolka aaddiyay, dhabarkana bari.","source_note":"The surrounding passage is sustained first-person narration (kaligey, waan xusuustaa, ayaan ...). In the target clause, ayaan resolves the narrator as first-person singular; aaddiyay is therefore scored as 1sg past. Mood is deliberately not scored.","benchmark_role":"positive"}
+{"id":"V17-BUUFI-PST-1SG","surface":"buufiyay","lemma":"buufi","part_of_speech":"verb","conjugation":"2A","tense_aspect":"past","person":"1sg","feature_scope":["lemma","part_of_speech","conjugation","tense_aspect","person"],"source_family":"Harvard ELIAS Beginning Somali Lesson 25","source_url":"https://elias.unix.fas.harvard.edu/index.php/languages/somali/Beginning/28/Reptiles-Amphibians-and-Insects","attested_context":"Sun baan ku buufiyay","source_note":"The bilingual lesson directly glosses the utterance as 'I have sprayed a poison' and separately lists Buufiyay = Sprayed. baan resolves the speaker as first-person singular in the dialogue. Mood is deliberately not scored.","benchmark_role":"positive"}
+{"id":"V17-UNK-01","surface":"aaddiqyay","benchmark_role":"unknown"}
+{"id":"V17-UNK-02","surface":"aaddivyay","benchmark_role":"unknown"}
+{"id":"V17-UNK-03","surface":"aaddizyay","benchmark_role":"unknown"}
+{"id":"V17-UNK-04","surface":"afceliqyay","benchmark_role":"unknown"}
+{"id":"V17-UNK-05","surface":"afcelivyay","benchmark_role":"unknown"}
+{"id":"V17-UNK-06","surface":"buufiqyay","benchmark_role":"unknown"}
+{"id":"V17-UNK-07","surface":"buufivyay","benchmark_role":"unknown"}
+{"id":"V17-UNK-08","surface":"buufizyay","benchmark_role":"unknown"}
