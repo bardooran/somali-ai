@@ -59,7 +59,7 @@ def test_v12_policy_and_pre_freeze_runtime_identity_are_locked() -> None:
     meta = json.loads(META.read_text(encoding="utf-8"))
     assert meta["benchmark_version"] == "v12"
     assert meta["manifest_git_blob_sha"] == "6ddfc6e97245911569e833472a2c4c71af76e17d"
-    assert meta["freeze_commit"] == "pending_merge"
+    assert meta["freeze_commit"] == "83c7a7d06a3a988b07a43835847e180b9b0d1fc3"
     assert meta["pre_freeze_class_authorization_commit"] == (
         "0ab8f13d2e5bc932048b413ebb3a82b445193b6a"
     )
