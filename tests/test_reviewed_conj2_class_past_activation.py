@@ -14,6 +14,7 @@ from src.morphology_paradigm_v14 import report as v14_report
 from src.morphology_paradigm_v15 import report as v15_report
 from src.morphology_paradigm_v16 import report as v16_report
 from src.morphology_paradigm_v17 import report as v17_report
+from src.morphology_paradigm_v18 import report as v18_report
 from src.morphophonology_conj2_class_past import (
     analyze_conj2_class_past_surface,
     eligible_conj2_class_past_activation_lemmas,
@@ -41,12 +42,20 @@ def test_past_activation_is_narrow_independent_and_benchmark_isolated() -> None:
 
     assert activation["tense_aspect"] == "past"
     assert activation["mood"] == "indicative"
-    assert activation["authorized_persons"] == ["1sg", "1pl", "2sg", "2pl", "3pl"]
+    assert activation["authorized_persons"] == [
+        "1sg",
+        "1pl",
+        "2sg",
+        "2pl",
+        "3sg_m",
+        "3pl",
+    ]
     assert activation["past_morphology"] == {
         "1sg": {"agreement": "", "tam": "ay"},
         "1pl": {"agreement": "n", "tam": "ay"},
         "2sg": {"agreement": "t", "tam": "ay"},
         "2pl": {"agreement": "s", "tam": "een"},
+        "3sg_m": {"agreement": "", "tam": "ay"},
         "3pl": {"agreement": "", "tam": "een"},
     }
     assert activation["required_processes"] == [
@@ -85,19 +94,23 @@ def test_past_activation_is_narrow_independent_and_benchmark_isolated() -> None:
     assert "1SG" in first_singular["evidence"]
     assert "3SG masculine" in first_singular["evidence"]
     assert "i-vowel-glide" in first_singular["evidence"]
-    assert "aaddiyay and buufiyay are not used" in first_singular["evidence"]
+    assert "aammusiyay/abhiyay" in first_singular["evidence"]
+    assert "v17 and v18 target answers remain evaluation-only" in first_singular["benchmark_boundary"]
 
     limits = activation["scope_limits"]
-    assert limits["only_1sg_1pl_2sg_2pl_and_3pl_past_are_authorized"] is True
+    assert limits[
+        "only_1sg_1pl_2sg_2pl_3sg_m_and_3pl_past_are_authorized"
+    ] is True
     assert limits["other_past_persons_inferred"] is False
     assert limits["full_past_paradigm_claimed"] is False
     assert limits["orthographic_ay_ey_variant_question_deferred"] is True
     assert limits["first_plural_past_manner_alternation_deferred"] is False
     assert limits["first_singular_and_third_singular_masculine_syncretism_documented"] is True
-    assert limits["third_singular_masculine_runtime_activation_deferred"] is True
+    assert limits["third_singular_masculine_runtime_activation_deferred"] is False
+    assert limits["third_singular_feminine_runtime_activation_deferred"] is True
 
     isolation = activation["benchmark_isolation"]
-    for version in range(5, 18):
+    for version in range(5, 19):
         assert isolation[f"v{version}_answers_used_as_runtime_evidence"] is False
     for key in (
         "v13_afceli_special_case_allowed",
@@ -111,6 +124,8 @@ def test_past_activation_is_narrow_independent_and_benchmark_isolated() -> None:
         "v17_aaddi_special_case_allowed",
         "v17_buufi_special_case_allowed",
         "v17_afceli_special_case_allowed",
+        "v18_aammusi_special_case_allowed",
+        "v18_abhi_special_case_allowed",
     ):
         assert isolation[key] is False
     assert isolation["v15_historical_baseline_merge_commit"] == (
@@ -122,8 +137,11 @@ def test_past_activation_is_narrow_independent_and_benchmark_isolated() -> None:
     assert isolation["v17_historical_baseline_merge_commit"] == (
         "6c818b3603f0cd73ce8ac6c6b6d4c6f21cda822d"
     )
+    assert isolation["v18_historical_baseline_merge_commit"] == (
+        "3e6d10840dad48d578da53490b6e6b37605f7e16"
+    )
     assert isolation[
-        "complete_stage1o_class_cohort_activated_uniformly_for_1sg_1pl_2sg_2pl_and_3pl_past"
+        "complete_stage1o_class_cohort_activated_uniformly_for_1sg_1pl_2sg_2pl_3sg_m_and_3pl_past"
     ] is True
 
 
@@ -135,6 +153,7 @@ def test_past_activation_uniformly_covers_complete_stage1o_class_cohort() -> Non
         "1pl": ("nnay", "i_n_weak_causative_manner_alternation"),
         "2sg": ("say", "i_t_assibilation"),
         "2pl": ("seen", "concatenative_elsewhere"),
+        "3sg_m": ("yay", "i_vowel_glide"),
         "3pl": ("yeen", "i_vowel_glide"),
     }
     for lemma in EXPECTED_LEMMAS:
@@ -160,23 +179,28 @@ def test_past_activation_uniformly_covers_complete_stage1o_class_cohort() -> Non
         )
 
         one_singular = generate_class_authorized_conj2_past(lemma, "1sg")
+        third_singular_m = generate_class_authorized_conj2_past(lemma, "3sg_m")
         assert one_singular is not None
-        assert any(
-            "Orwin" in item and "kariyay" in item and "Zorc" in item
-            for item in one_singular.evidence_summary
-        )
+        assert third_singular_m is not None
+        assert one_singular.surface == third_singular_m.surface
+        assert one_singular.person == "1sg"
+        assert third_singular_m.person == "3sg_m"
+        for candidate in (one_singular, third_singular_m):
+            assert any(
+                "Orwin" in item and "kariyay" in item and "Zorc" in item
+                for item in candidate.evidence_summary
+            )
 
 
-def test_other_class_level_past_persons_remain_unjudged() -> None:
+def test_only_3sg_f_remains_unjudged_at_class_level() -> None:
     for lemma in EXPECTED_LEMMAS:
-        for person in ("3sg_m", "3sg_f"):
-            assert generate_class_authorized_conj2_past(lemma, person) is None
+        assert generate_class_authorized_conj2_past(lemma, "3sg_f") is None
 
 
 def test_generic_past_is_not_inferred_from_i_final_spelling() -> None:
     outsiders = ("zzabi", "qarqari", "nadiifi", "qurxi", "kari", "joogi")
     for lemma in outsiders:
-        for person in ("1sg", "1pl", "2sg", "2pl", "3pl"):
+        for person in ("1sg", "1pl", "2sg", "2pl", "3sg_m", "3pl"):
             assert generate_class_authorized_conj2_past(lemma, person) is None
 
     for surface in (
@@ -207,7 +231,7 @@ def test_future_class_entry_does_not_auto_activate_for_past(monkeypatch) -> None
         "reviewed_class_entry",
         lambda lemma: future_entry if lemma.casefold() == "mustaqbali" else None,
     )
-    for person in ("1sg", "1pl", "2sg", "2pl", "3pl"):
+    for person in ("1sg", "1pl", "2sg", "2pl", "3sg_m", "3pl"):
         assert generate_class_authorized_conj2_past("mustaqbali", person) is None
 
 
@@ -246,6 +270,20 @@ def test_frozen_targets_are_reached_only_through_generic_past_rules() -> None:
     )
     _assert_runtime_target("aaddiyay", "aaddi", "1sg", "i_vowel_glide")
     _assert_runtime_target("buufiyay", "buufi", "1sg", "i_vowel_glide")
+    _assert_runtime_target("aammusiyay", "aammusi", "3sg_m", "i_vowel_glide")
+    _assert_runtime_target("abhiyay", "abhi", "3sg_m", "i_vowel_glide")
+
+
+def test_syncretic_surface_index_preserves_both_person_analyses() -> None:
+    for surface, lemma in (("aammusiyay", "aammusi"), ("abhiyay", "abhi")):
+        direct = analyze_conj2_class_past_surface(surface)
+        relevant = [item for item in direct if item.lemma == lemma]
+        assert {item.person for item in relevant} >= {"1sg", "3sg_m"}
+        assert all(item.surface == surface for item in relevant)
+        assert all(item.correction_allowed is False for item in relevant)
+
+        analyzed = [item for item in analyze_morphology(surface) if item.lemma == lemma]
+        assert {item.features.get("person") for item in analyzed} >= {"1sg", "3sg_m"}
 
 
 def test_unresolved_targets_can_be_mechanical_candidates_but_not_attestations() -> None:
@@ -273,7 +311,7 @@ def test_unresolved_targets_can_be_mechanical_candidates_but_not_attestations() 
     assert v17["preauthorization"]["unresolved_target_lemmas"] == ["afceli"]
 
 
-def test_frozen_benchmarks_preserve_v10_to_v16_and_improve_live_v17() -> None:
+def test_frozen_benchmarks_preserve_history_and_improve_live_v18() -> None:
     v10 = v10_report()["combined"]
     assert v10["recognized_unique_surface_count"] == 0
     assert v10["deep_feature_matched_row_count"] == 0
@@ -370,3 +408,36 @@ def test_frozen_benchmarks_preserve_v10_to_v16_and_improve_live_v17() -> None:
     ] == "0/2"
     assert historical17["tested_head_commit"] == "b5e8615382cbf4387288f563993655a426b4e707"
     assert v17["preauthorization"]["generic_1sg_past_authorized_at_freeze"] is False
+
+    v18 = v18_report()
+    live18 = v18["combined"]
+    assert live18["recognized_unique_surface_count"] == 2
+    assert live18["lemma_matched_unique_surface_count"] == 2
+    assert live18["pos_matched_unique_surface_count"] == 2
+    assert live18["conjugation_matched_unique_surface_count"] == 2
+    assert live18["tense_matched_unique_surface_count"] == 2
+    assert live18["person_matched_unique_surface_count"] == 2
+    assert live18["deep_feature_matched_row_count"] == 2
+    assert live18["unknown_rejected_count"] == 8
+    assert live18["authority_diagnostics"]["reviewed_exact_surfaces"] == []
+    assert live18["authority_diagnostics"]["reviewed_rule_derived_surfaces"] == [
+        "aammusiyay", "abhiyay"
+    ]
+    diagnostics = live18["syncretism_diagnostics"]
+    assert diagnostics["surface_has_1sg_analysis_count"] == 2
+    assert diagnostics["surface_has_3sg_m_analysis_count"] == 2
+    assert diagnostics["syncretic_surface_preserved_count"] == 2
+
+    master18 = v18["master"]
+    assert master18["recognized_unique_surface_count"] == 0
+    assert master18["unknown_rejected_count"] == 8
+
+    historical18 = v18["benchmark"]["measured_result"]
+    assert historical18["somali_ai_combined_positive_surface_recognition"] == "2/2"
+    assert historical18["somali_ai_combined_3sg_m_person_matches"] == "0/2"
+    assert historical18["somali_ai_combined_deep_feature_rows"] == "0/2"
+    assert historical18[
+        "somali_ai_reviewed_rule_derived_positive_surface_recognition"
+    ] == "2/2"
+    assert historical18["tested_head_commit"] == "32904a205ba8f789415e3b1e9acaa1e75227d1a2"
+    assert v18["preauthorization"]["generic_3sg_masculine_past_authorized_at_freeze"] is False
