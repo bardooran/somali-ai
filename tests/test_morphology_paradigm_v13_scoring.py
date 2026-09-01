@@ -41,6 +41,21 @@ def test_v13_measurement_preserves_unknown_safety_and_evaluation_boundary() -> N
     assert result["holdout_integrity"]["answer_sources_may_not_authorize_special_case_runtime_forms"] is True
 
 
+def test_v13_historical_baseline_is_locked_in_metadata() -> None:
+    measured = report()["benchmark"]["measured_result"]
+
+    assert measured["tested_head_commit"] == "a742134feb3b9146d4fc8eb67fccc7c66e539cbe"
+    assert measured["workflow_run_id"] == 33459796100
+    assert measured["workflow_job_id"] == 99707373367
+    assert measured["full_test_suite"] == "1107/1107 passed"
+    assert measured["somali_ai_combined_positive_surface_recognition"] == "1/2"
+    assert measured["somali_ai_combined_deep_feature_rows"] == "1/2"
+    assert measured["somali_ai_reviewed_rule_derived_positive_surface_recognition"] == "1/2 (abhiyaa)"
+    assert measured["somali_ai_reviewed_exact_positive_surface_recognition"] == "0/2"
+    assert measured["somali_ai_master_positive_surface_recognition"] == "0/2"
+    assert measured["unknown_safety"] == "8/8 for combined runtime and master exact"
+
+
 def test_v13_scorer_does_not_claim_mood_or_full_paradigm_evaluation() -> None:
     interpretation = report()["interpretation"]
 
