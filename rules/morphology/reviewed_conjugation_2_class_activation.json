@@ -8,6 +8,10 @@
   "mood": "indicative",
   "authorized_persons": ["1sg", "2sg", "3sg_m", "3sg_f", "1pl", "2pl", "3pl"],
   "activated_lemmas": [
+    "aaddi",
+    "aammusi",
+    "abhi",
+    "afceli",
     "bushi",
     "butaaci",
     "buubi",
@@ -16,12 +20,20 @@
     "caafi",
     "caajisi"
   ],
-  "activation_cohort_source": "Complete reviewed C2A class-only registry already present at pre-v11 commit b7c57eeadc02282d3830bbf80399ea418917d6ea.",
+  "activation_cohorts": {
+    "pre_v11": ["bushi", "butaaci", "buubi", "buufi", "buuxi", "caafi", "caajisi"],
+    "stage1n_post_v12_baseline": ["aaddi", "aammusi", "abhi", "afceli"]
+  },
+  "activation_cohort_source": "The pre-v11 seven-lemma cohort was class-authorized before v11. The Stage 1N four-lemma cohort (aaddi, aammusi, abhi, afceli) was merged as class-only knowledge at commit 0ab8f13d2e5bc932048b413ebb3a82b445193b6a before any v12 answer-source search, remained unactivated through the frozen v12 0/2 baseline, and is activated here uniformly as one cohort.",
   "required_lemma_suffix": "i",
   "required_class_entry_status": "reviewed_class_only",
   "class_lexicon_path": "rules/morphology/reviewed_conjugation_2_class_lexicon.json",
   "class_lexicon_freeze_commit": "b7c57eeadc02282d3830bbf80399ea418917d6ea",
   "class_lexicon_blob_sha_at_v11_pre_freeze": "55e1fff0cfa593a9e4df118b4be56d3e715fbbc5",
+  "stage1n_class_authorization_commit": "0ab8f13d2e5bc932048b413ebb3a82b445193b6a",
+  "stage1n_class_lexicon_blob_sha": "2c4cbf5e2736cb6bd4fee7614c5495258a44c3b3",
+  "v12_freeze_commit": "83c7a7d06a3a988b07a43835847e180b9b0d1fc3",
+  "v12_baseline_measurement_merge_commit": "ea0366f7f785ced58fc11022702c42900135c19f",
   "morphology_rule_path": "rules/morphology/reviewed_conjugation_2_morphophonology.json",
   "processes": [
     "i_t_assibilation",
@@ -31,7 +43,7 @@
   "process_evidence": {
     "i_t_assibilation": "Green & Morrison (2018) gives kari+t+aa -> karisaa and describes t-assibilation after i; Puglielli & Cabdallah Cumar Mansuur (1997) independently gives kari+t+ay and joogi+t+ay with t -> s after i; Ahmed Mohamed (2013) independently prints kari 2pl karisaan.",
     "i_vowel_glide": "Ahmed Mohamed (2013) explicitly prints kariyaa and kariyaan; Green & Jones (2016), table 24, independently prints the same Northern/Benaadir weak-causative present surfaces.",
-    "i_n_weak_causative_manner_alternation": "Green & Jones (2016), table 24, independently prints Northern/Benaadir weak-causative 1pl karinnaa. Stage 1L deliberately does not cite Green 2021 or the frozen v11 target surface as activation evidence."
+    "i_n_weak_causative_manner_alternation": "Green & Jones (2016), table 24, independently prints Northern/Benaadir weak-causative 1pl karinnaa. Neither the Green 2021 v11 answer table nor either v12 answer source is cited as Stage 1O activation evidence."
   },
   "open_class_generation": false,
   "reverse_suffix_stripping": false,
@@ -51,15 +63,19 @@
     "v9_answers_used_as_runtime_evidence": false,
     "v10_answers_used_as_runtime_evidence": false,
     "v11_answers_used_as_runtime_evidence": false,
+    "v12_answers_used_as_runtime_evidence": false,
     "v11_answer_source_used_as_stage1l_activation_evidence": false,
     "v11_target_special_case_allowed": false,
-    "v11_post_freeze_general_activation_allowed": true,
-    "note": "The activated lemma allowlist is exactly the complete reviewed C2A class-only registry that was merged before v11 answers existed. Future class-only additions do not auto-activate. v11 answer rows are never read by this activation rule."
+    "v12_answer_sources_used_as_stage1o_activation_evidence": false,
+    "v12_targets_special_cased": false,
+    "stage1n_complete_cohort_activated_uniformly": true,
+    "future_class_lexicon_entries_auto_activate": false,
+    "note": "Stage 1O activates all four Stage 1N class-only lemmas together after v12 was frozen and measured at zero. The activation rule never reads v12 answer rows and does not create target-specific profiles. The two reserve lemmas abhi and afceli are activated by the same mechanics even though no post-activation benchmark answers have been consulted for them."
   },
   "evidence": {
-    "class_authorization": "Zorc 2019 Somali-English Dictionary class-only registry, frozen on main before v11; each activated lemma is explicitly labelled v2a.",
-    "present_person_morphology": "Existing reviewed MORPH-CONJ-IIA-MPH-001 person/TAM structure, developed before v11. Stage 1L process authorization is limited to the independent evidence map above rather than the frozen v11 answer source.",
-    "activation_rationale": "v11 was frozen and measured at zero after the class registry existed but before class-level generation. Activating the already-reviewed class morphology uniformly across the preauthorized cohort tests cross-lemma generalization rather than target memorization."
+    "class_authorization": "Zorc 2019 Somali-English Dictionary class-only registry; all eleven activated lemmas were explicitly labelled v2a before their respective activation experiments.",
+    "present_person_morphology": "Existing reviewed MORPH-CONJ-IIA-MPH-001 person/TAM structure and the independent process evidence above, all established before v12 answer-source use.",
+    "stage1o_activation_rationale": "Stage 1N selected and merged aaddi, aammusi, abhi and afceli as one class-only cohort before answer lookup. v12 subsequently froze and measured two naturally attested 3pl surfaces at 0/2 while the full four-lemma cohort remained unactivated. Stage 1O now activates the complete preauthorized cohort uniformly using only preexisting C2A processes; v12 answers remain evaluation-only."
   },
-  "notes": "Finite class-authorized present generation only. Stage 1M freezes the activation cohort explicitly so later reviewed class-only lemmas can be added without automatic surface generation. The activation does not create target-specific profiles, infer new class membership, generate past forms, reverse-strip endings, or grant correction authority."
+  "notes": "Finite class-authorized present generation only. The activation allowlist remains explicit: future reviewed class entries do not auto-activate. Stage 1O adds the complete four-lemma Stage 1N cohort without adding any target-specific profile, new morphophonological process, past generation, reverse stripping, open-class generation, or correction authority. Mechanical outputs for reserve lemmas are not claimed independently attested until separately evaluated."
 }
