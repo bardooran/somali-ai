@@ -7,6 +7,16 @@
   "tense_aspect": "present",
   "mood": "indicative",
   "authorized_persons": ["1sg", "2sg", "3sg_m", "3sg_f", "1pl", "2pl", "3pl"],
+  "activated_lemmas": [
+    "bushi",
+    "butaaci",
+    "buubi",
+    "buufi",
+    "buuxi",
+    "caafi",
+    "caajisi"
+  ],
+  "activation_cohort_source": "Complete reviewed C2A class-only registry already present at pre-v11 commit b7c57eeadc02282d3830bbf80399ea418917d6ea.",
   "required_lemma_suffix": "i",
   "required_class_entry_status": "reviewed_class_only",
   "class_lexicon_path": "rules/morphology/reviewed_conjugation_2_class_lexicon.json",
@@ -27,7 +37,8 @@
   "reverse_suffix_stripping": false,
   "correction_authority": false,
   "eligibility_policy": {
-    "all_pre_v11_reviewed_class_entries": true,
+    "explicit_activated_lemma_allowlist": true,
+    "future_class_lexicon_entries_auto_activate": false,
     "target_specific_profile_required": false,
     "arbitrary_i_final_lemma_allowed": false,
     "explicit_profile_lemmas_use_existing_profile_path": true
@@ -43,12 +54,12 @@
     "v11_answer_source_used_as_stage1l_activation_evidence": false,
     "v11_target_special_case_allowed": false,
     "v11_post_freeze_general_activation_allowed": true,
-    "note": "The eligible class lexicon was merged before v11 answers existed. v11 answer rows are never read by this activation rule. Stage 1L uses a separate process-evidence map that excludes Green 2021/v11 target surfaces and applies uniformly to the complete pre-v11 reviewed C2A class-only inventory."
+    "note": "The activated lemma allowlist is exactly the complete reviewed C2A class-only registry that was merged before v11 answers existed. Future class-only additions do not auto-activate. v11 answer rows are never read by this activation rule."
   },
   "evidence": {
-    "class_authorization": "Zorc 2019 Somali-English Dictionary class-only registry, frozen on main before v11; each eligible lemma is explicitly labelled v2a.",
+    "class_authorization": "Zorc 2019 Somali-English Dictionary class-only registry, frozen on main before v11; each activated lemma is explicitly labelled v2a.",
     "present_person_morphology": "Existing reviewed MORPH-CONJ-IIA-MPH-001 person/TAM structure, developed before v11. Stage 1L process authorization is limited to the independent evidence map above rather than the frozen v11 answer source.",
-    "activation_rationale": "v11 was frozen and measured at zero after the class registry existed but before class-level generation. Activating the already-reviewed class morphology uniformly across that preauthorized registry tests cross-lemma generalization rather than target memorization."
+    "activation_rationale": "v11 was frozen and measured at zero after the class registry existed but before class-level generation. Activating the already-reviewed class morphology uniformly across the preauthorized cohort tests cross-lemma generalization rather than target memorization."
   },
-  "notes": "Finite class-authorized present generation only. The activation does not change the historical generation_enabled=false flag in the class lexicon, does not create target-specific profiles, does not infer new class membership, does not generate past forms, and grants no correction authority."
+  "notes": "Finite class-authorized present generation only. Stage 1M freezes the activation cohort explicitly so later reviewed class-only lemmas can be added without automatic surface generation. The activation does not create target-specific profiles, infer new class membership, generate past forms, reverse-strip endings, or grant correction authority."
 }
