@@ -58,3 +58,6 @@ jobs:
 
       - name: Print frozen C2A reserve verification paradigm v13 baseline
         run: python -m src.morphology_paradigm_v13
+
+      - name: Print frozen preselected C2A 2pl past paradigm v14 baseline
+        run: python -m src.morphology_paradigm_v14
