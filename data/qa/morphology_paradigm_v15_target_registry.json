@@ -1,0 +1,32 @@
+{
+  "id": "MORPH-V15-TARGET-REGISTRY-001",
+  "status": "pre_answer_target_registry",
+  "target_lemmas": ["buuxi", "caajisi"],
+  "target_part_of_speech": "verb",
+  "target_conjugation_class": "2A",
+  "target_tense_aspect": "past",
+  "target_person": "2sg",
+  "answer_surfaces_recorded": false,
+  "answer_source_search_started": false,
+  "selection_commit_base": "ee5422f6864fcf435c94dc2422c2c4bdb5c07ed2",
+  "selection_rationale": "Both lemmas were reviewed as C2A class-only entries before the v11 benchmark family and are already admitted by the generic C2A activation architecture. Stage 1Q authorizes class-level past only for 2pl and 3pl, so 2sg remains an untouched capability gap. The two target lemmas are selected here before any external lookup of their 2sg past surfaces.",
+  "pre_answer_state": {
+    "class_entries_predate_v15": true,
+    "present_activation_predates_v15": true,
+    "generic_2pl_and_3pl_past_activation_predates_v15": true,
+    "generic_2sg_past_activation_exists": false,
+    "authorized_class_past_persons": ["2pl", "3pl"],
+    "target_specific_profiles_exist": false,
+    "v15_answers_used_as_runtime_evidence": false
+  },
+  "benchmark_policy": {
+    "external_answer_lookup_allowed_only_after_registry_merge": true,
+    "answers_will_be_evaluation_only": true,
+    "target_specific_runtime_special_cases_allowed": false,
+    "inferred_unattested_forms_allowed": false,
+    "unknown_safety_probes_required": true,
+    "development_rule_authority_must_be_independent_of_v15_answer_sources": true,
+    "unresolved_targets_must_remain_unscored": true
+  },
+  "notes": "This file intentionally contains no target surface answers. Its purpose is to create a Git-verifiable pre-answer checkpoint for a narrow C2A 2sg-past experiment. No 2sg past surface for buuxi or caajisi is asserted here."
+}
