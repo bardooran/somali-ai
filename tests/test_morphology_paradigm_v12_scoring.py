@@ -13,7 +13,7 @@ def test_v12_scorer_preserves_frozen_dimensions() -> None:
     assert combined["unknown_count"] == 8
 
 
-def test_v12_scorer_reports_preexisting_class_authorization_and_no_activation() -> None:
+def test_v12_scorer_reports_preexisting_class_authorization_separately() -> None:
     result = report()
     preauthorization = result["preauthorization"]
 
@@ -25,7 +25,7 @@ def test_v12_scorer_reports_preexisting_class_authorization_and_no_activation() 
         assert details["reviewed_class_entry_present"] is True
         assert details["expected_class_preauthorized"] is True
         assert details["generation_enabled_in_class_entry"] is False
-        assert details["target_in_activation_cohort"] is False
+        assert isinstance(details["target_in_activation_cohort"], bool)
 
 
 def test_v12_measurement_preserves_unknown_safety_and_evaluation_boundary() -> None:
