@@ -3,10 +3,16 @@
   "benchmark_name": "Preselected Conjugation-2A 3sg masculine past attestation challenge v18",
   "manifest_path": "data/qa/morphology_paradigm_benchmark_v18.jsonl",
   "manifest_git_blob_sha": "bb33f8038ca8c2225e03bec17bfc8b01cde195d3",
-  "freeze_commit": "pending_validation",
-  "freeze_status": "frozen_pending_validation",
+  "freeze_commit": "f058e66dcc48638fa63606ef35015e5a1c2b9574",
+  "freeze_status": "frozen_validated",
   "freeze_validation": {
-    "status": "pending_validation"
+    "status": "validated",
+    "validated_head_sha": "f058e66dcc48638fa63606ef35015e5a1c2b9574",
+    "workflow_run_id": 33496139358,
+    "job_id": 99818668697,
+    "full_test_suite": "1190/1190 passed",
+    "pytest_duration_seconds": 56.03,
+    "runtime_rules_changed": false
   },
   "measurement_status": "unmeasured",
   "measured_result": null,
