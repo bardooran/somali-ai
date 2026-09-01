@@ -1,0 +1,37 @@
+{
+  "id": "MORPH-V19-TARGET-REGISTRY-001",
+  "status": "pre_answer_target_registry",
+  "target_lemmas": ["caafi", "bushi"],
+  "target_part_of_speech": "verb",
+  "target_conjugation_class": "2A",
+  "target_tense_aspect": "past",
+  "target_person": "3sg_feminine",
+  "answer_surfaces_recorded": false,
+  "answer_source_search_started": false,
+  "selection_commit_base": "f278834fd7102f9a6d845a7f8953357269b60c58",
+  "selection_rationale": "After v18, 3sg feminine is the only remaining separately staged C2A class-past person cell. All eleven members of the fixed reviewed cohort have appeared in at least one v14-v18 target registry, so v19 cannot select completely unused cohort lemmas. caafi and bushi are chosen before answer lookup because each is a long-reviewed C2A class-only entry that appeared only once in an older target registry, and neither was used in the two most recent person-cell benchmarks v17-v18. No 3sg-feminine surface is asserted here.",
+  "pre_answer_state": {
+    "class_entries_predate_v19": true,
+    "present_activation_predates_v19": true,
+    "generic_1sg_1pl_2sg_2pl_3sg_m_and_3pl_past_activation_predates_v19": true,
+    "generic_3sg_feminine_past_activation_exists": false,
+    "authorized_class_past_persons": ["1sg", "1pl", "2sg", "2pl", "3sg_m", "3pl"],
+    "target_specific_profiles_exist": false,
+    "v19_answers_used_as_runtime_evidence": false,
+    "one_surface_can_have_multiple_person_analyses": true,
+    "documented_2sg_3sg_feminine_syncretism_predates_v19": true
+  },
+  "benchmark_policy": {
+    "external_answer_lookup_allowed_only_after_registry_merge": true,
+    "answers_will_be_evaluation_only": true,
+    "target_specific_runtime_special_cases_allowed": false,
+    "inferred_unattested_forms_allowed": false,
+    "unknown_safety_probes_required": true,
+    "development_rule_authority_must_be_independent_of_v19_answer_sources": true,
+    "unresolved_targets_must_remain_unscored": true,
+    "orthographic_variants_must_be_attested_not_assumed": true,
+    "syncretic_person_values_must_be_preserved_as_ambiguity": true,
+    "surface_recognition_must_not_force_unique_person": true
+  },
+  "notes": "This file intentionally contains no target surface answers. Its purpose is to create a Git-verifiable pre-answer checkpoint for the final separately staged C2A 3sg-feminine-past cell. General pre-v19 development evidence already documents the C2A 2sg/3sg-feminine t-to-s pattern and syncretic surface behavior, but no 3sg-feminine past surface for caafi or bushi is asserted here."
+}
