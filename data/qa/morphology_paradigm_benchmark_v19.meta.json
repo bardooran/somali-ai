@@ -1,0 +1,86 @@
+{
+  "benchmark_version": "v19",
+  "benchmark_name": "Preselected Conjugation-2A 3sg feminine past attestation challenge v19",
+  "manifest_path": "data/qa/morphology_paradigm_benchmark_v19.jsonl",
+  "manifest_git_blob_sha": "7a30db59364c91e77bc40757e50ad2d3da94adb6",
+  "freeze_commit": "pending_validation",
+  "freeze_status": "pending_validation",
+  "freeze_validation": null,
+  "measurement_status": "unmeasured",
+  "measured_result": null,
+  "pre_answer_target_registry_path": "data/qa/morphology_paradigm_v19_target_registry.json",
+  "pre_answer_target_registry_merge_commit": "bcf86d494a0fbd62096df982868f714521670e41",
+  "selected_target_lemmas": ["caafi", "bushi"],
+  "scored_target_lemmas": ["caafi", "bushi"],
+  "unresolved_target_lemmas": [],
+  "positive_case_count": 2,
+  "positive_unique_surface_count": 2,
+  "unknown_case_count": 8,
+  "total_case_count": 10,
+  "answer_sources": [
+    {
+      "target_lemma": "caafi",
+      "surface": "caafisay",
+      "source_family": "Qaamuuska Af-Soomaaliga (Puglielli & Cabdallah Cumar Mansuur)",
+      "source_url": "https://cpb-us-w2.wpmucdn.com/u.osu.edu/dist/5/1926/files/2016/02/QAAMUUSKA-AF-SOOMAALIGA1-12d0iep.pdf",
+      "grammar_url": "https://www.qaamuuska.org/naxwaha",
+      "evidence_type": "lemma_specific_dictionary_principal_part_with_dictionary_grammar_resolution",
+      "attested_entry": "caafi f.g2 (-iyay, -isay)",
+      "feature_resolution": "The dictionary grammar states that Conjugation 2 third-person singular past uses -yay for masculine and -say for feminine, illustrated by kariyay / karisay. The lemma-specific principal-part entry therefore resolves caafisay as 3sg feminine past."
+    },
+    {
+      "target_lemma": "bushi",
+      "surface": "bushisay",
+      "source_family": "Qaamuuska Af-Soomaaliga (Puglielli & Cabdallah Cumar Mansuur)",
+      "source_url": "https://cpb-us-w2.wpmucdn.com/u.osu.edu/dist/5/1926/files/2016/02/QAAMUUSKA-AF-SOOMAALIGA1-12d0iep.pdf",
+      "grammar_url": "https://www.qaamuuska.org/naxwaha",
+      "evidence_type": "lemma_specific_dictionary_principal_part_with_dictionary_grammar_resolution",
+      "attested_entry": "bushi² f.g2 (-iyay, -isay)",
+      "feature_resolution": "The dictionary grammar states that Conjugation 2 third-person singular past uses -yay for masculine and -say for feminine, illustrated by kariyay / karisay. The lemma-specific principal-part entry therefore resolves bushisay as 3sg feminine past."
+    }
+  ],
+  "pre_freeze_runtime_blob_identities": {
+    "rules/morphology/reviewed_conjugation_2_class_past_activation.json": "188ad817237bd1f0992521ec444f914e32e4f555",
+    "src/morphology_analysis.py": "11b5b04e4c617100d0e05a20775420f5775e33a7",
+    "src/morphophonology_conj2_class_past.py": "7b0da662a8b2d1687525b04ea4d9d63562b75e02"
+  },
+  "pre_freeze_runtime_state": {
+    "authorized_class_past_persons": ["1sg", "1pl", "2sg", "2pl", "3sg_m", "3pl"],
+    "generic_3sg_feminine_past_authorized": false,
+    "existing_2sg_3sg_feminine_syncretism_documented": true,
+    "existing_2sg_surface_generation_authorized": true,
+    "target_specific_profiles_allowed": false
+  },
+  "benchmark_policy": {
+    "answers_are_evaluation_only": true,
+    "runtime_rule_learning_from_v19_allowed": false,
+    "answer_sources_may_not_authorize_special_case_runtime_forms": true,
+    "lemma_specific_lexicographic_principal_parts_count_as_explicit_attestation": true,
+    "inferred_unattested_surfaces_included": false,
+    "unresolved_targets_may_not_be_guessed": true,
+    "synthetic_unknowns_are_claimed_somali_forms": false,
+    "feature_scope_is_row_specific": true,
+    "mood_is_scored": false,
+    "syncretic_person_values_must_be_preserved": true,
+    "surface_recognition_must_not_be_equated_with_3sg_feminine_person_resolution": true,
+    "future_generic_3sg_feminine_improvement_allowed_from_independent_development_evidence": true,
+    "development_rule_authority_must_be_independent_of_v19_answer_sources": true
+  },
+  "experimental_design": {
+    "target_selection_is_git_verifiable": true,
+    "target_selection_predates_answer_lookup": true,
+    "answer_lookup_started_only_after_registry_merge": true,
+    "global_generalization_claim_from_v19_alone_allowed": false,
+    "purpose": "Test the still-unauthorized C2A 3sg-feminine past analysis on two preselected class lemmas while explicitly separating surface recognition from person resolution in a cell documented as syncretic with 2sg."
+  },
+  "independence_limits": {
+    "full_paradigm_benchmark": false,
+    "two_positive_lemmas": true,
+    "distinct_answer_source_families": 1,
+    "answer_source_is_lemma_specific_lexicographic_evidence": true,
+    "answer_source_is_not_runtime_development_authority": true,
+    "post_freeze_development_authority_must_be_distinct_from_v19_answer_source": true,
+    "reason": "Both target answers are resolved from lemma-specific entries in one authoritative dictionary family. v19 therefore tests two lexical targets but does not claim answer-source-family independence. Any generic 3sg-feminine runtime activation must use separate pre-v19 class development authority for the t-bearing 3sg-feminine cell and i+t assibilation, not these answer rows."
+  },
+  "notes": "PR #58 merged the answer-free target registry before any v19 target-answer lookup. Post-registry lookup found lemma-specific Qaamuuska Af-Soomaaliga principal parts for both selected C2A verbs, and the dictionary's own grammar explicitly identifies the second C2 past principal part as third-person singular feminine. The benchmark freezes caafisay and bushisay as evaluation-only 3sg-feminine rows. Because 2sg is already live and the class evidence documents 2sg/3sg-feminine syncretism, the untouched baseline is not assumed to be 0/2 surface recognition; v19 is designed to measure person/deep-feature resolution separately."
+}
