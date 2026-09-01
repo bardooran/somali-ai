@@ -45,6 +45,32 @@ def test_v16_measurement_preserves_unknown_safety_and_evaluation_boundary() -> N
     assert integrity["unresolved_targets_may_not_be_guessed"] is True
 
 
+def test_v16_metadata_locks_untouched_historical_baseline() -> None:
+    benchmark = report()["benchmark"]
+    measured = benchmark["measured_result"]
+
+    assert benchmark["measurement_status"] == "measured"
+    assert measured["full_test_suite"] == "1167/1167 passed"
+    assert measured["pull_request"] == 48
+    assert measured["tested_head_commit"] == "acf49ce2441a0c393788c20aa8bfa58f2eb9d1b1"
+    assert measured["workflow_run_id"] == 33489758541
+    assert measured["workflow_job_id"] == 99798204010
+    assert measured["somali_ai_combined_positive_surface_recognition"] == "0/1"
+    assert measured["somali_ai_combined_lemma_matches"] == "0/1"
+    assert measured["somali_ai_combined_pos_matches"] == "0/1"
+    assert measured["somali_ai_combined_conjugation_2a_matches"] == "0/1"
+    assert measured["somali_ai_combined_past_tense_matches"] == "0/1"
+    assert measured["somali_ai_combined_person_matches"] == "0/1"
+    assert measured["somali_ai_combined_deep_feature_rows"] == "0/1"
+    assert measured["somali_ai_master_positive_surface_recognition"] == "0/1"
+    assert measured["somali_ai_reviewed_exact_positive_surface_recognition"] == "0/1"
+    assert measured["somali_ai_reviewed_rule_derived_positive_surface_recognition"] == "0/1"
+    assert measured["unknown_safety"] == "8/8 for combined runtime and master exact"
+    assert "0/1" in measured["historical_interpretation"]
+    assert "bushi and butaaci remained unresolved" in measured["historical_interpretation"]
+    assert "1167/1167" in benchmark["notes"]
+
+
 def test_v16_scorer_does_not_claim_mood_full_paradigm_or_global_win() -> None:
     interpretation = report()["interpretation"]
 
