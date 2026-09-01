@@ -1,0 +1,76 @@
+{
+  "id": "MORPH-CONJ-IIA-CLASS-PST-ACT-001",
+  "status": "reviewed_rule_derived",
+  "activation_enabled": true,
+  "part_of_speech": "verb",
+  "conjugation_class": "2A",
+  "tense_aspect": "past",
+  "mood": "indicative",
+  "authorized_persons": ["3pl"],
+  "past_morphology": {
+    "3pl": {"agreement": "", "tam": "een"}
+  },
+  "activated_lemmas": [
+    "aaddi",
+    "aammusi",
+    "abhi",
+    "afceli",
+    "bushi",
+    "butaaci",
+    "buubi",
+    "buufi",
+    "buuxi",
+    "caafi",
+    "caajisi"
+  ],
+  "required_lemma_suffix": "i",
+  "required_class_entry_status": "reviewed_class_only",
+  "class_lexicon_path": "rules/morphology/reviewed_conjugation_2_class_lexicon.json",
+  "present_activation_path": "rules/morphology/reviewed_conjugation_2_class_activation.json",
+  "required_processes": ["i_vowel_glide"],
+  "open_class_generation": false,
+  "reverse_suffix_stripping": false,
+  "correction_authority": false,
+  "eligibility_policy": {
+    "explicit_activated_lemma_allowlist": true,
+    "future_class_lexicon_entries_auto_activate": false,
+    "arbitrary_i_final_lemma_allowed": false,
+    "explicit_profile_lemmas_use_existing_profile_path": true,
+    "target_specific_profile_required": false
+  },
+  "development_evidence": {
+    "primary": {
+      "citation": "John I. Saeed. 1999. Somali. London Oriental and African Language Library 10. Amsterdam/Philadelphia: John Benjamins, section 4.3.4.3 Past simple, p. 86.",
+      "evidence": "The explicit C2A past-simple table gives 3PL kariyeen, distinct from 2PL kariseen and the singular/1PL cells. This directly supports an i-final C2A stem plus 3PL -een with y between stem-final i and the vowel-initial ending.",
+      "source_url": "https://theswissbay.ch/pdf/Books/Linguistics/Mega%20linguistics%20pack/Afro-Asiatic/Cushitic/Somali%20%28Saeed%29.pdf"
+    },
+    "independent_corroboration": {
+      "citation": "Michal Allon Livnat. 1983. The Indicator Particle baa in Somali. Studies in the Linguistic Sciences 13(1): 89-132, section 4.6, p. 118.",
+      "evidence": "Plural-subject extensive-paradigm examples explicitly print cuntadii bay dumarku kariyeen and dumarkii way kariyeen cuntadii, independently confirming kariyeen with a plural subject.",
+      "source_url": "https://libsysdigi.library.illinois.edu/OCA/Books2008-11/studiesinlinguis/studiesinlinguis1314119831984univ/studiesinlinguis1314119831984univ.pdf"
+    }
+  },
+  "scope_limits": {
+    "only_3pl_past_is_authorized": true,
+    "other_past_persons_inferred": false,
+    "full_past_paradigm_claimed": false,
+    "orthographic_ay_ey_variant_question_deferred": true,
+    "first_plural_past_manner_alternation_deferred": true
+  },
+  "benchmark_isolation": {
+    "v5_answers_used_as_runtime_evidence": false,
+    "v6_answers_used_as_runtime_evidence": false,
+    "v7_answers_used_as_runtime_evidence": false,
+    "v8_answers_used_as_runtime_evidence": false,
+    "v9_answers_used_as_runtime_evidence": false,
+    "v10_answers_used_as_runtime_evidence": false,
+    "v11_answers_used_as_runtime_evidence": false,
+    "v12_answers_used_as_runtime_evidence": false,
+    "v13_answers_used_as_runtime_evidence": false,
+    "v13_afceli_special_case_allowed": false,
+    "v13_historical_baseline_merge_commit": "10e41ed8578672b015f8f51bfa1ee8de0158c5eb",
+    "complete_stage1o_class_cohort_activated_uniformly_for_3pl_past": true,
+    "note": "The 3PL past rule is authorized from Saeed 1999 plus Livnat 1983, not from the frozen v13 afceliyeen row. All eleven already activated C2A class lemmas receive the same narrow 3PL past authority."
+  },
+  "notes": "Narrow generic C2A class-level past activation. It authorizes only 3PL, using the independently documented C2A pattern kari + een -> kariyeen. Other past persons remain unjudged at class level. Generated forms are recognition/analysis candidates only and never automatic correction authority."
+}
