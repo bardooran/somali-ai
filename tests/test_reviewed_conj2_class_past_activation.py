@@ -387,10 +387,12 @@ def test_frozen_benchmarks_preserve_v10_to_v14_and_improve_live_v15() -> None:
         "buuxisay"
     ]
 
+    # Class-level morphology improves the combined analyzer only. The separate
+    # master-exact inventory remains intentionally unchanged by a generated rule.
     master15 = v15["master"]
-    assert master15["recognized_unique_surface_count"] == 1
-    assert master15["lemma_matched_unique_surface_count"] == 1
-    assert master15["pos_matched_unique_surface_count"] == 1
+    assert master15["recognized_unique_surface_count"] == 0
+    assert master15["lemma_matched_unique_surface_count"] == 0
+    assert master15["pos_matched_unique_surface_count"] == 0
     assert master15["unknown_rejected_count"] == 8
 
     historical15 = v15["benchmark"]["measured_result"]
