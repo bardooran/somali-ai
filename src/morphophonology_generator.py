@@ -1,9 +1,12 @@
-"""Finite reviewed morphophonology generation for explicitly authorized profiles.
+"""Finite reviewed morphophonology generation for explicitly authorized knowledge.
 
-This module is deliberately separate from the broader concatenative morphology
-generator. It handles only reviewed, non-concatenative development profiles and
-builds finite forward indexes. It never performs reverse suffix stripping and
-never grants correction authority.
+This module keeps three authority paths separate:
+- finite Class-I development profiles,
+- finite Conjugation-2 development profiles,
+- finite Conjugation-2A class-authorized activation over a reviewed class lexicon.
+
+All paths build forward indexes only. No reverse suffix stripping is performed and
+no generated candidate receives correction authority.
 """
 
 from __future__ import annotations
@@ -12,10 +15,18 @@ import json
 from functools import lru_cache
 from pathlib import Path
 
+from .morphology_class_lexicon import (
+    ReviewedMorphologyClassEntry,
+    reviewed_class_entries,
+    reviewed_class_entry,
+)
 from .morphology_generator import GeneratedMorphology
 
 CLASS_I_RULE_PATH = Path("rules/morphology/reviewed_class_i_morphophonology.json")
 CONJ2_RULE_PATH = Path("rules/morphology/reviewed_conjugation_2_morphophonology.json")
+CONJ2_CLASS_ACTIVATION_PATH = Path(
+    "rules/morphology/reviewed_conjugation_2_class_activation.json"
+)
 
 
 def _load_rule(path: Path = CLASS_I_RULE_PATH) -> dict:
@@ -79,6 +90,27 @@ def _evidence_summary(rule: dict, profile: dict, process: str) -> tuple[str, ...
     return tuple(result)
 
 
+def _class_activation_evidence_summary(
+    entry: ReviewedMorphologyClassEntry,
+    activation: dict,
+    process: str,
+) -> tuple[str, ...]:
+    evidence = activation.get("evidence", {})
+    result = [
+        (
+            f"Reviewed class authorization for {entry.lemma}: "
+            f"{entry.source_label}, Zorc 2019 Somali-English Dictionary"
+            + (f", p. {entry.source_page}." if entry.source_page is not None else ".")
+        )
+    ]
+    if isinstance(evidence, dict) and evidence.get("present_person_morphology"):
+        result.append(str(evidence["present_person_morphology"]))
+    process_evidence = activation.get("process_evidence", {})
+    if isinstance(process_evidence, dict) and process_evidence.get(process):
+        result.append(str(process_evidence[process]))
+    return tuple(result)
+
+
 def generate_profile_past(lemma: str, person: str) -> GeneratedMorphology | None:
     rule = _load_rule(CLASS_I_RULE_PATH)
     profile = rule.get("profiles", {}).get(lemma)
@@ -115,7 +147,7 @@ def _generate_conj2_finite(
     person: str,
     tense_aspect: str,
 ) -> GeneratedMorphology | None:
-    """Generate one explicitly authorized finite Conjugation-2 candidate."""
+    """Generate one explicitly profile-authorized finite Conjugation-2 candidate."""
     rule = _load_rule(CONJ2_RULE_PATH)
     profile = rule.get("profiles", {}).get(lemma)
     if not isinstance(profile, dict):
@@ -152,13 +184,81 @@ def _generate_conj2_finite(
 
 
 def generate_conj2_present(lemma: str, person: str) -> GeneratedMorphology | None:
-    """Generate one finite reviewed Conjugation-2 present candidate."""
+    """Generate one finite reviewed profile-authorized Conjugation-2 present candidate."""
     return _generate_conj2_finite(lemma, person, "present")
 
 
 def generate_conj2_past(lemma: str, person: str) -> GeneratedMorphology | None:
-    """Generate one finite reviewed Conjugation-2 past candidate."""
+    """Generate one finite reviewed profile-authorized Conjugation-2 past candidate."""
     return _generate_conj2_finite(lemma, person, "past")
+
+
+def _eligible_conj2_class_entry(lemma: str) -> ReviewedMorphologyClassEntry | None:
+    activation = _load_rule(CONJ2_CLASS_ACTIVATION_PATH)
+    if not activation.get("activation_enabled"):
+        return None
+
+    entry = reviewed_class_entry(lemma)
+    if entry is None:
+        return None
+    if entry.part_of_speech.casefold() != str(activation["part_of_speech"]).casefold():
+        return None
+    if entry.conjugation_class.casefold() != str(activation["conjugation_class"]).casefold():
+        return None
+    if entry.status != str(activation["required_class_entry_status"]):
+        return None
+    required_suffix = str(activation.get("required_lemma_suffix", ""))
+    if required_suffix and not entry.lemma.casefold().endswith(required_suffix.casefold()):
+        return None
+
+    # Explicit development profiles keep their own narrower authority path.
+    profile_rule = _load_rule(CONJ2_RULE_PATH)
+    if entry.lemma in profile_rule.get("profiles", {}):
+        return None
+    return entry
+
+
+def generate_class_authorized_conj2_present(
+    lemma: str,
+    person: str,
+) -> GeneratedMorphology | None:
+    """Generate present morphology for one reviewed class-authorized C2A lemma.
+
+    Class membership comes only from the frozen reviewed class lexicon. The function
+    does not infer class membership from spelling and never reads benchmark answers.
+    """
+    entry = _eligible_conj2_class_entry(lemma)
+    if entry is None:
+        return None
+
+    activation = _load_rule(CONJ2_CLASS_ACTIVATION_PATH)
+    authorized = {str(value) for value in activation.get("authorized_persons", [])}
+    if person not in authorized:
+        return None
+
+    morphology_rule = _load_rule(CONJ2_RULE_PATH)
+    morphology = morphology_rule.get("present_morphology", {}).get(person)
+    if not isinstance(morphology, dict):
+        return None
+
+    agreement = str(morphology.get("agreement", ""))
+    tam = str(morphology.get("tam", ""))
+    processes = {str(value) for value in activation.get("processes", [])}
+    surface, process = _apply_conj2_processes(entry.lemma, agreement, tam, processes)
+    return GeneratedMorphology(
+        surface=surface,
+        lemma=entry.lemma,
+        part_of_speech=entry.part_of_speech,
+        conjugation_class=entry.conjugation_class,
+        tense_aspect=str(activation["tense_aspect"]),
+        mood=str(activation["mood"]),
+        person=person,
+        form=None,
+        status=str(activation["status"]),
+        rule_id=f"{activation['id']}:{process}",
+        evidence_summary=_class_activation_evidence_summary(entry, activation, process),
+        correction_allowed=False,
+    )
 
 
 @lru_cache(maxsize=1)
@@ -186,19 +286,36 @@ def _conj2_surface_index() -> dict[str, tuple[GeneratedMorphology, ...]]:
         for tense_aspect in ("present", "past"):
             authorized_key = f"authorized_{tense_aspect}_persons"
             for person in profile.get(authorized_key, []):
-                candidate = _generate_conj2_finite(
-                    str(lemma), str(person), tense_aspect
-                )
+                candidate = _generate_conj2_finite(str(lemma), str(person), tense_aspect)
                 if candidate is None:
                     continue
                 index.setdefault(candidate.surface.casefold(), []).append(candidate)
     return {key: tuple(values) for key, values in index.items()}
 
 
+@lru_cache(maxsize=1)
+def _conj2_class_surface_index() -> dict[str, tuple[GeneratedMorphology, ...]]:
+    activation = _load_rule(CONJ2_CLASS_ACTIVATION_PATH)
+    index: dict[str, list[GeneratedMorphology]] = {}
+    for entry in reviewed_class_entries():
+        if _eligible_conj2_class_entry(entry.lemma) is None:
+            continue
+        for person in activation.get("authorized_persons", []):
+            candidate = generate_class_authorized_conj2_present(entry.lemma, str(person))
+            if candidate is None:
+                continue
+            index.setdefault(candidate.surface.casefold(), []).append(candidate)
+    return {key: tuple(values) for key, values in index.items()}
+
+
 def analyze_morphophonological_surface(form: str) -> tuple[GeneratedMorphology, ...]:
-    """Return exact forward-generated candidates from finite reviewed profiles."""
+    """Return exact forward-generated candidates from finite reviewed authority paths."""
     key = form.strip().casefold()
-    return _surface_index().get(key, ()) + _conj2_surface_index().get(key, ())
+    return (
+        _surface_index().get(key, ())
+        + _conj2_surface_index().get(key, ())
+        + _conj2_class_surface_index().get(key, ())
+    )
 
 
 def eligible_profile_lemmas() -> tuple[str, ...]:
@@ -208,5 +325,17 @@ def eligible_profile_lemmas() -> tuple[str, ...]:
 
 
 def eligible_conj2_profile_lemmas() -> tuple[str, ...]:
+    """Return the explicit Conjugation-2 development-profile lemmas."""
     rule = _load_rule(CONJ2_RULE_PATH)
     return tuple(sorted(str(value) for value in rule.get("profiles", {})))
+
+
+def eligible_conj2_class_activation_lemmas() -> tuple[str, ...]:
+    """Return finite class-authorized C2A lemmas admitted by the activation policy."""
+    return tuple(
+        sorted(
+            entry.lemma
+            for entry in reviewed_class_entries()
+            if _eligible_conj2_class_entry(entry.lemma) is not None
+        )
+    )

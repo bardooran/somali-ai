@@ -1,0 +1,54 @@
+{
+  "id": "MORPH-CONJ-IIA-CLASS-ACT-001",
+  "status": "reviewed_rule_derived",
+  "activation_enabled": true,
+  "part_of_speech": "verb",
+  "conjugation_class": "2A",
+  "tense_aspect": "present",
+  "mood": "indicative",
+  "authorized_persons": ["1sg", "2sg", "3sg_m", "3sg_f", "1pl", "2pl", "3pl"],
+  "required_lemma_suffix": "i",
+  "required_class_entry_status": "reviewed_class_only",
+  "class_lexicon_path": "rules/morphology/reviewed_conjugation_2_class_lexicon.json",
+  "class_lexicon_freeze_commit": "b7c57eeadc02282d3830bbf80399ea418917d6ea",
+  "class_lexicon_blob_sha_at_v11_pre_freeze": "55e1fff0cfa593a9e4df118b4be56d3e715fbbc5",
+  "morphology_rule_path": "rules/morphology/reviewed_conjugation_2_morphophonology.json",
+  "processes": [
+    "i_t_assibilation",
+    "i_n_weak_causative_manner_alternation",
+    "i_vowel_glide"
+  ],
+  "process_evidence": {
+    "i_t_assibilation": "Green & Morrison (2018) gives kari+t+aa -> karisaa and describes t-assibilation after i; Puglielli & Cabdallah Cumar Mansuur (1997) independently gives kari+t+ay and joogi+t+ay with t -> s after i; Ahmed Mohamed (2013) independently prints kari 2pl karisaan.",
+    "i_vowel_glide": "Ahmed Mohamed (2013) explicitly prints kariyaa and kariyaan; Green & Jones (2016), table 24, independently prints the same Northern/Benaadir weak-causative present surfaces.",
+    "i_n_weak_causative_manner_alternation": "Green & Jones (2016), table 24, independently prints Northern/Benaadir weak-causative 1pl karinnaa. Stage 1L deliberately does not cite Green 2021 or the frozen v11 target surface as activation evidence."
+  },
+  "open_class_generation": false,
+  "reverse_suffix_stripping": false,
+  "correction_authority": false,
+  "eligibility_policy": {
+    "all_pre_v11_reviewed_class_entries": true,
+    "target_specific_profile_required": false,
+    "arbitrary_i_final_lemma_allowed": false,
+    "explicit_profile_lemmas_use_existing_profile_path": true
+  },
+  "benchmark_isolation": {
+    "v5_answers_used_as_runtime_evidence": false,
+    "v6_answers_used_as_runtime_evidence": false,
+    "v7_answers_used_as_runtime_evidence": false,
+    "v8_answers_used_as_runtime_evidence": false,
+    "v9_answers_used_as_runtime_evidence": false,
+    "v10_answers_used_as_runtime_evidence": false,
+    "v11_answers_used_as_runtime_evidence": false,
+    "v11_answer_source_used_as_stage1l_activation_evidence": false,
+    "v11_target_special_case_allowed": false,
+    "v11_post_freeze_general_activation_allowed": true,
+    "note": "The eligible class lexicon was merged before v11 answers existed. v11 answer rows are never read by this activation rule. Stage 1L uses a separate process-evidence map that excludes Green 2021/v11 target surfaces and applies uniformly to the complete pre-v11 reviewed C2A class-only inventory."
+  },
+  "evidence": {
+    "class_authorization": "Zorc 2019 Somali-English Dictionary class-only registry, frozen on main before v11; each eligible lemma is explicitly labelled v2a.",
+    "present_person_morphology": "Existing reviewed MORPH-CONJ-IIA-MPH-001 person/TAM structure, developed before v11. Stage 1L process authorization is limited to the independent evidence map above rather than the frozen v11 answer source.",
+    "activation_rationale": "v11 was frozen and measured at zero after the class registry existed but before class-level generation. Activating the already-reviewed class morphology uniformly across that preauthorized registry tests cross-lemma generalization rather than target memorization."
+  },
+  "notes": "Finite class-authorized present generation only. The activation does not change the historical generation_enabled=false flag in the class lexicon, does not create target-specific profiles, does not infer new class membership, does not generate past forms, and grants no correction authority."
+}
