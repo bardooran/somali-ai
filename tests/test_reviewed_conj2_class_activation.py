@@ -3,8 +3,12 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import src.morphophonology_generator as morphophonology_generator
 from src.morphology_analysis import analyze_morphology
-from src.morphology_class_lexicon import reviewed_class_lemmas
+from src.morphology_class_lexicon import (
+    ReviewedMorphologyClassEntry,
+    reviewed_class_lemmas,
+)
 from src.morphology_paradigm_v11 import report as v11_report
 from src.morphophonology_generator import (
     analyze_morphophonological_surface,
@@ -14,6 +18,7 @@ from src.morphophonology_generator import (
     generate_conj2_past,
 )
 
+ACTIVATION = Path("rules/morphology/reviewed_conjugation_2_class_activation.json")
 V10 = Path("data/qa/morphology_paradigm_benchmark_v10.jsonl")
 V11 = Path("data/qa/morphology_paradigm_benchmark_v11.jsonl")
 
@@ -52,6 +57,21 @@ def _expected_present_surface(lemma: str, person: str) -> str:
     raise AssertionError(person)
 
 
+def test_activation_cohort_is_explicitly_frozen_to_pre_v11_registry() -> None:
+    activation = json.loads(ACTIVATION.read_text(encoding="utf-8"))
+    assert tuple(activation["activated_lemmas"]) == EXPECTED_CLASS_LEMMAS
+    assert activation["class_lexicon_freeze_commit"] == (
+        "b7c57eeadc02282d3830bbf80399ea418917d6ea"
+    )
+    assert activation["class_lexicon_blob_sha_at_v11_pre_freeze"] == (
+        "55e1fff0cfa593a9e4df118b4be56d3e715fbbc5"
+    )
+    policy = activation["eligibility_policy"]
+    assert policy["explicit_activated_lemma_allowlist"] is True
+    assert policy["future_class_lexicon_entries_auto_activate"] is False
+    assert policy["arbitrary_i_final_lemma_allowed"] is False
+
+
 def test_activation_uniformly_covers_complete_pre_v11_c2a_registry() -> None:
     assert reviewed_class_lemmas("2A") == EXPECTED_CLASS_LEMMAS
     assert eligible_conj2_class_activation_lemmas() == EXPECTED_CLASS_LEMMAS
@@ -70,6 +90,33 @@ def test_activation_uniformly_covers_complete_pre_v11_c2a_registry() -> None:
             assert candidate.status == "reviewed_rule_derived"
             assert candidate.rule_id == f"MORPH-CONJ-IIA-CLASS-ACT-001:{process}"
             assert candidate.correction_allowed is False
+
+
+def test_future_reviewed_class_entry_does_not_auto_activate(monkeypatch) -> None:
+    future_entry = ReviewedMorphologyClassEntry(
+        lemma="mustaqbali",
+        part_of_speech="verb",
+        conjugation_class="2A",
+        status="reviewed_class_only",
+        generation_enabled=False,
+        correction_allowed=False,
+        source_label="v2a=",
+        source_page=999,
+        gloss="synthetic test entry, not a claimed Somali form",
+    )
+    monkeypatch.setattr(
+        morphophonology_generator,
+        "reviewed_class_entry",
+        lambda lemma: future_entry if lemma.casefold() == "mustaqbali" else None,
+    )
+
+    for person in PERSON_PROCESS:
+        assert (
+            morphophonology_generator.generate_class_authorized_conj2_present(
+                "mustaqbali", person
+            )
+            is None
+        )
 
 
 def test_activation_generalizes_on_non_v11_lemmas_and_preserves_syncretism() -> None:

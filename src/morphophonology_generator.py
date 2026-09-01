@@ -201,6 +201,13 @@ def _eligible_conj2_class_entry(lemma: str) -> ReviewedMorphologyClassEntry | No
     entry = reviewed_class_entry(lemma)
     if entry is None:
         return None
+
+    activated_lemmas = {
+        str(value).casefold() for value in activation.get("activated_lemmas", [])
+    }
+    if entry.lemma.casefold() not in activated_lemmas:
+        return None
+
     if entry.part_of_speech.casefold() != str(activation["part_of_speech"]).casefold():
         return None
     if entry.conjugation_class.casefold() != str(activation["conjugation_class"]).casefold():
@@ -224,8 +231,10 @@ def generate_class_authorized_conj2_present(
 ) -> GeneratedMorphology | None:
     """Generate present morphology for one reviewed class-authorized C2A lemma.
 
-    Class membership comes only from the frozen reviewed class lexicon. The function
-    does not infer class membership from spelling and never reads benchmark answers.
+    Class membership comes only from the reviewed class lexicon, and activation
+    additionally requires explicit membership in the frozen activation cohort.
+    The function does not infer class membership from spelling and never reads
+    benchmark answers.
     """
     entry = _eligible_conj2_class_entry(lemma)
     if entry is None:
