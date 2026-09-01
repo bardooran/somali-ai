@@ -93,7 +93,6 @@ def _evidence_summary(rule: dict, profile: dict, process: str) -> tuple[str, ...
 def _class_activation_evidence_summary(
     entry: ReviewedMorphologyClassEntry,
     activation: dict,
-    morphology_rule: dict,
     process: str,
 ) -> tuple[str, ...]:
     evidence = activation.get("evidence", {})
@@ -106,9 +105,9 @@ def _class_activation_evidence_summary(
     ]
     if isinstance(evidence, dict) and evidence.get("present_person_morphology"):
         result.append(str(evidence["present_person_morphology"]))
-    process_record = morphology_rule.get("processes", {}).get(process)
-    if isinstance(process_record, dict) and process_record.get("source"):
-        result.append(str(process_record["source"]))
+    process_evidence = activation.get("process_evidence", {})
+    if isinstance(process_evidence, dict) and process_evidence.get(process):
+        result.append(str(process_evidence[process]))
     return tuple(result)
 
 
@@ -257,9 +256,7 @@ def generate_class_authorized_conj2_present(
         form=None,
         status=str(activation["status"]),
         rule_id=f"{activation['id']}:{process}",
-        evidence_summary=_class_activation_evidence_summary(
-            entry, activation, morphology_rule, process
-        ),
+        evidence_summary=_class_activation_evidence_summary(entry, activation, process),
         correction_allowed=False,
     )
 
