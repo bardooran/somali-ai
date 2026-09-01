@@ -4,11 +4,7 @@ import json
 from pathlib import Path
 
 from src.morphology_class_lexicon import reviewed_class_entry
-from src.morphophonology_conj2_class_past import (
-    CONJ2_CLASS_PAST_ACTIVATION_PATH,
-    eligible_conj2_class_past_activation_lemmas,
-    generate_class_authorized_conj2_past,
-)
+from src.morphophonology_conj2_class_past import eligible_conj2_class_past_activation_lemmas
 from src.morphophonology_generator import eligible_conj2_profile_lemmas
 
 REGISTRY = Path("data/qa/morphology_paradigm_v15_target_registry.json")
@@ -17,10 +13,6 @@ TARGETS = ("buuxi", "caajisi")
 
 def _registry() -> dict:
     return json.loads(REGISTRY.read_text(encoding="utf-8"))
-
-
-def _past_activation() -> dict:
-    return json.loads(CONJ2_CLASS_PAST_ACTIVATION_PATH.read_text(encoding="utf-8"))
 
 
 def test_v15_targets_are_registered_before_answer_lookup() -> None:
@@ -66,22 +58,16 @@ def test_v15_targets_are_class_known_and_not_target_specific_profiles() -> None:
         assert lemma not in profiles
 
 
-def test_v15_selection_pins_current_plural_only_class_past_scope() -> None:
+def test_v15_selection_pins_pre_answer_plural_only_class_past_scope() -> None:
     record = _registry()
-    activation = _past_activation()
+    state = record["pre_answer_state"]
 
-    assert activation["authorized_persons"] == ["2pl", "3pl"]
-    assert set(activation["past_morphology"]) == {"2pl", "3pl"}
-    assert record["pre_answer_state"]["authorized_class_past_persons"] == [
-        "2pl",
-        "3pl",
-    ]
-    assert record["pre_answer_state"]["generic_2sg_past_activation_exists"] is False
-
-    for lemma in TARGETS:
-        assert generate_class_authorized_conj2_past(lemma, "2sg") is None
-        assert generate_class_authorized_conj2_past(lemma, "2pl") is not None
-        assert generate_class_authorized_conj2_past(lemma, "3pl") is not None
+    # This registry is a historical pre-answer snapshot. It must not require
+    # the current post-freeze runtime to remain permanently plural-only.
+    assert state["authorized_class_past_persons"] == ["2pl", "3pl"]
+    assert state["generic_2sg_past_activation_exists"] is False
+    assert state["target_specific_profiles_exist"] is False
+    assert state["v15_answers_used_as_runtime_evidence"] is False
 
 
 def test_v15_registry_contains_no_answer_surface_fields_or_answers() -> None:
