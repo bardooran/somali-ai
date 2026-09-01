@@ -3,7 +3,15 @@
   "benchmark_name": "Preselected Conjugation-2A 1sg past attestation challenge v17",
   "manifest_path": "data/qa/morphology_paradigm_benchmark_v17.jsonl",
   "manifest_git_blob_sha": "8f9d1bd4fd9e71a034c105eacaae19d3a05023d4",
-  "freeze_status": "pending_validation",
+  "freeze_commit": "f149676ed5fe2a34a7848fbb64a19b11f5e5156e",
+  "freeze_status": "frozen",
+  "freeze_validation": {
+    "full_test_suite": "1175/1175 passed",
+    "pull_request": 51,
+    "tested_head_commit": "f149676ed5fe2a34a7848fbb64a19b11f5e5156e",
+    "workflow_run_id": 33492291919,
+    "workflow_job_id": 99806334218
+  },
   "measurement_status": "not_measured",
   "pre_answer_target_registry_path": "data/qa/morphology_paradigm_v17_target_registry.json",
   "pre_answer_target_registry_merge_commit": "2d432b6edacb96e18a93ae9fd52cf0af52e6b793",
@@ -87,5 +95,5 @@
     "post_freeze_development_authority_must_be_distinct_from_v17_answer_sources": true,
     "reason": "v17 uses two unrelated post-registry answer sources. The benchmark answers remain evaluation-only; any generic 1sg runtime rule must be authorized from separate development evidence."
   },
-  "notes": "PR #50 merged the answer-free target registry before any 1sg answer lookup. Post-registry search found explicit person-resolved 1sg past evidence for aaddiyay and buufiyay. afceli remains unresolved because available afceliyay examples were third-person or did not safely resolve 1sg. This freeze branch changes benchmark/test infrastructure only, not runtime morphology."
+  "notes": "PR #50 merged the answer-free target registry before any 1sg answer lookup. Post-registry search found explicit person-resolved 1sg past evidence for aaddiyay and buufiyay. afceli remains unresolved because available afceliyay examples were third-person or did not safely resolve 1sg. PR #51's first exact-head validation passed 1175/1175 tests with untouched v17 at 0/2 recognition and 8/8 unknown safety; this metadata records that freeze validation before the final exact-head rerun."
 }
