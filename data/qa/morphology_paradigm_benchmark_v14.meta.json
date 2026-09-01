@@ -1,0 +1,86 @@
+{
+  "benchmark_version": "v14",
+  "benchmark_name": "Preselected Conjugation-2A 2pl past attestation challenge v14",
+  "manifest_path": "data/qa/morphology_paradigm_benchmark_v14.jsonl",
+  "manifest_git_blob_sha": "67786024c209abed20388bf47a6287b3d99efcd7",
+  "freeze_commit": "pending_merge",
+  "freeze_status": "candidate",
+  "measurement_status": "not_measured",
+  "pre_answer_target_registry_merge_commit": "107b733021e27b8da6ba1470e76946d0b7181a78",
+  "pre_answer_target_registry_path": "data/qa/morphology_paradigm_v14_target_registry.json",
+  "selected_target_lemmas": ["buufi", "caafi"],
+  "scored_target_lemmas": ["buufi"],
+  "unresolved_target_lemmas": ["caafi"],
+  "positive_case_count": 1,
+  "positive_unique_surface_count": 1,
+  "unknown_case_count": 8,
+  "total_case_count": 9,
+  "answer_sources": [
+    {
+      "target_lemma": "buufi",
+      "surface": "buufiseen",
+      "source_family": "Ebrahim 2019 Addis Ababa University malaria thesis Somali questionnaire",
+      "source_url": "https://etd.aau.edu.et/bitstreams/84bb2e6a-32c1-4c05-8d4b-24bdc1b424aa/download",
+      "source_page_pdf": 74,
+      "source_page_printed": 66,
+      "attested_context": "Wali mara kanic sun kaniiceed maku buufiseen?",
+      "feature_resolution": "The questionnaire directly addresses respondents with the plural/polite 2pl form and uses the completed-event question context; the row is scored as 2pl past. Mood is outside the scored scope.",
+      "verification": {
+        "pdf_text_layer_verified": true,
+        "web_screenshot_attempted": true,
+        "web_screenshot_succeeded": false,
+        "visual_screenshot_claimed": false,
+        "translation_credit_present_in_thesis": true,
+        "translation_credit": "Omer Said and Berwaqo Ibrahim translated the questionnaires into Af-Somali."
+      }
+    }
+  ],
+  "unresolved_targets": [
+    {
+      "lemma": "caafi",
+      "requested_cell": "2pl past",
+      "status": "unresolved_not_scored",
+      "reason": "No trustworthy exact independent attestation was found during the v14 answer-source search. No surface is inferred from the C2A pattern."
+    }
+  ],
+  "pre_freeze_runtime_blob_identities": {
+    "rules/morphology/reviewed_conjugation_2_class_past_activation.json": "ee1860b197abd3931534e7491f4e53a9a1a7ba6d",
+    "src/morphophonology_conj2_class_past.py": "72ca664b4f26d25d8f5b9922366c617eeabfaa6d",
+    "src/morphology_analysis.py": "11b5b04e4c617100d0e05a20775420f5775e33a7"
+  },
+  "pre_freeze_runtime_state": {
+    "authorized_class_past_persons": ["3pl"],
+    "generic_2pl_past_authorized": false,
+    "buufi_2pl_past_available": false,
+    "caafi_2pl_past_available": false,
+    "target_specific_profiles_allowed": false
+  },
+  "benchmark_policy": {
+    "answers_are_evaluation_only": true,
+    "runtime_rule_learning_from_v14_allowed": false,
+    "answer_sources_may_not_authorize_special_case_runtime_forms": true,
+    "explicit_source_surfaces_only": true,
+    "inferred_unattested_surfaces_included": false,
+    "unresolved_targets_may_not_be_guessed": true,
+    "feature_scope_is_row_specific": true,
+    "mood_is_scored": false,
+    "synthetic_unknowns_are_claimed_somali_forms": false,
+    "future_generic_2pl_past_improvement_allowed_from_independent_development_evidence": true
+  },
+  "experimental_design": {
+    "target_selection_predates_answer_lookup": true,
+    "target_selection_is_git_verifiable": true,
+    "answer_lookup_started_only_after_registry_merge": true,
+    "purpose": "Test an unsupported C2A 2pl past cell on preselected, long-authorized class lemmas. Score only independently attested surfaces and leave unresolved targets unjudged rather than inferred.",
+    "partial_answer_set_is_intentional": true,
+    "global_generalization_claim_from_v14_alone_allowed": false
+  },
+  "independence_limits": {
+    "full_paradigm_benchmark": false,
+    "single_positive_surface": true,
+    "source_is_scholarly_thesis_questionnaire_not_grammar_table": true,
+    "pdf_visual_screenshot_verification_available": false,
+    "reason": "v14 is deliberately narrow. It tests one independently attested preselected 2pl-past surface and preserves caafi as unresolved because no trustworthy exact attestation was found."
+  },
+  "notes": "PR #38 merged the answer-free target registry before any external lookup. The subsequent search found exact buufiseen in an Addis Ababa University thesis's Somali questionnaire but did not find a trustworthy exact caafi 2pl-past attestation. v14 therefore scores buufiseen only and records caafi as unresolved."
+}
