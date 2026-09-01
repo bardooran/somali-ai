@@ -1,0 +1,33 @@
+{
+  "id": "MORPH-V16-TARGET-REGISTRY-001",
+  "status": "pre_answer_target_registry",
+  "target_lemmas": ["bushi", "butaaci", "buubi"],
+  "target_part_of_speech": "verb",
+  "target_conjugation_class": "2A",
+  "target_tense_aspect": "past",
+  "target_person": "1pl",
+  "answer_surfaces_recorded": false,
+  "answer_source_search_started": false,
+  "selection_commit_base": "301600a65409724d366895d75d5a74144930bcda",
+  "selection_rationale": "All three lemmas were reviewed as C2A class-only entries before the v11 benchmark family and are already admitted by the generic C2A class-past activation architecture. After v15, class-level past authorizes 2sg, 2pl and 3pl only, while the 1pl cell and its documented weak-causative manner alternation remain explicitly deferred. These three pre-v11 lemmas are selected before any external lookup of their 1pl past surfaces.",
+  "pre_answer_state": {
+    "class_entries_predate_v16": true,
+    "present_activation_predates_v16": true,
+    "generic_2sg_2pl_and_3pl_past_activation_predates_v16": true,
+    "generic_1pl_past_activation_exists": false,
+    "authorized_class_past_persons": ["2sg", "2pl", "3pl"],
+    "target_specific_profiles_exist": false,
+    "v16_answers_used_as_runtime_evidence": false
+  },
+  "benchmark_policy": {
+    "external_answer_lookup_allowed_only_after_registry_merge": true,
+    "answers_will_be_evaluation_only": true,
+    "target_specific_runtime_special_cases_allowed": false,
+    "inferred_unattested_forms_allowed": false,
+    "unknown_safety_probes_required": true,
+    "development_rule_authority_must_be_independent_of_v16_answer_sources": true,
+    "unresolved_targets_must_remain_unscored": true,
+    "orthographic_variants_must_be_attested_not_assumed": true
+  },
+  "notes": "This file intentionally contains no target surface answers. Its purpose is to create a Git-verifiable pre-answer checkpoint for a narrow C2A 1pl-past experiment. No 1pl past surface for bushi, butaaci or buubi is asserted here."
+}
