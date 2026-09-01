@@ -76,3 +76,6 @@ jobs:
 
       - name: Print frozen preselected C2A 3sg feminine past paradigm v19 baseline
         run: python -m src.morphology_paradigm_v19
+
+      - name: Print frozen C2A imperative and infinitive paradigm v20
+        run: python -m src.morphology_paradigm_v20

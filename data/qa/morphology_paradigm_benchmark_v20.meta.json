@@ -1,0 +1,47 @@
+{
+  "id": "MORPH-V20-META-001",
+  "status": "frozen_pending_baseline",
+  "benchmark_path": "data/qa/morphology_paradigm_benchmark_v20.jsonl",
+  "benchmark_blob_sha": "08a3f58a73fdc2bbfb5c9381932fed295403dcf8",
+  "registry_merge_commit": "2130e2bf53d29e5b4b015778009dac44b53639f3",
+  "scored_target_lemmas": ["aaddi", "butaaci", "caajisi"],
+  "positive_row_count": 5,
+  "unknown_probe_count": 8,
+  "unresolved_cells": [
+    {"lemma": "butaaci", "mood": "imperative", "person": "2sg"},
+    {"lemma": "butaaci", "mood": "imperative", "person": "2pl"},
+    {"lemma": "caajisi", "mood": "imperative", "person": "2sg"},
+    {"lemma": "caajisi", "mood": "imperative", "person": "2pl"}
+  ],
+  "freeze_runtime_blobs": {
+    "rules/morphology/reviewed_conjugation_2_class_activation.json": "c51ca1e4ff4cdbbae7d65e8687a890f5324f41db",
+    "rules/morphology/reviewed_conjugation_2_class_past_activation.json": "d4a2eb065aec2b4ef971abf946bd5e9a39b78682",
+    "src/morphophonology_conj2_class_past.py": "6a4190ebe150f16107af0b01354f8307d56628ee",
+    "src/morphology_analysis.py": "11b5b04e4c617100d0e05a20775420f5775e33a7"
+  },
+  "pre_freeze_runtime_state": {
+    "c2a_present_all_seven_persons": true,
+    "c2a_past_all_seven_persons": true,
+    "generic_c2a_imperative_authorized": false,
+    "generic_c2a_infinitive_authorized": false,
+    "open_class_generation": false,
+    "reverse_suffix_stripping": false,
+    "correction_authority": false
+  },
+  "answer_evidence": {
+    "aaddi_2sg_imperative": "University of Gothenburg material explicitly uses 'Isku aaddi' and identifies aaddi as imperative.",
+    "aaddi_2pl_imperative": "Somali instructional material explicitly uses 'Isku aaddiya ...' as a plural command.",
+    "aaddi_infinitive": "Gothenburg wordlist explicitly labels aaddin as the infinitive of aaddi; Qaamuus independently prints aaddin linked to aaddi.",
+    "butaaci_infinitive": "Qaamuus explicitly prints butaacin linked to butaaci; independent C2A grammar shows type-2a infinitive and verbal-noun surface identity in -n.",
+    "caajisi_infinitive": "Qaamuus explicitly prints caajisin linked to caajisi; independent C2A grammar shows type-2a infinitive and verbal-noun surface identity in -n."
+  },
+  "isolation": {
+    "v20_answers_are_evaluation_only": true,
+    "v20_answers_may_not_authorize_runtime_rule": true,
+    "target_specific_special_cases_allowed": false,
+    "unresolved_cells_may_not_be_guessed": true,
+    "development_authority_must_come_from_independent_source_family": true
+  },
+  "measurement_status": "not_measured",
+  "notes": "v20 is the first larger post-v19 C2A block. It freezes only five independently defensible rows out of the nine preselected cells; four imperative cells remain unresolved rather than inferred."
+}
