@@ -3,7 +3,6 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from src.morphology_analysis import analyze_morphology
 from src.morphology_class_lexicon import reviewed_class_entries, reviewed_class_entry, reviewed_class_lemmas
 from src.morphophonology_generator import generate_conj2_present
 
@@ -62,22 +61,14 @@ def test_class_only_lemmas_are_disjoint_from_all_frozen_v5_to_v10_positive_lemma
         assert development.isdisjoint(_positive_lemmas(benchmark))
 
 
-def test_class_only_knowledge_has_zero_surface_generation_authority() -> None:
+def test_class_lexicon_itself_does_not_turn_entries_into_explicit_profiles() -> None:
+    # The original finite-profile API remains profile-only. Generic class activation
+    # is a separate authority path and must not rewrite this historical class registry.
     for lemma in reviewed_class_lemmas():
         for person in ("1sg", "2sg", "3sg_m", "3sg_f", "1pl", "2pl", "3pl"):
             assert generate_conj2_present(lemma, person) is None
 
-
-def test_class_only_knowledge_does_not_create_analyzer_hits() -> None:
-    synthetic_would_be_forms = (
-        "buubiyaa",
-        "buubisaa",
-        "buubinnaa",
-        "buubisaan",
-        "buubiyaan",
-    )
-    for surface in synthetic_would_be_forms:
-        assert not any(
-            item.lemma == "buubi" and item.authority == "reviewed_rule_derived"
-            for item in analyze_morphology(surface)
-        )
+    for entry in reviewed_class_entries():
+        assert entry.generation_enabled is False
+        assert entry.status == "reviewed_class_only"
+        assert entry.correction_allowed is False
