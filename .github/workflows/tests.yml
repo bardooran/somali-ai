@@ -55,3 +55,6 @@ jobs:
 
       - name: Print frozen multi-source C2A natural 3pl paradigm v12 baseline
         run: python -m src.morphology_paradigm_v12
+
+      - name: Print frozen C2A reserve verification paradigm v13 baseline
+        run: python -m src.morphology_paradigm_v13
