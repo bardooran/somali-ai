@@ -67,3 +67,24 @@ def test_v15_freeze_identity_is_locked_before_measurement() -> None:
     assert benchmark["freeze_validation"]["workflow_run_id"] == 33463736584
     assert benchmark["freeze_validation"]["workflow_job_id"] == 99719176772
     assert benchmark["freeze_validation"]["full_test_suite"] == "1142/1142 passed"
+
+
+def test_v15_historical_untouched_baseline_is_locked_in_metadata() -> None:
+    measured = report()["benchmark"]["measured_result"]
+
+    assert measured["pull_request"] == 44
+    assert measured["tested_head_commit"] == "cf9fe4cab77072fbeca28aa9ba5e58aea3a6c8fa"
+    assert measured["workflow_run_id"] == 33464111141
+    assert measured["workflow_job_id"] == 99720281376
+    assert measured["full_test_suite"] == "1147/1147 passed"
+    assert measured["somali_ai_combined_positive_surface_recognition"] == "0/1"
+    assert measured["somali_ai_combined_lemma_matches"] == "0/1"
+    assert measured["somali_ai_combined_pos_matches"] == "0/1"
+    assert measured["somali_ai_combined_conjugation_2a_matches"] == "0/1"
+    assert measured["somali_ai_combined_past_tense_matches"] == "0/1"
+    assert measured["somali_ai_combined_person_matches"] == "0/1"
+    assert measured["somali_ai_combined_deep_feature_rows"] == "0/1"
+    assert measured["somali_ai_reviewed_exact_positive_surface_recognition"] == "0/1"
+    assert measured["somali_ai_reviewed_rule_derived_positive_surface_recognition"] == "0/1"
+    assert measured["somali_ai_master_positive_surface_recognition"] == "0/1"
+    assert measured["unknown_safety"] == "8/8 for combined runtime and master exact"
