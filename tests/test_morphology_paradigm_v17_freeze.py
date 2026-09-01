@@ -100,12 +100,18 @@ def test_v17_metadata_records_partial_attestation_without_guessing_afceli() -> N
     assert sources[1]["source_family"] == "Harvard ELIAS Beginning Somali Lesson 25"
 
 
-def test_v17_freeze_metadata_is_pending_validation_before_ci_lock() -> None:
+def test_v17_freeze_metadata_locks_first_green_validation() -> None:
     meta = _meta()
-    assert meta["freeze_status"] == "pending_validation"
+    validation = meta["freeze_validation"]
+
+    assert meta["freeze_status"] == "frozen"
+    assert meta["freeze_commit"] == "f149676ed5fe2a34a7848fbb64a19b11f5e5156e"
     assert meta["measurement_status"] == "not_measured"
-    assert "freeze_commit" not in meta
-    assert "freeze_validation" not in meta
+    assert validation["full_test_suite"] == "1175/1175 passed"
+    assert validation["pull_request"] == 51
+    assert validation["tested_head_commit"] == "f149676ed5fe2a34a7848fbb64a19b11f5e5156e"
+    assert validation["workflow_run_id"] == 33492291919
+    assert validation["workflow_job_id"] == 99806334218
 
 
 def test_v17_freeze_pins_historical_four_cell_scope_and_1sg_gap() -> None:
