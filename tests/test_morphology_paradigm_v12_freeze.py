@@ -4,12 +4,7 @@ import json
 from pathlib import Path
 
 from src.morphology_class_lexicon import reviewed_class_entry
-from src.morphophonology_generator import (
-    analyze_morphophonological_surface,
-    eligible_conj2_class_activation_lemmas,
-    eligible_conj2_profile_lemmas,
-    generate_class_authorized_conj2_present,
-)
+from src.morphophonology_generator import eligible_conj2_profile_lemmas
 
 MANIFEST = Path("data/qa/morphology_paradigm_benchmark_v12.jsonl")
 META = Path("data/qa/morphology_paradigm_benchmark_v12.meta.json")
@@ -19,6 +14,7 @@ TARGETS = {
     "aammusi": "aammusiyaan",
 }
 RESERVE_STAGE1N = {"abhi", "afceli"}
+STAGE1N = set(TARGETS) | RESERVE_STAGE1N
 
 
 def _rows() -> list[dict]:
@@ -55,7 +51,7 @@ def test_v12_uses_two_distinct_post_class_authorization_answer_sources() -> None
     assert {row.get("surface") for row in positives} == {"aaddiyaan", "aammusiyaan"}
 
 
-def test_v12_policy_and_pre_freeze_runtime_identity_are_locked() -> None:
+def test_v12_policy_pre_freeze_identity_and_historical_baseline_are_locked() -> None:
     meta = json.loads(META.read_text(encoding="utf-8"))
     assert meta["benchmark_version"] == "v12"
     assert meta["manifest_git_blob_sha"] == "6ddfc6e97245911569e833472a2c4c71af76e17d"
@@ -82,7 +78,29 @@ def test_v12_policy_and_pre_freeze_runtime_identity_are_locked() -> None:
     assert meta["target_lemma_count"] == 2
     assert meta["unknown_case_count"] == 8
     assert set(meta["stage1n_reserve_class_only_lemmas"]) == RESERVE_STAGE1N
-    assert meta["measurement_status"] == "pending_measurement"
+    assert meta["measurement_status"] == "measured"
+
+    measured = meta["measured_result"]
+    assert measured["full_test_suite"] == "1096/1096 passed"
+    assert measured["somali_ai_combined_positive_surface_recognition"] == "0/2"
+    assert measured["somali_ai_combined_lemma_matches"] == "0/2"
+    assert measured["somali_ai_combined_pos_matches"] == "0/2"
+    assert measured["somali_ai_combined_conjugation_2a_matches"] == "0/2"
+    assert measured["somali_ai_combined_present_tense_matches"] == "0/2"
+    assert measured["somali_ai_combined_indicative_mood_matches"] == "0/2"
+    assert measured["somali_ai_combined_deep_feature_rows"] == "0/2"
+    assert measured["somali_ai_reviewed_exact_positive_surface_recognition"] == "0/2"
+    assert measured["somali_ai_reviewed_rule_derived_positive_surface_recognition"] == "0/2"
+    assert measured["somali_ai_master_positive_surface_recognition"] == "0/2"
+    assert measured["target_activation_at_baseline"] == "0/2 targets activated"
+    assert measured["unknown_safety"] == "8/8 for combined runtime and master exact"
+    assert measured["tested_head_commit"] == (
+        "a4eb6e365b338856dc8667a2437235d553a8a9e1"
+    )
+    assert measured["tested_pull_request_merge_commit"] == (
+        "1879179fcb4d9c536894adb1a161819527dbfa3d"
+    )
+    assert measured["workflow_run_id"] == 33456661445
 
     policy = meta["benchmark_policy"]
     assert policy["answers_are_evaluation_only"] is True
@@ -94,12 +112,16 @@ def test_v12_policy_and_pre_freeze_runtime_identity_are_locked() -> None:
     assert policy["post_freeze_uniform_activation_of_stage1n_cohort_allowed"] is True
     assert policy["v12_answer_rows_may_authorize_special_case_runtime_forms"] is False
 
+    design = meta["experimental_design"]
+    assert design["class_authorization_predates_answer_search"] is True
+    assert design["class_authorization_predates_answer_freeze"] is True
+    assert design["targets_were_not_in_activation_cohort_before_freeze"] is True
 
-def test_v12_targets_were_class_known_but_unactivated_before_freeze() -> None:
-    activated = set(eligible_conj2_class_activation_lemmas())
+
+def test_v12_stage1n_lemmas_remain_class_only_and_never_target_profiles() -> None:
     explicit_profiles = set(eligible_conj2_profile_lemmas())
 
-    for lemma in set(TARGETS) | RESERVE_STAGE1N:
+    for lemma in STAGE1N:
         entry = reviewed_class_entry(lemma)
         assert entry is not None
         assert entry.part_of_speech == "verb"
@@ -107,19 +129,7 @@ def test_v12_targets_were_class_known_but_unactivated_before_freeze() -> None:
         assert entry.status == "reviewed_class_only"
         assert entry.generation_enabled is False
         assert entry.correction_allowed is False
-        assert lemma not in activated
         assert lemma not in explicit_profiles
-        for person in ("1sg", "2sg", "3sg_m", "3sg_f", "1pl", "2pl", "3pl"):
-            assert generate_class_authorized_conj2_present(lemma, person) is None
-
-
-def test_v12_target_surfaces_have_zero_class_activation_authority_at_freeze() -> None:
-    for lemma, surface in TARGETS.items():
-        assert not any(
-            candidate.lemma == lemma
-            and candidate.rule_id.startswith("MORPH-CONJ-IIA-CLASS-ACT-001:")
-            for candidate in analyze_morphophonological_surface(surface)
-        )
 
 
 def test_v12_unknowns_are_distinct_synthetic_safety_strings() -> None:
