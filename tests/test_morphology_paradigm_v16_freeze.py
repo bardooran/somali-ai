@@ -99,6 +99,21 @@ def test_v16_metadata_records_partial_attestation_without_guessing_unresolved_ta
     assert source["evidence_type"] == "explicit_scholarly_paradigm_table"
 
 
+def test_v16_freeze_validation_is_locked_to_exact_green_checkpoint() -> None:
+    meta = _meta()
+    validation = meta["freeze_validation"]
+
+    assert meta["freeze_status"] == "frozen"
+    assert meta["freeze_commit"] == "dd7905fcfaa66175aadc2d52d49a05f6417f78c4"
+    assert validation["full_test_suite"] == "1165/1165 passed"
+    assert validation["pull_request"] == 47
+    assert validation["tested_head_commit"] == (
+        "dd7905fcfaa66175aadc2d52d49a05f6417f78c4"
+    )
+    assert validation["workflow_job_id"] == 99793741065
+    assert validation["workflow_run_id"] == 33488380081
+
+
 def test_v16_freeze_pins_historical_three_cell_class_past_scope_and_1pl_gap() -> None:
     meta = _meta()
     state = meta["pre_freeze_runtime_state"]
