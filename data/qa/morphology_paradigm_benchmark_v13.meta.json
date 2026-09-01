@@ -3,8 +3,15 @@
   "benchmark_name": "Post-activation C2A reserve attestation and tense-gap challenge v13",
   "manifest_path": "data/qa/morphology_paradigm_benchmark_v13.jsonl",
   "manifest_git_blob_sha": "fe0d0617cdeb40b22c95633dc3b644c238583309",
-  "freeze_commit": null,
-  "freeze_status": "pending_merge",
+  "freeze_commit": "5dd761c6c0187b15e0039f7e6f9cdb8d8c67140b",
+  "freeze_status": "frozen",
+  "freeze_validation": {
+    "pull_request": 35,
+    "tested_head_commit": "d829b6ab59d03b02e13839d418afa6467bdf1c36",
+    "workflow_run_id": 33459430413,
+    "workflow_job_id": 99706272358,
+    "full_test_suite": "1103/1103 passed"
+  },
   "measurement_status": "pending_measurement",
   "pre_answer_activation_commit": "4b2bed488dbbb89d26ac48ca7f87a4de7464d6c3",
   "pre_answer_runtime_blob_identities": {
@@ -74,5 +81,5 @@
     "natural_text_feature_resolution_required": true,
     "reason": "v13 is a small post-activation verification benchmark. It checks whether a prediction made before answer lookup is attested and whether a new tense remains unsupported; it is not a blind rule-discovery benchmark."
   },
-  "notes": "Stage 1O activated abhi and afceli as part of the complete four-lemma Stage 1N cohort before either v13 answer was searched. The current runtime already predicts abhiyaa mechanically from reviewed present C2A rules, but does not provide generic class-level past generation for afceliyeen. v13 freezes later independent attestations without changing runtime. Any future C2A past expansion must be authorized by development evidence independent of the v13 answer rows."
+  "notes": "Stage 1O activated abhi and afceli as part of the complete four-lemma Stage 1N cohort before either v13 answer was searched. The runtime already predicted abhiyaa mechanically from reviewed present C2A rules, but did not provide generic class-level past generation for afceliyeen. v13 froze those later independent attestations without changing runtime. Any future C2A past expansion must be authorized by development evidence independent of the v13 answer rows."
 }
