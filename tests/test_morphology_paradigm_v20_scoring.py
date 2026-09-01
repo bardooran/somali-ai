@@ -59,6 +59,41 @@ def test_v20_unknown_probes_remain_safe_at_measurement() -> None:
     assert result["master"]["unknown_rejected_count"] == 8
 
 
+def test_v20_historical_baseline_is_locked_without_binding_future_runtime() -> None:
+    benchmark = report()["benchmark"]
+
+    assert benchmark["status"] == "historical_baseline_locked"
+    assert benchmark["measurement_status"] == "measured_and_locked"
+    assert benchmark["measurement_runtime_commit"] == (
+        "fe1701a7ef5767794c8925bee98652980aed8223"
+    )
+    assert benchmark["measurement_merge_commit"] == (
+        "391da4ce59192bf6f6c37c374a7702d052a630a0"
+    )
+    assert benchmark["historical_baseline"] == {
+        "combined": {
+            "recognized_unique_surface_count": 0,
+            "lemma_matched_row_count": 0,
+            "pos_matched_row_count": 0,
+            "conjugation_matched_row_count": 0,
+            "mood_matched_row_count": 0,
+            "person_matched_row_count": 0,
+            "form_matched_row_count": 0,
+            "deep_feature_matched_row_count": 0,
+            "imperative_deep_matched_row_count": 0,
+            "infinitive_deep_matched_row_count": 0,
+            "unknown_rejected_count": 8,
+        },
+        "master": {
+            "recognized_unique_surface_count": 1,
+            "lemma_matched_row_count": 1,
+            "pos_matched_row_count": 1,
+            "recognized_surfaces": ["aaddi"],
+            "unknown_rejected_count": 8,
+        },
+    }
+
+
 def test_v20_does_not_claim_full_registry_or_global_win() -> None:
     interpretation = report()["interpretation"]
 

@@ -1,6 +1,6 @@
 {
   "id": "MORPH-V20-META-001",
-  "status": "frozen_pending_baseline",
+  "status": "historical_baseline_locked",
   "benchmark_path": "data/qa/morphology_paradigm_benchmark_v20.jsonl",
   "benchmark_blob_sha": "08a3f58a73fdc2bbfb5c9381932fed295403dcf8",
   "registry_merge_commit": "2130e2bf53d29e5b4b015778009dac44b53639f3",
@@ -42,6 +42,30 @@
     "unresolved_cells_may_not_be_guessed": true,
     "development_authority_must_come_from_independent_source_family": true
   },
-  "measurement_status": "not_measured",
-  "notes": "v20 is the first larger post-v19 C2A block. It freezes only five independently defensible rows out of the nine preselected cells; four imperative cells remain unresolved rather than inferred."
+  "measurement_status": "measured_and_locked",
+  "measurement_runtime_commit": "fe1701a7ef5767794c8925bee98652980aed8223",
+  "measurement_merge_commit": "391da4ce59192bf6f6c37c374a7702d052a630a0",
+  "historical_baseline": {
+    "combined": {
+      "recognized_unique_surface_count": 0,
+      "lemma_matched_row_count": 0,
+      "pos_matched_row_count": 0,
+      "conjugation_matched_row_count": 0,
+      "mood_matched_row_count": 0,
+      "person_matched_row_count": 0,
+      "form_matched_row_count": 0,
+      "deep_feature_matched_row_count": 0,
+      "imperative_deep_matched_row_count": 0,
+      "infinitive_deep_matched_row_count": 0,
+      "unknown_rejected_count": 8
+    },
+    "master": {
+      "recognized_unique_surface_count": 1,
+      "lemma_matched_row_count": 1,
+      "pos_matched_row_count": 1,
+      "recognized_surfaces": ["aaddi"],
+      "unknown_rejected_count": 8
+    }
+  },
+  "notes": "v20 freezes five independently defensible rows out of nine preselected cells. Four imperative cells remain unresolved. The historical baseline records the untouched present/past-only runtime result and must not be used as development authority."
 }
