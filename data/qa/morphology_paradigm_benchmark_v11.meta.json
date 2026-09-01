@@ -3,7 +3,7 @@
   "benchmark_name": "Preauthorized Conjugation-2A cross-lemma generalization challenge v11",
   "manifest_path": "data/qa/morphology_paradigm_benchmark_v11.jsonl",
   "manifest_git_blob_sha": "f42514b710558fd37a2e73a17c7625686ca77296",
-  "freeze_commit": "pending_merge",
+  "freeze_commit": "9589fcb73e0349eaba073502987cd3b531c0da8b",
   "pre_freeze_class_authorization_commit": "b7c57eeadc02282d3830bbf80399ea418917d6ea",
   "pre_freeze_runtime_commit": "b7c57eeadc02282d3830bbf80399ea418917d6ea",
   "pre_freeze_blob_identities": {
@@ -36,7 +36,26 @@
   "unknown_case_count": 8,
   "total_case_count": 15,
   "pre_freeze_overlap_status": "class_known_surfaces_unavailable",
-  "measurement_status": "pending_measurement",
+  "measurement_status": "measured",
+  "measured_result": {
+    "full_test_suite": "1075/1075 passed",
+    "somali_ai_combined_positive_surface_recognition": "0/5",
+    "somali_ai_combined_lemma_matches": "0/5",
+    "somali_ai_combined_pos_matches": "0/5",
+    "somali_ai_combined_conjugation_2a_matches": "0/5",
+    "somali_ai_combined_present_tense_matches": "0/5",
+    "somali_ai_combined_indicative_mood_matches": "0/5",
+    "somali_ai_combined_deep_feature_rows": "0/7",
+    "somali_ai_syncretic_surfaces_preserved": "0/2",
+    "somali_ai_reviewed_exact_positive_surface_recognition": "0/5",
+    "somali_ai_reviewed_rule_derived_positive_surface_recognition": "0/5",
+    "somali_ai_master_positive_surface_recognition": "0/5",
+    "unknown_safety": "8/8 for combined runtime and master exact",
+    "preauthorized_class_entry": "buubi -> verb, 2A, reviewed_class_only, generation disabled",
+    "tested_head_commit": "4bfd8b6819458434ae02d9c9a82881776344b3b1",
+    "tested_pull_request_merge_commit": "05f8780b2a86e295392aa63f124b4948d3ee57b4",
+    "workflow_run_id": 33452902749
+  },
   "benchmark_policy": {
     "answers_are_evaluation_only": true,
     "runtime_rule_learning_from_v11_allowed": false,
@@ -59,5 +78,5 @@
     "reason": "Green 2021 also contributes previously reviewed weak-causative process evidence, including the 1PL manner alternation. v11 therefore tests cross-lemma generalization from preauthorized class knowledge, not discovery of unseen morphophonological processes.",
     "answer_source_independent_of_class_authorization_source": true
   },
-  "notes": "v11 is intentionally different from v10. Before any v11 answer file existed, main already contained a reviewed class-only entry buubi -> C2A from Zorc 2019, with generation disabled. Green 2021 Table 48 then supplies the frozen five unique Simple Present surfaces across seven person rows. After freeze and baseline measurement, runtime may activate previously reviewed general C2A rules for the preauthorized class lexicon, but v11 answer rows themselves remain evaluation-only and may never be used to special-case buubi."
+  "notes": "v11 is intentionally different from v10. Before any v11 answer file existed, main already contained a reviewed class-only entry buubi -> C2A from Zorc 2019, with generation disabled. Green 2021 Table 48 then supplied the frozen five unique Simple Present surfaces across seven person rows. The untouched post-freeze baseline found zero surface recognition, zero complete deep-feature rows, zero preserved syncretic surfaces, and 8/8 unknown safety while confirming the preauthorized C2A class entry existed. Runtime may now activate previously reviewed general C2A rules for the preauthorized class lexicon, but v11 answer rows themselves remain evaluation-only and may never be used to special-case buubi."
 }

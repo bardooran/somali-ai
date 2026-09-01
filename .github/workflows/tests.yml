@@ -49,3 +49,6 @@ jobs:
 
       - name: Print frozen Conjugation-2A finite present morphology paradigm v10 baseline
         run: python -m src.morphology_paradigm_v10
+
+      - name: Print frozen preauthorized C2A generalization paradigm v11 baseline
+        run: python -m src.morphology_paradigm_v11
