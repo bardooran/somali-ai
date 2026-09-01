@@ -1,0 +1,34 @@
+{
+  "id": "MORPH-V17-TARGET-REGISTRY-001",
+  "status": "pre_answer_target_registry",
+  "target_lemmas": ["aaddi", "afceli", "buufi"],
+  "target_part_of_speech": "verb",
+  "target_conjugation_class": "2A",
+  "target_tense_aspect": "past",
+  "target_person": "1sg",
+  "answer_surfaces_recorded": false,
+  "answer_source_search_started": false,
+  "selection_commit_base": "6c66f97d58d8a0d667a9f3cc19539049c9a2803c",
+  "selection_rationale": "All three lemmas were reviewed as C2A class-only entries before the recent past-cell benchmarks and are already admitted by the generic C2A class-past activation architecture. After v16, class-level past authorizes 1pl, 2sg, 2pl and 3pl only, leaving 1sg unsupported. The three targets are fixed before any external lookup of their 1sg past surfaces.",
+  "pre_answer_state": {
+    "class_entries_predate_v17": true,
+    "present_activation_predates_v17": true,
+    "generic_1pl_2sg_2pl_and_3pl_past_activation_predates_v17": true,
+    "generic_1sg_past_activation_exists": false,
+    "authorized_class_past_persons": ["1pl", "2sg", "2pl", "3pl"],
+    "target_specific_profiles_exist": false,
+    "v17_answers_used_as_runtime_evidence": false
+  },
+  "benchmark_policy": {
+    "external_answer_lookup_allowed_only_after_registry_merge": true,
+    "answers_will_be_evaluation_only": true,
+    "target_specific_runtime_special_cases_allowed": false,
+    "inferred_unattested_forms_allowed": false,
+    "unknown_safety_probes_required": true,
+    "development_rule_authority_must_be_independent_of_v17_answer_sources": true,
+    "unresolved_targets_must_remain_unscored": true,
+    "orthographic_variants_must_be_attested_not_assumed": true,
+    "syncretic_person_values_must_be_resolved_from_context_or_explicit_paradigm_labels": true
+  },
+  "notes": "This file intentionally contains no target surface answers. Its purpose is to create a Git-verifiable pre-answer checkpoint for a narrow C2A 1sg-past experiment. No 1sg past surface for aaddi, afceli or buufi is asserted here."
+}
