@@ -13,7 +13,9 @@ from pathlib import Path
 from .master_recognition import recognize_form
 from .morphology_analysis import MorphologyAnalysis, analyze_morphology
 from .morphology_class_lexicon import reviewed_class_entry
-from .morphophonology_conj2_class_past import eligible_conj2_class_past_lemmas
+from .morphophonology_conj2_class_past import (
+    eligible_conj2_class_past_activation_lemmas,
+)
 
 BENCHMARK_PATH = Path("data/qa/morphology_paradigm_benchmark_v14.jsonl")
 METADATA_PATH = Path("data/qa/morphology_paradigm_benchmark_v14.meta.json")
@@ -135,7 +137,7 @@ def report() -> dict:
         if recognize_form(str(row["surface"]))
     ]
 
-    past_activated = set(eligible_conj2_class_past_lemmas())
+    past_activated = set(eligible_conj2_class_past_activation_lemmas())
     selected_state: dict[str, dict] = {}
     for lemma in SELECTED_TARGETS:
         entry = reviewed_class_entry(lemma)
