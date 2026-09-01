@@ -1,0 +1,10 @@
+{"id":"V13-ABHI-PRS-3SGM","surface":"abhiyaa","lemma":"abhi","part_of_speech":"verb","conjugation":"2A","tense_aspect":"present","person":"3sg_m","feature_scope":["lemma","part_of_speech","conjugation","tense_aspect","person"],"source_family":"Guuleed 2012 Aan Ooyee Albaabka ii Xidha / Maktabadda transcription","source_url":"https://maktabadda.com/category/aan-ooyee-albaabka-ii-xidha/","source_original":"Cali Xuseen Xirsi, Gabaygii Fiinta, 1954","source_note":"The published transcription explicitly prints 'Qofkii i abhiyaa, wuu ammaan heliye'. The singular human subject Qofkii resolves the attested abhiyaa token to the 3sg masculine reading. Mood is deliberately not scored because the poetic relative/conditional context is not used to make a finer mood claim.","benchmark_role":"positive"}
+{"id":"V13-AFCELI-PST-3PL","surface":"afceliyeen","lemma":"afceli","part_of_speech":"verb","conjugation":"2A","tense_aspect":"past","person":"3pl","feature_scope":["lemma","part_of_speech","conjugation","tense_aspect","person"],"source_family":"Cali Cabdi Coomay / Afka Shacabka natural narrative","source_url":"https://afkashacabka.com/articles/30109/Kaftanada-Qosol-Badan-ee-Reer-Burco-W-Q-Cali-Cabdi-Coomay","source_note":"The published narrative explicitly prints 'iyana may fahmin oo waxa ay ugu afceliyeen mooyi'. The plural subject iyana and past narrative context resolve afceliyeen as a 3pl past token. Mood is deliberately not scored separately.","benchmark_role":"positive"}
+{"id":"V13-UNK-01","surface":"abhiyqzz","benchmark_role":"unknown"}
+{"id":"V13-UNK-02","surface":"abhivyaa","benchmark_role":"unknown"}
+{"id":"V13-UNK-03","surface":"abhiyezz","benchmark_role":"unknown"}
+{"id":"V13-UNK-04","surface":"afceliyzz","benchmark_role":"unknown"}
+{"id":"V13-UNK-05","surface":"afcelivyeen","benchmark_role":"unknown"}
+{"id":"V13-UNK-06","surface":"afceliqeen","benchmark_role":"unknown"}
+{"id":"V13-UNK-07","surface":"afcelizzyeen","benchmark_role":"unknown"}
+{"id":"V13-UNK-08","surface":"abhizyaan","benchmark_role":"unknown"}
