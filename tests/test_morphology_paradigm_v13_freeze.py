@@ -9,7 +9,6 @@ from src.morphophonology_generator import (
     eligible_conj2_class_activation_lemmas,
     eligible_conj2_profile_lemmas,
     generate_class_authorized_conj2_present,
-    generate_conj2_past,
 )
 
 MANIFEST = Path("data/qa/morphology_paradigm_benchmark_v13.jsonl")
@@ -27,6 +26,10 @@ def _rows() -> list[dict]:
         for line in MANIFEST.read_text(encoding="utf-8").splitlines()
         if line.strip()
     ]
+
+
+def _meta() -> dict:
+    return json.loads(META.read_text(encoding="utf-8"))
 
 
 def test_v13_manifest_is_two_row_mixed_tense_reserve_challenge() -> None:
@@ -60,13 +63,20 @@ def test_v13_manifest_is_two_row_mixed_tense_reserve_challenge() -> None:
 
 
 def test_v13_freeze_metadata_pins_pre_answer_runtime_state() -> None:
-    meta = json.loads(META.read_text(encoding="utf-8"))
+    meta = _meta()
 
     assert meta["benchmark_version"] == "v13"
     assert meta["manifest_git_blob_sha"] == "fe0d0617cdeb40b22c95633dc3b644c238583309"
-    assert meta["freeze_commit"] is None
-    assert meta["freeze_status"] == "pending_merge"
-    assert meta["measurement_status"] == "pending_measurement"
+    assert meta["freeze_commit"] == "5dd761c6c0187b15e0039f7e6f9cdb8d8c67140b"
+    assert meta["freeze_status"] == "frozen"
+    assert meta["measurement_status"] == "measured"
+    assert meta["freeze_validation"] == {
+        "pull_request": 35,
+        "tested_head_commit": "d829b6ab59d03b02e13839d418afa6467bdf1c36",
+        "workflow_run_id": 33459430413,
+        "workflow_job_id": 99706272358,
+        "full_test_suite": "1103/1103 passed",
+    }
     assert meta["pre_answer_activation_commit"] == (
         "4b2bed488dbbb89d26ac48ca7f87a4de7464d6c3"
     )
@@ -90,6 +100,7 @@ def test_v13_freeze_metadata_pins_pre_answer_runtime_state() -> None:
     assert policy["runtime_rule_learning_from_v13_allowed"] is False
     assert policy["answer_sources_may_not_authorize_special_case_runtime_forms"] is True
     assert policy["pre_answer_activation_is_intentional"] is True
+    assert policy["future_generic_past_improvement_allowed_from_independent_development_evidence"] is True
 
     design = meta["experimental_design"]
     assert design["activation_predates_answer_lookup"] is True
@@ -136,12 +147,18 @@ def test_v13_abhi_prediction_existed_before_answer_lookup_and_preserves_syncreti
     assert people == {"1sg", "3sg_m"}
 
 
-def test_v13_afceli_past_remains_outside_present_only_class_activation() -> None:
-    assert generate_conj2_past("afceli", "3pl") is None
-    assert not any(
-        candidate.lemma == "afceli" and candidate.status == "reviewed_rule_derived"
-        for candidate in analyze_morphophonological_surface("afceliyeen")
-    )
+def test_v13_freeze_records_past_gap_historically_without_forbidding_future_generic_past() -> None:
+    meta = _meta()
+    prediction = meta["pre_answer_prediction_state"]["afceliyeen"]
+    measured = meta["measured_result"]
+
+    assert prediction["prediction_existed_before_answer_lookup"] is False
+    assert "no class-level past generator" in prediction["reason"]
+    assert measured["somali_ai_combined_positive_surface_recognition"] == "1/2"
+    assert measured["somali_ai_combined_deep_feature_rows"] == "1/2"
+    assert meta["benchmark_policy"][
+        "future_generic_past_improvement_allowed_from_independent_development_evidence"
+    ] is True
 
 
 def test_v13_unknowns_are_synthetic_distinct_and_not_rule_derived() -> None:

@@ -3,9 +3,35 @@
   "benchmark_name": "Post-activation C2A reserve attestation and tense-gap challenge v13",
   "manifest_path": "data/qa/morphology_paradigm_benchmark_v13.jsonl",
   "manifest_git_blob_sha": "fe0d0617cdeb40b22c95633dc3b644c238583309",
-  "freeze_commit": null,
-  "freeze_status": "pending_merge",
-  "measurement_status": "pending_measurement",
+  "freeze_commit": "5dd761c6c0187b15e0039f7e6f9cdb8d8c67140b",
+  "freeze_status": "frozen",
+  "freeze_validation": {
+    "pull_request": 35,
+    "tested_head_commit": "d829b6ab59d03b02e13839d418afa6467bdf1c36",
+    "workflow_run_id": 33459430413,
+    "workflow_job_id": 99706272358,
+    "full_test_suite": "1103/1103 passed"
+  },
+  "measurement_status": "measured",
+  "measured_result": {
+    "pull_request": 36,
+    "tested_head_commit": "a742134feb3b9146d4fc8eb67fccc7c66e539cbe",
+    "workflow_run_id": 33459796100,
+    "workflow_job_id": 99707373367,
+    "full_test_suite": "1107/1107 passed",
+    "somali_ai_combined_positive_surface_recognition": "1/2",
+    "somali_ai_combined_deep_feature_rows": "1/2",
+    "somali_ai_combined_lemma_matches": "1/2",
+    "somali_ai_combined_pos_matches": "1/2",
+    "somali_ai_combined_conjugation_2a_matches": "1/2",
+    "somali_ai_combined_tense_matches": "1/2",
+    "somali_ai_combined_person_matches": "1/2",
+    "somali_ai_reviewed_rule_derived_positive_surface_recognition": "1/2 (abhiyaa)",
+    "somali_ai_reviewed_exact_positive_surface_recognition": "0/2",
+    "somali_ai_master_positive_surface_recognition": "0/2",
+    "unknown_safety": "8/8 for combined runtime and master exact",
+    "historical_interpretation": "The pre-answer generic present prediction abhiyaa was independently validated; afceliyeen remained outside the present-only class activation, establishing the generic C2A past gap."
+  },
   "pre_answer_activation_commit": "4b2bed488dbbb89d26ac48ca7f87a4de7464d6c3",
   "pre_answer_runtime_blob_identities": {
     "rules/morphology/reviewed_conjugation_2_class_lexicon.json": "2c4cbf5e2736cb6bd4fee7614c5495258a44c3b3",
@@ -56,7 +82,8 @@
     "feature_scope_is_row_specific": true,
     "mood_is_scored": false,
     "synthetic_unknowns_are_claimed_somali_forms": false,
-    "pre_answer_activation_is_intentional": true
+    "pre_answer_activation_is_intentional": true,
+    "future_generic_past_improvement_allowed_from_independent_development_evidence": true
   },
   "experimental_design": {
     "activation_predates_answer_lookup": true,
@@ -74,5 +101,5 @@
     "natural_text_feature_resolution_required": true,
     "reason": "v13 is a small post-activation verification benchmark. It checks whether a prediction made before answer lookup is attested and whether a new tense remains unsupported; it is not a blind rule-discovery benchmark."
   },
-  "notes": "Stage 1O activated abhi and afceli as part of the complete four-lemma Stage 1N cohort before either v13 answer was searched. The current runtime already predicts abhiyaa mechanically from reviewed present C2A rules, but does not provide generic class-level past generation for afceliyeen. v13 freezes later independent attestations without changing runtime. Any future C2A past expansion must be authorized by development evidence independent of the v13 answer rows."
+  "notes": "Stage 1O activated abhi and afceli as part of the complete four-lemma Stage 1N cohort before either v13 answer was searched. The untouched v13 measurement validated the pre-existing abhiyaa present prediction at full scored features and left afceliyeen unrecognized, establishing the class-level past gap. The historical 1/2 baseline is locked. Future generic C2A past improvement is allowed only from development evidence independent of v13 answer rows; v13 may never authorize an afceli special case."
 }
