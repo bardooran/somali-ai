@@ -1,0 +1,9 @@
+{"id":"V16-BUUBI-PST-1PL","surface":"buubinnay","lemma":"buubi","part_of_speech":"verb","conjugation":"2A","tense_aspect":"past","person":"1pl","feature_scope":["lemma","part_of_speech","conjugation","tense_aspect","person"],"source_family":"Green 2021 Somali Grammar","source_url":"https://doi.org/10.1515/9781501503610","source_section":"7.5.1.3 Simple Past","source_table":"50","source_pages":[167,168],"source_note":"Table 50 explicitly prints the weak-causative 'chased away' Simple Past paradigm as buubiyay, buubisay, buubinnay, buubiseen, buubiyeen under the columns 1SG/3SG.M, 2SG/3SG.F, 1PL, 2PL, 3PL. The 1PL target is therefore directly printed as buubinnay. Mood is deliberately not scored.","benchmark_role":"positive"}
+{"id":"V16-UNK-01","surface":"buubinqay","benchmark_role":"unknown"}
+{"id":"V16-UNK-02","surface":"buubinvay","benchmark_role":"unknown"}
+{"id":"V16-UNK-03","surface":"buubinzay","benchmark_role":"unknown"}
+{"id":"V16-UNK-04","surface":"buubiqnay","benchmark_role":"unknown"}
+{"id":"V16-UNK-05","surface":"bushiqnay","benchmark_role":"unknown"}
+{"id":"V16-UNK-06","surface":"bushivnay","benchmark_role":"unknown"}
+{"id":"V16-UNK-07","surface":"butaacivnay","benchmark_role":"unknown"}
+{"id":"V16-UNK-08","surface":"butaaciznay","benchmark_role":"unknown"}
