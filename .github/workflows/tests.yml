@@ -52,3 +52,6 @@ jobs:
 
       - name: Print frozen preauthorized C2A generalization paradigm v11 baseline
         run: python -m src.morphology_paradigm_v11
+
+      - name: Print frozen multi-source C2A natural 3pl paradigm v12 baseline
+        run: python -m src.morphology_paradigm_v12
