@@ -1,0 +1,78 @@
+{
+  "benchmark_version": "v13",
+  "benchmark_name": "Post-activation C2A reserve attestation and tense-gap challenge v13",
+  "manifest_path": "data/qa/morphology_paradigm_benchmark_v13.jsonl",
+  "manifest_git_blob_sha": "fe0d0617cdeb40b22c95633dc3b644c238583309",
+  "freeze_commit": null,
+  "freeze_status": "pending_merge",
+  "measurement_status": "pending_measurement",
+  "pre_answer_activation_commit": "4b2bed488dbbb89d26ac48ca7f87a4de7464d6c3",
+  "pre_answer_runtime_blob_identities": {
+    "rules/morphology/reviewed_conjugation_2_class_lexicon.json": "2c4cbf5e2736cb6bd4fee7614c5495258a44c3b3",
+    "rules/morphology/reviewed_conjugation_2_class_activation.json": "c51ca1e4ff4cdbbae7d65e8687a890f5324f41db",
+    "src/morphophonology_generator.py": "43a62617d4f6ad9c0fad0a446afcbd9724dc703b"
+  },
+  "target_lemmas": ["abhi", "afceli"],
+  "positive_case_count": 2,
+  "positive_unique_surface_count": 2,
+  "unknown_case_count": 8,
+  "total_case_count": 10,
+  "answer_sources": [
+    {
+      "target_lemma": "abhi",
+      "surface": "abhiyaa",
+      "source_family": "Guuleed 2012 Aan Ooyee Albaabka ii Xidha / Maktabadda transcription",
+      "source_url": "https://maktabadda.com/category/aan-ooyee-albaabka-ii-xidha/",
+      "original_work": "Cali Xuseen Xirsi, Gabaygii Fiinta, 1954",
+      "attested_context": "Qofkii i abhiyaa, wuu ammaan heliye",
+      "feature_resolution": "Qofkii supplies a singular human subject, resolving the attested abhiyaa token to 3sg masculine. Present is scored from the finite -yaa form and general-present sense. Mood is intentionally outside the scored feature scope."
+    },
+    {
+      "target_lemma": "afceli",
+      "surface": "afceliyeen",
+      "source_family": "Cali Cabdi Coomay / Afka Shacabka natural narrative",
+      "source_url": "https://afkashacabka.com/articles/30109/Kaftanada-Qosol-Badan-ee-Reer-Burco-W-Q-Cali-Cabdi-Coomay",
+      "attested_context": "iyana may fahmin oo waxa ay ugu afceliyeen mooyi",
+      "feature_resolution": "Iyana supplies a plural subject and the surrounding narrative is past, resolving afceliyeen as 3pl past. Mood is intentionally outside the scored feature scope."
+    }
+  ],
+  "pre_answer_prediction_state": {
+    "abhiyaa": {
+      "prediction_existed_before_answer_lookup": true,
+      "expected_runtime_path": "generic C2A class activation",
+      "expected_surface_syncretism": ["1sg", "3sg_m"]
+    },
+    "afceliyeen": {
+      "prediction_existed_before_answer_lookup": false,
+      "reason": "Stage 1O generic C2A class activation is present-indicative only and has no class-level past generator."
+    }
+  },
+  "benchmark_policy": {
+    "answers_are_evaluation_only": true,
+    "runtime_rule_learning_from_v13_allowed": false,
+    "answer_sources_may_not_authorize_special_case_runtime_forms": true,
+    "explicit_source_surfaces_only": true,
+    "inferred_unattested_surfaces_included": false,
+    "feature_scope_is_row_specific": true,
+    "mood_is_scored": false,
+    "synthetic_unknowns_are_claimed_somali_forms": false,
+    "pre_answer_activation_is_intentional": true
+  },
+  "experimental_design": {
+    "activation_predates_answer_lookup": true,
+    "class_authorization_predates_answer_lookup": true,
+    "purpose": "Verify a pre-existing reserve present prediction against later independent attestation while simultaneously exposing whether an independently attested C2A past 3pl form remains outside the present-only generic activation.",
+    "abhi_row_is_prediction_validation": true,
+    "afceli_row_is_tense_gap_probe": true,
+    "global_generalization_claim_from_v13_alone_allowed": false
+  },
+  "independence_limits": {
+    "full_paradigm_benchmark": false,
+    "both_rows_share_same_tense": false,
+    "both_rows_share_same_source_family": false,
+    "answer_sources_are_distinct_from_v5_to_v12_answer_families": true,
+    "natural_text_feature_resolution_required": true,
+    "reason": "v13 is a small post-activation verification benchmark. It checks whether a prediction made before answer lookup is attested and whether a new tense remains unsupported; it is not a blind rule-discovery benchmark."
+  },
+  "notes": "Stage 1O activated abhi and afceli as part of the complete four-lemma Stage 1N cohort before either v13 answer was searched. The current runtime already predicts abhiyaa mechanically from reviewed present C2A rules, but does not provide generic class-level past generation for afceliyeen. v13 freezes later independent attestations without changing runtime. Any future C2A past expansion must be authorized by development evidence independent of the v13 answer rows."
+}
