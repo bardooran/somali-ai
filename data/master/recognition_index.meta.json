@@ -10,14 +10,14 @@
   "input_row_count": 14402,
   "matching_policy": "exact Unicode-preserving casefolded surface matching only; no suffix guessing",
   "output": "data/master/recognition_index.jsonl",
-  "output_sha256": "3b8ca504a2e0a27c07859c3d7e8c47cb821dddf16665f6ef3524dd66fee4513e",
+  "output_sha256": "017c753c2615e15f503c04584fff741082e304fa5daf01f8ab59076a168c4f04",
   "recognition_record_count": 14291,
   "record_type_counts": {
     "grammar": 352,
     "morphology": 13705,
     "vocabulary": 234
   },
-  "source_commit": "65ce54484b50043f390a9c269c8386211c10bbf8",
+  "source_commit": "fca25c75026df688e7974b5edc805d493720542e",
   "source_repository": "bardooran/somali-ai-data",
   "unique_surface_count": 12374
 }
