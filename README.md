@@ -1,4 +1,4 @@
-# Somali AI — Somali-First Language Intelligence
+# Somali AI — Somali-First Language Intelligence 
 
 An evidence-based Somali language foundation and a working Somali-first AI assistant layer.
 
